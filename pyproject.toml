@@ -22,7 +22,7 @@ include = ["README.md"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 tomlkit = ">=0.5.5"
 click = "^7.0"
 
@@ -40,7 +40,7 @@ toml-sort = 'toml_sort.cli:cli'
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py
+envlist = py36,py37
 isolated_build = true
 skipsdist = true
 [testenv]
@@ -48,6 +48,7 @@ platform = linux
 whitelist_externals = poetry
 skip_install = true
 commands =
+  poetry install
   poetry run mypy toml_sort
   poetry run pylint toml_sort tests/
   poetry run pytest
