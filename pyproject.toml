@@ -15,8 +15,11 @@ homepage = "https://github.com/pappasam/toml-sort"
 repository = "https://github.com/pappasam/toml-sort"
 keywords = ["toml", "sort", "cli", "unix", "utility"]
 classifiers = [
-  "Topic :: Command Line :: Tools",
-  "Topic :: Formatters :: Toml :: Sorting",
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Topic :: Software Development :: Code Generators",
+  "Topic :: Utilities",
+  "Typing :: Typed",
 ]
 include = ["README.md"]
 license = "MIT"
