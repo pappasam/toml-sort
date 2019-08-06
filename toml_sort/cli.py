@@ -33,6 +33,10 @@ def cli(output, filename) -> None:
         Read from file on disk, write to stdout
 
             toml-sort input.toml
+
+        Read from stdin, write to file on disk
+
+            cat input.toml | toml-sort -o output.toml -
     """
     toml_content = filename.read()
     sorted_toml = sort_toml(toml_content)

@@ -10,21 +10,44 @@ pip install toml-sort
 
 ## Usage
 
-Currently, this project only reads from a toml file on disk and writes to stdout. I plan to flesh out the interface in the coming days.
+Read from stdin, write to stdout:
 
-```bash
-# Prints sorted results to stdout
-toml-sort FILENAME
-```
+    cat input.toml | toml-sort -
+
+Read from file on disk, write to file on disk:
+
+    toml-sort -o output.toml input.toml
+
+Read from file on disk, write to stdout
+
+    toml-sort input.toml
+
+Read from stdin, write to file on disk
+
+    cat input.toml | toml-sort -o output.toml -
 
 ## Local Development
 
-### Dependencies
+This project is super simple.
+
+**Dependencies**
+
+Install the following tools manually.
 
 * [Poetry](https://github.com/sdispater/poetry#installation)
 * [GNU Make](https://www.gnu.org/software/make/)
 
-### Run Tests
+*Recommended*
+
+* [pyenv](https://github.com/pyenv/pyenv)
+
+**Set up development environment**
+
+```bash
+make setup
+```
+
+**Run Tests**
 
 ```bash
 make test
