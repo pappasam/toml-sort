@@ -12,7 +12,7 @@ pip install toml-sort
 
 Read from stdin, write to stdout:
 
-    cat input.toml | toml-sort -
+    cat input.toml | toml-sort
 
 Read from file on disk, write to file on disk:
 
@@ -24,7 +24,7 @@ Read from file on disk, write to stdout
 
 Read from stdin, write to file on disk
 
-    cat input.toml | toml-sort -o output.toml -
+    cat input.toml | toml-sort -o output.toml
 
 ## Local Development
 
