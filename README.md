@@ -19,7 +19,7 @@ pip install toml-sort
 
 ## Usage
 
-This project can be used as either a Python library or a command line utility.
+This project can be used as either a Python library or a command line utility. I will document the Python library interface in the future when it stabilizes. The command line interface should remain fairly stable.
 
 ### Command line interface
 
