@@ -2,7 +2,15 @@
 
 import click
 
-from . import sort_toml
+from . import TomlSort
+
+
+def get_help() -> str:
+    """Get the help string for the current click context"""
+    ctx = click.get_current_context()
+    help_message = ctx.get_help()
+    ctx.exit()
+    return help_message
 
 
 @click.command()
@@ -14,8 +22,14 @@ from . import sort_toml
     show_default=True,
     help="The output filepath. Choose stdout with '-'.",
 )
+@click.option(
+    "-i",
+    "--ignore-non-tables",
+    is_flag=True,
+    help="Use this option to only sort top-level Tables / Arrays of Tables",
+)
 @click.argument("filename", type=click.File("r"), default="-")
-def cli(output, filename) -> None:
+def cli(output, ignore_non_tables, filename) -> None:
     """Sort toml file FILENAME, saving results to a file, or stdout (default)
 
     FILENAME a filepath or standard input (-)
@@ -39,10 +53,10 @@ def cli(output, filename) -> None:
             cat input.toml | toml-sort -o output.toml
     """
     if filename.isatty():
-        ctx = click.get_current_context()
-        click.echo(ctx.get_help())
-        ctx.exit()
+        click.echo(get_help())
         return
+
+    only_sort_tables = bool(ignore_non_tables)
     toml_content = filename.read()
-    sorted_toml = sort_toml(toml_content)
+    sorted_toml = TomlSort(toml_content, only_sort_tables).sorted()
     output.write(sorted_toml)
