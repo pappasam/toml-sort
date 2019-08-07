@@ -14,6 +14,7 @@ def get_help() -> str:
 
 
 @click.command()
+@click.version_option()
 @click.option(
     "-o",
     "--output",
