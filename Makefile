@@ -11,3 +11,8 @@ setup:  ## Set up the local development environment
 .PHONY: tox
 test:  ## Run the tests
 	poetry run tox
+
+.PHONY: publish
+publish:  ## Build & publish the new version
+	poetry build
+	poetry publish
