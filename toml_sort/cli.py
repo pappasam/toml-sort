@@ -51,6 +51,10 @@ def cli(output, ignore_non_tables, filename) -> None:
         Read from stdin, write to file on disk
 
             cat input.toml | toml-sort -o output.toml
+
+        Only sort the top-level tables / arrays of tables
+
+            cat input.toml | toml-sort -i
     """
     if filename.isatty():
         click.echo(get_help())

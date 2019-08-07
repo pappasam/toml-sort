@@ -2,6 +2,15 @@
 
 A command line utility to sort your toml files. Requires Python 3.6 or greater.
 
+## Motivation
+
+I wrote this library because I couldn't find any "good" sorting utilities for TOML files. This library strives to sort TOML files by providing the following features:
+
+* Preserve comments
+* Sort tables / arrays of Tables
+* Option to sort table keys, or not
+* Preserve whitespace / indentation (in progress)
+
 ## Installation
 
 ```bash
@@ -9,6 +18,10 @@ pip install toml-sort
 ```
 
 ## Usage
+
+This project can be used as either a Python library or a command line utility.
+
+### Command line interface
 
 Read from stdin, write to stdout:
 
@@ -26,9 +39,14 @@ Read from stdin, write to file on disk
 
     cat input.toml | toml-sort -o output.toml
 
+Only sort the top-level tables / arrays of tables
+
+    cat input.toml | toml-sort -i
+    cat input.toml | toml-sort --ignore-non-tables
+
 ## Local Development
 
-This project is super simple.
+Local development for this project is quite simple.
 
 **Dependencies**
 
