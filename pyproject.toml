@@ -52,7 +52,8 @@ whitelist_externals = poetry
 skip_install = true
 commands =
   poetry install
+  poetry run black --check --diff toml_sort tests
   poetry run mypy toml_sort
-  poetry run pylint toml_sort tests/
+  poetry run pylint toml_sort tests
   poetry run pytest
 """
