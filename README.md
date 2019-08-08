@@ -9,6 +9,7 @@ I wrote this library because I couldn't find any "good" sorting utilities for TO
 * Preserve comments
 * Sort tables / arrays of Tables
 * Option to sort table keys, or not
+* Option to include "Super Table" headers, or not
 * Preserve whitespace / indentation (in progress)
 
 ## Installation
@@ -43,6 +44,11 @@ Only sort the top-level tables / arrays of tables
 
     cat input.toml | toml-sort -i
     cat input.toml | toml-sort --ignore-non-tables
+
+Include Super Tables
+
+    cat input.toml | toml-sort -s
+    cat input.toml | toml-sort --super-tables
 
 ## Local Development
 
