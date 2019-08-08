@@ -62,6 +62,10 @@ def cli(output, ignore_non_tables, filename, super_tables) -> None:
         Only sort the top-level tables / arrays of tables
 
             cat input.toml | toml-sort -i
+
+        Include Super Tables
+
+            cat input.toml | toml-sort -s
     """
     if filename.isatty():
         click.echo(get_help())
