@@ -72,7 +72,7 @@ class TomlSort:
                 new_table[key] = self.toml_elements_sorted(value)
             return new_table
         if isinstance(original, Table):
-            original.trivia.indent = "\n" + original.trivia.indent
+            original.trivia.indent = "\n"
             new_table = Table(
                 Container(),
                 trivia=original.trivia,
@@ -97,6 +97,9 @@ class TomlSort:
                     new_aot.append(self.toml_elements_sorted(aot_item))
                     id_lookup.add(id_aot_item)
             return new_aot
+        if isinstance(original, Item):
+            original.trivia.indent = ""
+            return original
         return original
 
     def toml_doc_sorted(self, original: TOMLDocument) -> TOMLDocument:

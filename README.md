@@ -9,8 +9,8 @@ I wrote this library because I couldn't find any "good" sorting utilities for TO
 * Preserve inline comments
 * Sort tables / arrays of Tables
 * Option to sort table keys, or not
-* Preserve whitespace / indentation
-* Preserve top-level comments (in-progress, but really hard and maybe unachievable)
+* Standardize top-level whitespace and indentation (generally removes it; this library is opinionated here)
+* Preserve top-level comments (in progress; really hard and maybe unachievable)
 
 ## Installation
 
