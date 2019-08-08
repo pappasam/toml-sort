@@ -8,12 +8,13 @@ import itertools
 from typing import Union, List, Tuple, Set
 
 import tomlkit
+from tomlkit.api import aot, table
 from tomlkit.toml_document import TOMLDocument
 from tomlkit.container import Container
 from tomlkit.items import Item, Table, AoT, Trivia
 
 
-def clean_input_toml(input_toml: str) -> str:
+def clean_toml_text(input_toml: str) -> str:
     """Clean input toml, increasing the chance for beautiful output"""
     cleaned = re.sub(r"[\r\n][\r\n]{2,}", "\n\n", input_toml)
     return "\n" + cleaned.strip() + "\n"
@@ -28,15 +29,21 @@ class TomlSort:
     """API to manage sorting toml files"""
 
     def __init__(
-        self, input_toml: str, only_sort_tables: bool = False
+        self,
+        input_toml: str,
+        only_sort_tables: bool = False,
+        super_tables: bool = False,
     ) -> None:
         """Initializer
 
         :attr input_toml: the input toml data for processing
         :attr only_sort_tables: turns on sorting for only tables
+        :attr super_tables: determines whether super tables are included in
+            output
         """
         self.input_toml = input_toml
         self.only_sort_tables = only_sort_tables
+        self.super_tables = super_tables
 
     def sorted_children_table(
         self, parent: Union[Table, Container]
@@ -66,19 +73,32 @@ class TomlSort:
     def toml_elements_sorted(self, original: Union[Item, Container]) -> Item:
         """Returns a sorted item, recursing collections to their base"""
         if isinstance(original, Container):
-            new_table = Table(
-                Container(), Trivia(), False, is_super_table=False
-            )
+            new_table = table()
             for key, value in self.sorted_children_table(original):
                 new_table[key] = self.toml_elements_sorted(value)
             return new_table
         if isinstance(original, Table):
-            new_table = Table(
-                Container(),
-                Trivia(indent="\n"),
-                is_aot_element=False,
-                is_super_table=True,
-            )
+            # NOTE: I access a protected attribute because this is the only way
+            # I can prevent unnecessary keys from being generated. See:
+            # https://github.com/sdispater/tomlkit/issues/47
+            if self.super_tables:
+                new_table = table()
+            else:
+                new_table = (
+                    Table(
+                        Container(),
+                        Trivia(indent="\n", trail="\n"),
+                        is_aot_element=False,
+                        is_super_table=True,
+                    )
+                    if original._is_super_table  # pylint: disable=protected-access
+                    else Table(
+                        Container(),
+                        Trivia(indent="\n", trail="\n"),
+                        is_aot_element=False,
+                        is_super_table=False,
+                    )
+                )
             for key, value in self.sorted_children_table(original):
                 new_table[key] = self.toml_elements_sorted(value)
             return new_table
@@ -89,7 +109,7 @@ class TomlSort:
             # implementation currently generates duplicate elements. I rely on
             # the object id remove these duplicates, since the object id will
             # allow correct duplicates to remain
-            new_aot = []
+            new_aot = aot()
             id_lookup = set()  # type: Set[int]
             for aot_item in original:
                 id_aot_item = id(aot_item)
@@ -108,7 +128,7 @@ class TomlSort:
 
     def sorted(self) -> str:
         """Sort a TOML string"""
-        clean_toml = clean_input_toml(self.input_toml)
+        clean_toml = clean_toml_text(self.input_toml)
         toml_doc = tomlkit.parse(clean_toml)
         sorted_toml = self.toml_doc_sorted(toml_doc)
-        return tomlkit.dumps(sorted_toml).strip() + "\n"
+        return clean_toml_text(tomlkit.dumps(sorted_toml)).strip() + "\n"
