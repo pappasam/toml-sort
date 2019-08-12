@@ -1,16 +1,9 @@
 """Toml Sort CLI"""
 
+import sys
 import click
 
 from . import TomlSort
-
-
-def get_help() -> str:
-    """Get the help string for the current click context"""
-    ctx = click.get_current_context()
-    help_message = ctx.get_help()
-    ctx.exit()
-    return help_message
 
 
 @click.command()
@@ -35,7 +28,9 @@ def get_help() -> str:
 @click.argument("filename", type=click.File("r"), default="-")
 @click.version_option()
 def cli(output, _all, filename) -> None:
-    """Sort toml file FILENAME, saving results to a file, or stdout (default)
+    """toml-sort [OPTION]... [FILENAME]
+
+    Sort toml file FILENAME, saving results to a file, or stdout (default)
 
     FILENAME a filepath or standard input (-)
 
@@ -62,8 +57,14 @@ def cli(output, _all, filename) -> None:
             cat input.toml | toml-sort -a
     """
     if filename.isatty():
-        click.echo(get_help())
-        return
+        error_message_if_terminal = """
+toml-sort: missing FILENAME
+Usage: toml-sort [OPTION]... [FILENAME]
+
+Try `toml-sort --help` for more information
+""".strip()
+        click.echo(error_message_if_terminal, err=True)
+        sys.exit(1)
     only_sort_tables = not bool(_all)
     toml_content = filename.read()
     sorted_toml = TomlSort(toml_content, only_sort_tables).sorted()
