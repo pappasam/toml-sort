@@ -5,7 +5,7 @@ Provides a class to simply sort TOMl files
 
 import re
 import itertools
-from typing import Union, List, Tuple, Set
+from typing import Union, Iterable, Tuple, Set
 
 import tomlkit
 from tomlkit.api import aot, table
@@ -41,7 +41,7 @@ class TomlSort:
 
     def sorted_children_table(
         self, parent: Union[Table, Container]
-    ) -> List[Tuple[str, Union[Item]]]:
+    ) -> Iterable[Tuple[str, Union[Item]]]:
         """Get the sorted children of a table"""
         tables = (
             (key, parent[key])
@@ -58,10 +58,8 @@ class TomlSort:
             if not self.only_sort_tables
             else non_tables
         )
-        return list(
-            itertools.chain(
-                non_tables_final, sorted(tables, key=lambda x: x[0])
-            )
+        return itertools.chain(
+            non_tables_final, sorted(tables, key=lambda x: x[0])
         )
 
     def toml_elements_sorted(self, original: Union[Item, Container]) -> Item:
