@@ -23,14 +23,18 @@ def get_help() -> str:
     help="The output filepath. Choose stdout with '-'.",
 )
 @click.option(
-    "-i",
-    "--ignore-non-tables",
+    "-a",
+    "--all",
+    "_all",
     is_flag=True,
-    help="Only sort top-level Tables / Arrays of Tables",
+    help=(
+        "Sort all keys. "
+        "Default is to only sort non-inline 'tables and arrays of tables'."
+    ),
 )
 @click.argument("filename", type=click.File("r"), default="-")
 @click.version_option()
-def cli(output, ignore_non_tables, filename) -> None:
+def cli(output, _all, filename) -> None:
     """Sort toml file FILENAME, saving results to a file, or stdout (default)
 
     FILENAME a filepath or standard input (-)
@@ -53,15 +57,14 @@ def cli(output, ignore_non_tables, filename) -> None:
 
             cat input.toml | toml-sort -o output.toml
 
-        Only sort the top-level tables / arrays of tables
+        Sort all keys, not just top-level / table keys
 
-            cat input.toml | toml-sort -i
+            cat input.toml | toml-sort -a
     """
     if filename.isatty():
         click.echo(get_help())
         return
-
-    only_sort_tables = bool(ignore_non_tables)
+    only_sort_tables = not bool(_all)
     toml_content = filename.read()
     sorted_toml = TomlSort(toml_content, only_sort_tables).sorted()
     output.write(sorted_toml)
