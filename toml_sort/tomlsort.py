@@ -8,10 +8,10 @@ import itertools
 from typing import Union, Iterable, Tuple, Set
 
 import tomlkit
-from tomlkit.api import aot, table
+from tomlkit.api import aot, table, ws
 from tomlkit.toml_document import TOMLDocument
 from tomlkit.container import Container
-from tomlkit.items import Item, Table, AoT
+from tomlkit.items import Item, Table, AoT, Comment, Whitespace
 
 
 def clean_toml_text(input_toml: str) -> str:
@@ -23,6 +23,24 @@ def clean_toml_text(input_toml: str) -> str:
 def is_table(element: Union[Item, Container]) -> bool:
     """Determines whether a TOML element is classified as a table type"""
     return isinstance(element, (Container, Table, AoT))
+
+
+def write_header_comment(from_doc: TOMLDocument, to_doc: TOMLDocument) -> None:
+    """Write header comment from the FROM doc to the TO doc
+
+    Only writes comments / whitespace from the beginning of a TOML document.
+    Anything from later in the document is ambiguous and cannot be sorted
+    accurately.
+    """
+    for _, value in from_doc.body:
+        if isinstance(value, Whitespace):
+            to_doc.add(ws("\n"))
+        elif isinstance(value, Comment):
+            value.trivia.indent = ""
+            to_doc.add(Comment(value.trivia))
+        else:
+            to_doc.add(ws("\n"))
+            return
 
 
 class TomlSort:
@@ -103,6 +121,7 @@ class TomlSort:
     def toml_doc_sorted(self, original: TOMLDocument) -> TOMLDocument:
         """Sort a TOMLDocument"""
         sorted_document = tomlkit.document()
+        write_header_comment(original, sorted_document)
         for key, value in self.sorted_children_table(original):
             sorted_document[key] = self.toml_elements_sorted(value)
         return sorted_document
