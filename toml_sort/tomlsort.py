@@ -49,16 +49,21 @@ def clean_buggy_types(value: object) -> Item:
     Sometimes, tomlkit returns a primitive type instead of an Item. This
     function forces primitive types into Items.
     """
+    if isinstance(value, Item):
+        return value
     if isinstance(value, bool):
         return boolean("true" if value else "false")
-    return value
+    raise TypeError("value is not an expected type: " + str(type(value)))
 
 
 class TomlSort:
     """API to manage sorting toml files"""
 
     def __init__(
-        self, input_toml: str, only_sort_tables: bool = False
+        self,
+        input_toml: str,
+        only_sort_tables: bool = False,
+        no_header: bool = False,
     ) -> None:
         """Initializer
 
@@ -67,6 +72,7 @@ class TomlSort:
         """
         self.input_toml = input_toml
         self.only_sort_tables = only_sort_tables
+        self.no_header = no_header
 
     def sorted_children_table(
         self, parent: Table
@@ -122,12 +128,15 @@ class TomlSort:
         if isinstance(original, Item):
             original.trivia.indent = ""
             return original
-        raise TypeError("Invalid TOML; " + type(original) + " is not an Item")
+        raise TypeError(
+            "Invalid TOML; " + str(type(original)) + " is not an Item"
+        )
 
     def toml_doc_sorted(self, original: TOMLDocument) -> TOMLDocument:
         """Sort a TOMLDocument"""
         sorted_document = tomlkit.document()
-        write_header_comment(original, sorted_document)
+        if not self.no_header:
+            write_header_comment(original, sorted_document)
         for key, value in self.sorted_children_table(original):
             sorted_document[key] = self.toml_elements_sorted(value)
         return sorted_document

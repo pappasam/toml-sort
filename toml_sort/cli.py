@@ -25,34 +25,25 @@ from . import TomlSort
         "Default is to only sort non-inline 'tables and arrays of tables'."
     ),
 )
+@click.option(
+    "--no-header",
+    is_flag=True,
+    help="Do not keep a document's leading comments.",
+)
 @click.argument("filename", type=click.File("r"), default="-")
 @click.version_option()
-def cli(output, _all, filename) -> None:
+def cli(output, _all, no_header, filename) -> None:
     """Sort toml file FILENAME, saving results to a file, or stdout (default)
 
     FILENAME a filepath or standard input (-)
 
-    Examples:
+    Examples (non-exhaustive list):
 
-        Read from stdin, write to stdout:
+        Read from stdin, write to stdout: cat input.toml | toml-sort
 
-            cat input.toml | toml-sort
+        Read from disk, write to disk   : toml-sort -o output.toml input.toml
 
-        Read from file on disk, write to file on disk:
-
-            toml-sort -o output.toml input.toml
-
-        Read from file on disk, write to stdout
-
-            toml-sort input.toml
-
-        Read from stdin, write to file on disk
-
-            cat input.toml | toml-sort -o output.toml
-
-        Sort all keys, not just top-level / table keys
-
-            cat input.toml | toml-sort -a
+        Read from disk, write to stdout : toml-sort input.toml
     """
     if filename.isatty():
         error_message_if_terminal = """
@@ -63,7 +54,9 @@ Try `toml-sort --help` for more information
 """.strip()
         click.echo(error_message_if_terminal, err=True)
         sys.exit(1)
-    only_sort_tables = not bool(_all)
-    toml_content = filename.read()
-    sorted_toml = TomlSort(toml_content, only_sort_tables).sorted()
+    sorted_toml = TomlSort(
+        input_toml=filename.read(),
+        only_sort_tables=not bool(_all),
+        no_header=bool(no_header),
+    ).sorted()
     output.write(sorted_toml)
