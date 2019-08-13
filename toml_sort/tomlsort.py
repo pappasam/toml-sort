@@ -8,7 +8,7 @@ import itertools
 from typing import Union, Iterable, Tuple, Set
 
 import tomlkit
-from tomlkit.api import aot, table, ws
+from tomlkit.api import aot, ws, boolean
 from tomlkit.toml_document import TOMLDocument
 from tomlkit.container import Container
 from tomlkit.items import Item, Table, AoT, Comment, Whitespace
@@ -43,6 +43,17 @@ def write_header_comment(from_doc: TOMLDocument, to_doc: TOMLDocument) -> None:
             return
 
 
+def clean_buggy_types(value: object) -> Item:
+    """Clean buggy types
+
+    Sometimes, tomlkit returns a primitive type instead of an Item. This
+    function forces primitive types into Items.
+    """
+    if isinstance(value, bool):
+        return boolean("true" if value else "false")
+    return value
+
+
 class TomlSort:
     """API to manage sorting toml files"""
 
@@ -58,18 +69,18 @@ class TomlSort:
         self.only_sort_tables = only_sort_tables
 
     def sorted_children_table(
-        self, parent: Union[Table, Container]
-    ) -> Iterable[Tuple[str, Union[Item]]]:
+        self, parent: Table
+    ) -> Iterable[Tuple[str, Item]]:
         """Get the sorted children of a table"""
         tables = (
             (key, parent[key])
             for key in parent
-            if isinstance(parent[key], (Table, AoT, Container))
+            if isinstance(parent[key], (Table, AoT))
         )
         non_tables = (
-            (key, parent[key])
+            (key, clean_buggy_types(parent[key]))
             for key in parent
-            if not isinstance(parent[key], (Table, AoT, Container))
+            if not isinstance(parent[key], (Table, AoT))
         )
         non_tables_final = (
             sorted(non_tables, key=lambda x: x[0])
@@ -80,13 +91,8 @@ class TomlSort:
             non_tables_final, sorted(tables, key=lambda x: x[0])
         )
 
-    def toml_elements_sorted(self, original: Union[Item, Container]) -> Item:
+    def toml_elements_sorted(self, original: Item) -> Item:
         """Returns a sorted item, recursing collections to their base"""
-        if isinstance(original, Container):
-            new_table = table()
-            for key, value in self.sorted_children_table(original):
-                new_table[key] = self.toml_elements_sorted(value)
-            return new_table
         if isinstance(original, Table):
             original.trivia.indent = "\n"
             new_table = Table(
@@ -116,7 +122,7 @@ class TomlSort:
         if isinstance(original, Item):
             original.trivia.indent = ""
             return original
-        return original
+        raise TypeError("Invalid TOML; " + type(original) + " is not an Item")
 
     def toml_doc_sorted(self, original: TOMLDocument) -> TOMLDocument:
         """Sort a TOMLDocument"""
