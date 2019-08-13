@@ -28,9 +28,7 @@ from . import TomlSort
 @click.argument("filename", type=click.File("r"), default="-")
 @click.version_option()
 def cli(output, _all, filename) -> None:
-    """toml-sort [OPTION]... [FILENAME]
-
-    Sort toml file FILENAME, saving results to a file, or stdout (default)
+    """Sort toml file FILENAME, saving results to a file, or stdout (default)
 
     FILENAME a filepath or standard input (-)
 
@@ -58,8 +56,8 @@ def cli(output, _all, filename) -> None:
     """
     if filename.isatty():
         error_message_if_terminal = """
-toml-sort: missing FILENAME
-Usage: toml-sort [OPTION]... [FILENAME]
+toml-sort: missing FILENAME, and no stdin
+Usage: toml-sort [OPTIONS] [FILENAME]
 
 Try `toml-sort --help` for more information
 """.strip()
