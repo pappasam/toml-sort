@@ -51,6 +51,7 @@ class TomlSort:
 
         :attr input_toml: the input toml data for processing
         :attr only_sort_tables: turns on sorting for only tables
+        :attr no_header: omit leading comments from the output
         """
         self.input_toml = input_toml
         self.only_sort_tables = only_sort_tables
@@ -100,9 +101,9 @@ class TomlSort:
         if isinstance(original, AoT):
             # REFACTOR WHEN POSSIBLE:
             #
-            # NOTE: this section contains a necessary hack tomlkit's AoT
+            # NOTE: this section contains a necessary hack. Tomlkit's AoT
             # implementation currently generates duplicate elements. I rely on
-            # the object id remove these duplicates, since the object id will
+            # the object id to remove these duplicates; the object id will
             # allow correct duplicates to remain
             new_aot = aot()
             id_lookup = set()  # type: Set[int]
