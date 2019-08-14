@@ -5,10 +5,10 @@ Provides a class to simply sort TOMl files
 
 import re
 import itertools
-from typing import Union, Iterable, Tuple, Set
+from typing import Iterable, Tuple, Set
 
 import tomlkit
-from tomlkit.api import aot, ws, boolean
+from tomlkit.api import aot, ws, item
 from tomlkit.toml_document import TOMLDocument
 from tomlkit.container import Container
 from tomlkit.items import Item, Table, AoT, Comment, Whitespace
@@ -18,11 +18,6 @@ def clean_toml_text(input_toml: str) -> str:
     """Clean input toml, increasing the chance for beautiful output"""
     cleaned = re.sub(r"[\r\n][\r\n]{2,}", "\n\n", input_toml)
     return "\n" + cleaned.strip() + "\n"
-
-
-def is_table(element: Union[Item, Container]) -> bool:
-    """Determines whether a TOML element is classified as a table type"""
-    return isinstance(element, (Container, Table, AoT))
 
 
 def write_header_comment(from_doc: TOMLDocument, to_doc: TOMLDocument) -> None:
@@ -41,19 +36,6 @@ def write_header_comment(from_doc: TOMLDocument, to_doc: TOMLDocument) -> None:
         else:
             to_doc.add(ws("\n"))
             return
-
-
-def clean_buggy_types(value: object) -> Item:
-    """Clean buggy types
-
-    Sometimes, tomlkit returns a primitive type instead of an Item. This
-    function forces primitive types into Items.
-    """
-    if isinstance(value, Item):
-        return value
-    if isinstance(value, bool):
-        return boolean("true" if value else "false")
-    raise TypeError("value is not an expected type: " + str(type(value)))
 
 
 class TomlSort:
@@ -77,14 +59,19 @@ class TomlSort:
     def sorted_children_table(
         self, parent: Table
     ) -> Iterable[Tuple[str, Item]]:
-        """Get the sorted children of a table"""
+        """Get the sorted children of a table
+
+        NOTE: non-tables are wrapped in an item to ensure that they are, in
+        fact, items. Tables and AoT's are definitely items, so the conversion
+        is not necessary.
+        """
         tables = (
             (key, parent[key])
             for key in parent
             if isinstance(parent[key], (Table, AoT))
         )
         non_tables = (
-            (key, clean_buggy_types(parent[key]))
+            (key, item(parent[key], parent))
             for key in parent
             if not isinstance(parent[key], (Table, AoT))
         )
