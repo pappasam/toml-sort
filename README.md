@@ -5,7 +5,11 @@ A command line utility to sort and format your toml files. Requires Python 3.6 o
 ## Installation
 
 ```bash
+# With pip
 pip install toml-sort
+
+# With poetry
+poetry add toml-sort
 ```
 
 ## Motivation
@@ -45,6 +49,60 @@ Read from file on disk, write to stdout
 Read from stdin, write to file on disk
 
     cat input.toml | toml-sort -o output.toml
+
+## Example
+
+The following example shows the input, and output, from the CLI with default options.
+
+### Unformatted, unsorted input
+
+```toml
+# My great TOML example
+
+  title = "The example"
+
+[[a-section.hello]]
+ports = [ 8001, 8001, 8002 ]
+dob = 1979-05-27T07:32:00Z # First class dates? Why not?
+
+
+
+  [b-section]
+  date = "2018"
+  name = "Richard Stallman"
+
+[[a-section.hello]]
+ports = [ 80 ]
+dob = 1920-05-27T07:32:00Z # Another date!
+
+                          [a-section]
+                          date = "2019"
+                          name = "Samuel Roeca"
+```
+
+### Formatted, sorted output
+
+```toml
+# My great TOML example
+
+title = "The example"
+
+[a-section]
+date = "2019"
+name = "Samuel Roeca"
+
+[[a-section.hello]]
+ports = [ 8001, 8001, 8002 ]
+dob = 1979-05-27T07:32:00Z # First class dates? Why not?
+
+[[a-section.hello]]
+ports = [ 80 ]
+dob = 1920-05-27T07:32:00Z # Another date!
+
+[b-section]
+date = "2018"
+name = "Richard Stallman"
+```
 
 ## Local Development
 

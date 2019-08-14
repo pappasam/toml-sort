@@ -1,0 +1,19 @@
+# My great TOML example
+
+title = "The example"
+
+[a-section]
+date = "2019"
+name = "Samuel Roeca"
+
+[[a-section.hello]]
+ports = [ 8001, 8001, 8002 ]
+dob = 1979-05-27T07:32:00Z # First class dates? Why not?
+
+[[a-section.hello]]
+ports = [ 80 ]
+dob = 1920-05-27T07:32:00Z # Another date!
+
+[b-section]
+date = "2018"
+name = "Richard Stallman"

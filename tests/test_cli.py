@@ -12,7 +12,10 @@ PATH_EXAMPLES = "tests/examples"
 
 @pytest.mark.parametrize(
     "path_unsorted,path_sorted",
-    [("from-toml-lang.toml", "defaults/from-toml-lang.toml")],
+    [
+        ("from-toml-lang.toml", "defaults/from-toml-lang.toml"),
+        ("weird.toml", "defaults/weird.toml"),
+    ],
 )
 def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
     """Test the basic cli behavior with default arguments

@@ -5,10 +5,10 @@ Provides a class to simply sort TOMl files
 
 import re
 import itertools
-from typing import Iterable, Tuple, Set
+from typing import Iterable, Tuple, Set, Union
 
 import tomlkit
-from tomlkit.api import aot, ws, item
+from tomlkit.api import aot, ws, item, table
 from tomlkit.toml_document import TOMLDocument
 from tomlkit.container import Container
 from tomlkit.items import Item, Table, AoT, Comment, Whitespace
@@ -59,7 +59,7 @@ class TomlSort:
 
     def sorted_children_table(
         self, parent: Table
-    ) -> Iterable[Tuple[str, Item]]:
+    ) -> Iterable[Tuple[str, Union[Item, Container]]]:
         """Get the sorted children of a table
 
         NOTE: non-tables are wrapped in an item to ensure that they are, in
@@ -69,7 +69,7 @@ class TomlSort:
         tables = (
             (key, parent[key])
             for key in parent
-            if isinstance(parent[key], (Table, AoT))
+            if isinstance(parent[key], (Table, AoT, Container))
         )
         non_tables = (
             (key, item(parent[key], parent))
@@ -87,6 +87,11 @@ class TomlSort:
 
     def toml_elements_sorted(self, original: Item) -> Item:
         """Returns a sorted item, recursing collections to their base"""
+        if isinstance(original, Container):
+            new_table = table()
+            for key, value in self.sorted_children_table(original):
+                new_table[key] = self.toml_elements_sorted(value)
+            return new_table
         if isinstance(original, Table):
             original.trivia.indent = "\n"
             new_table = Table(
