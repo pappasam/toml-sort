@@ -1,0 +1,24 @@
+[build-system]
+requires = ["poetry>=0.12"]
+
+[tool.poetry]
+name = "toml-sort"
+version = "0.14.0"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.scripts]
+toml-sort = 'toml_sort.cli:cli'
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py36,py37
+"""
+
+[tool.black]
+line-length = 79
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.3"

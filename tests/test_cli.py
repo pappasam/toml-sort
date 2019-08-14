@@ -15,6 +15,7 @@ PATH_EXAMPLES = "tests/examples"
     [
         ("from-toml-lang.toml", "defaults/from-toml-lang.toml"),
         ("weird.toml", "defaults/weird.toml"),
+        ("pyproject-weird-order.toml", "defaults/pyproject-weird-order.toml"),
     ],
 )
 def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
