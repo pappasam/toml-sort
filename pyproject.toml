@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "toml-sort"
-version = "0.15.0"
+version = "0.15.1"
 description = "Toml sorting library"
 authors = ["Sam Roeca <samuel.roeca@gmail.com>"]
 readme = "README.md"
