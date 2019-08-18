@@ -1,5 +1,9 @@
 # toml-sort
 
+[![image-version](https://img.shields.io/pypi/v/toml-sort.svg)](https://python.org/pypi/toml-sort)
+[![image-license](https://img.shields.io/pypi/l/toml-sort.svg)](https://python.org/pypi/toml-sort)
+[![image](https://img.shields.io/pypi/pyversions/toml-sort.svg)](https://python.org/pypi/toml-sort)
+
 A command line utility to sort and format your toml files. Requires Python 3.6 or greater.
 
 ## Installation
