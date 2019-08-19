@@ -84,13 +84,13 @@ def cli(output, _all, in_place, no_header, check, filename) -> None:
 
     Examples (non-exhaustive list):
 
-        Stdin -> Disk : cat input.toml | toml-sort
+        Stdin -> Stdout : cat input.toml | toml-sort
 
-        Disk -> Disk  : toml-sort -o output.toml input.toml
+        Disk -> Disk    : toml-sort -o output.toml input.toml
 
-        Linting       : toml-sort --check input.toml
+        Linting         : toml-sort --check input.toml
 
-        Inplace Disk  : toml-sort --in-place input.toml
+        Inplace Disk    : toml-sort --in-place input.toml
     """
     if filename == "-" and sys.stdin.isatty():
         error_message_if_terminal = """
