@@ -26,16 +26,17 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-tomlkit = ">=0.5.5"
-click = "^7.0"
+tomlkit = ">=0.5.8"
+click = ">=7.0"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.3"
-black = {version = "^19.3b0", allows-prereleases = true}
+black = {version = "^19.3b0", allow-prereleases = true}
 mypy = "^0.720.0"
 pre-commit = "^1.18"
 tox = "^3.13"
 pytest = "^5.0"
+tox-asdf = "^0.1.0"
 
 [tool.poetry.scripts]
 toml-sort = 'toml_sort.cli:cli'
