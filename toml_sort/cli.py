@@ -1,6 +1,7 @@
 """Toml Sort CLI"""
 
 import sys
+
 import click
 
 from . import TomlSort
