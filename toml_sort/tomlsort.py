@@ -3,15 +3,15 @@
 Provides a class to simply sort TOMl files
 """
 
-import re
 import itertools
-from typing import Iterable, Tuple, Set
+import re
+from typing import Iterable, Tuple
 
 import tomlkit
-from tomlkit.api import aot, ws, item
-from tomlkit.toml_document import TOMLDocument
+from tomlkit.api import aot, item, ws
 from tomlkit.container import Container
-from tomlkit.items import Item, Table, AoT, Comment, Whitespace, Trivia
+from tomlkit.items import AoT, Comment, Item, Table, Trivia, Whitespace
+from tomlkit.toml_document import TOMLDocument
 
 
 def clean_toml_text(input_toml: str) -> str:
@@ -115,19 +115,9 @@ class TomlSort:
                 new_table[key] = self.toml_elements_sorted(value)
             return new_table
         if isinstance(original, AoT):
-            # REFACTOR WHEN POSSIBLE:
-            #
-            # NOTE: this section contains a necessary hack. Tomlkit's AoT
-            # implementation currently generates duplicate elements. I rely on
-            # the object id to remove these duplicates; the object id will
-            # allow correct duplicates to remain
             new_aot = aot()
-            id_lookup = set()  # type: Set[int]
             for aot_item in original:
-                id_aot_item = id(aot_item)
-                if id_aot_item not in id_lookup:
-                    new_aot.append(self.toml_elements_sorted(aot_item))
-                    id_lookup.add(id_aot_item)
+                new_aot.append(self.toml_elements_sorted(aot_item))
             return new_aot
         if isinstance(original, Item):
             original.trivia.indent = ""
