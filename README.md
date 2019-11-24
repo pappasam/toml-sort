@@ -109,7 +109,7 @@ Install the following tools manually.
 
 *Recommended*
 
-* [pyenv](https://github.com/pyenv/pyenv)
+* [asdf](https://github.com/asdf-vm/asdf)
 
 **Set up development environment**
 
