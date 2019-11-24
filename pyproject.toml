@@ -21,7 +21,7 @@ homepage = "https://github.com/pappasam/toml-sort"
 repository = "https://github.com/pappasam/toml-sort"
 keywords = ["toml", "sort", "cli", "unix", "utility"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Topic :: Software Development :: Code Generators",
   "Topic :: Utilities",
@@ -51,7 +51,7 @@ toml-sort = 'toml_sort.cli:cli'
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py36,py37
+envlist = py36,py37,py38
 isolated_build = true
 skipsdist = true
 [testenv]
