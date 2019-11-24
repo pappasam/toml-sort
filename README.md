@@ -4,7 +4,7 @@
 [![image-license](https://img.shields.io/pypi/l/toml-sort.svg)](https://python.org/pypi/toml-sort)
 [![image](https://img.shields.io/pypi/pyversions/toml-sort.svg)](https://python.org/pypi/toml-sort)
 
-A command line utility to sort and format your toml files. Requires Python 3.6 or greater.
+A command line utility to sort and format your toml files. Requires Python 3.6+.
 
 ## Installation
 
@@ -18,7 +18,7 @@ poetry add toml-sort
 
 ## Motivation
 
- This library strives to sort TOML files by providing the following features:
+ This library sorts TOML files, providing the following features:
 
 * Sort tables and Arrays of Tables (AoT)
 * Option to sort non-tables / non-AoT's, or not
@@ -26,7 +26,7 @@ poetry add toml-sort
 * Option to preserve top-level document comments, or not
 * Standardize whitespace and indentation
 
-I wrote this library because I couldn't find any "good" sorting utilities for TOML files.
+I wrote this library/application because I couldn't find any "good" sorting utilities for TOML files. Now, I use this as part of my daily workflow. Hopefully it helps you too!
 
 ## Usage
 
