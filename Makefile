@@ -16,3 +16,21 @@ test:  ## Run the tests
 publish:  ## Build & publish the new version
 	poetry build
 	poetry publish
+
+.PHONY: build-docs
+build-docs: docs/autogen-requirements.txt  ## Build the Sphinx docs
+	sphinx-build -M html docs docs/_build
+
+.PHONY: serve-docs
+serve-docs: build-docs  ## Simple development server for Sphinx docs
+	@echo "Serving documentation locally."
+	@echo "Open browser with 'make open-docs'"
+	@find docs toml_sort | entr -ps "$(MAKE) build-docs"
+
+.PHONY: open-docs
+open-docs:  ## Open Sphinx docs index in a browser
+	gio open docs/_build/html/index.html
+
+docs/autogen-requirements.txt:  ## Autogenerate the requirements.txt
+	poetry export --dev --format requirements.txt --output $@ && git add $@
+	exit 1

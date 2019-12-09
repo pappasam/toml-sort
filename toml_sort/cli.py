@@ -1,4 +1,4 @@
-"""Toml Sort CLI"""
+"""Toml Sort command line interface"""
 
 import sys
 
@@ -7,20 +7,20 @@ import click
 from . import TomlSort
 
 # The standard stream
-STD_STREAM = "-"
+_STD_STREAM = "-"
 
 
-def read_file(path: str) -> str:
+def _read_file(path: str) -> str:
     """Read contents from a file"""
-    if path == STD_STREAM:
+    if path == _STD_STREAM:
         return sys.stdin.read()
     with open(path, "r") as fileobj:
         return fileobj.read()
 
 
-def write_file(path: str, content: str) -> None:
+def _write_file(path: str, content: str) -> None:
     """Write content to a path"""
-    if path == STD_STREAM:
+    if path == _STD_STREAM:
         click.echo(content, nl=False)
         return
     with open(path, "w") as fileobj:
@@ -32,7 +32,7 @@ def write_file(path: str, content: str) -> None:
     "-o",
     "--output",
     type=click.Path(file_okay=True, writable=True, allow_dash=True),
-    default=STD_STREAM,
+    default=_STD_STREAM,
     show_default=True,
     help="The output filepath. Choose stdout with '-'.",
 )
@@ -75,7 +75,7 @@ def write_file(path: str, content: str) -> None:
     type=click.Path(
         exists=True, file_okay=True, readable=True, allow_dash=True
     ),
-    default=STD_STREAM,
+    default=_STD_STREAM,
 )
 @click.version_option()
 def cli(output, _all, in_place, no_header, check, filename) -> None:
@@ -102,13 +102,13 @@ Try `toml-sort --help` for more information
 """.strip()
         click.echo(error_message_if_terminal, err=True)
         sys.exit(1)
-    elif in_place and filename == STD_STREAM:
+    elif in_place and filename == _STD_STREAM:
         click.echo("Cannot format stdin in-place", err=True)
         sys.exit(1)
-    elif in_place and output != STD_STREAM:
+    elif in_place and output != _STD_STREAM:
         click.echo("Cannot specify output file with in-place", err=True)
         sys.exit(1)
-    original_toml = read_file(filename)
+    original_toml = _read_file(filename)
     sorted_toml = TomlSort(
         input_toml=original_toml,
         only_sort_tables=not bool(_all),
@@ -120,6 +120,6 @@ Try `toml-sort --help` for more information
             sys.exit(1)
         return
     if in_place:
-        write_file(filename, sorted_toml)
+        _write_file(filename, sorted_toml)
         return
-    write_file(output, sorted_toml)
+    _write_file(output, sorted_toml)

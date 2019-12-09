@@ -1,7 +1,4 @@
-"""Toml Sort
-
-Provides a class to simply sort TOMl files
-"""
+"""Utility functions and classes to sort toml text"""
 
 import itertools
 import re
@@ -12,6 +9,8 @@ from tomlkit.api import aot, item, ws
 from tomlkit.container import Container
 from tomlkit.items import AoT, Comment, Item, Table, Trivia, Whitespace
 from tomlkit.toml_document import TOMLDocument
+
+__all__ = ["TomlSort"]
 
 
 def clean_toml_text(input_toml: str) -> str:
@@ -51,7 +50,12 @@ def convert_tomlkit_buggy_types(in_value: object, parent: Item) -> Item:
 
 
 class TomlSort:
-    """API to manage sorting toml files"""
+    """API to manage sorting toml files
+
+    :var str input_toml: the input toml data for processing
+    :var bool only_sort_tables: turns on sorting for only tables
+    :var bool no_header: omit leading comments from the output
+    """
 
     def __init__(
         self,
@@ -59,12 +63,7 @@ class TomlSort:
         only_sort_tables: bool = False,
         no_header: bool = False,
     ) -> None:
-        """Initializer
-
-        :attr input_toml: the input toml data for processing
-        :attr only_sort_tables: turns on sorting for only tables
-        :attr no_header: omit leading comments from the output
-        """
+        """Initializer"""
         self.input_toml = input_toml
         self.only_sort_tables = only_sort_tables
         self.no_header = no_header
