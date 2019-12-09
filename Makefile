@@ -1,6 +1,3 @@
-MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CURRENT_DIR := $(abspath $(dir $(MKFILE_PATH)))
-
 .PHONY: help
 help:  ## Print this help menu
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -21,7 +18,7 @@ publish:  ## Build & publish the new version
 	poetry publish
 
 .PHONY: build-docs
-build-docs:  ## Build the Sphinx docs
+build-docs: docs/autogen-requirements.txt  ## Build the Sphinx docs
 	sphinx-build -M html docs docs/_build
 
 .PHONY: serve-docs
