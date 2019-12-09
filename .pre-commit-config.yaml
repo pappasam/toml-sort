@@ -29,3 +29,12 @@ repos:
       language: system
       types: [python]
       exclude: ^tests/
+  - repo: local
+    hooks:
+    - id: poetry-to-requirements
+      name: poetry-to-requirements
+      require_serial: true
+      entry: make -f Makefile docs/autogen-requirements.txt
+      language: system
+      pass_filenames: false
+      files: ^poetry.lock$
