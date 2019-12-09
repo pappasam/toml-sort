@@ -34,13 +34,15 @@ This project can be used as either a command line utility or a Python library.
 
 ### Command line interface
 
-    Stdin -> Stdout : cat input.toml | toml-sort
+```text
+Stdin -> Stdout : cat input.toml | toml-sort
 
-    Disk -> Disk    : toml-sort -o output.toml input.toml
+Disk -> Disk    : toml-sort -o output.toml input.toml
 
-    Linting         : toml-sort --check input.toml
+Linting         : toml-sort --check input.toml
 
-    Inplace Disk    : toml-sort --in-place input.toml
+Inplace Disk    : toml-sort --in-place input.toml
+```
 
 ## Example
 
