@@ -7,6 +7,8 @@
 
 A command line utility to sort and format your toml files. Requires Python 3.6+.
 
+Read the latest documentation here: https://toml-sort.readthedocs.io/en/latest/
+
 ## Installation
 
 ```bash
