@@ -13,11 +13,11 @@ include_trailing_comma = true
 
 [tool.poetry]
 name = "toml-sort"
-version = "0.17.0"
+version = "0.17.1"
 description = "Toml sorting library"
 authors = ["Sam Roeca <samuel.roeca@gmail.com>"]
 readme = "README.md"
-homepage = "https://github.com/pappasam/toml-sort"
+homepage = "https://toml-sort.readthedocs.io/en/latest/"
 repository = "https://github.com/pappasam/toml-sort"
 keywords = ["toml", "sort", "cli", "unix", "utility"]
 classifiers = [

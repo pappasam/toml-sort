@@ -21,7 +21,7 @@ poetry add toml-sort
 
 ## Motivation
 
- This library sorts TOML files, providing the following features:
+This library sorts TOML files, providing the following features:
 
 * Sort tables and Arrays of Tables (AoT)
 * Option to sort non-tables / non-AoT's, or not
@@ -109,7 +109,7 @@ Local development for this project is quite simple.
 
 Install the following tools manually.
 
-* [Poetry](https://github.com/sdispater/poetry#installation)
+* [Poetry>=1.0](https://github.com/sdispater/poetry#installation)
 * [GNU Make](https://www.gnu.org/software/make/)
 
 *Recommended*
@@ -130,4 +130,4 @@ make test
 
 ## Written by
 
-Samuel Roeca *samuel.roeca@gmail.com*
+Samuel Roeca, *samuel.roeca@gmail.com*
