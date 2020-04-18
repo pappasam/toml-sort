@@ -71,14 +71,14 @@ def _write_file(path: str, content: str) -> None:
     ),
 )
 @click.argument(
-    "filename",
+    "filenames",
+    nargs=-1,
     type=click.Path(
         exists=True, file_okay=True, readable=True, allow_dash=True
     ),
-    default=_STD_STREAM,
 )
 @click.version_option()
-def cli(output, _all, in_place, no_header, check, filename) -> None:
+def cli(output, _all, in_place, no_header, check, filenames) -> None:
     """Sort toml file FILENAME, saving results to a file, or stdout (default)
 
     FILENAME a filepath or standard input (-)
@@ -93,7 +93,25 @@ def cli(output, _all, in_place, no_header, check, filename) -> None:
 
         Inplace Disk    : toml-sort --in-place input.toml
     """
-    if filename == "-" and sys.stdin.isatty():
+    if not filenames:
+        filenames = (_STD_STREAM,)
+
+    if len(filenames) > 1:
+        if not (in_place or check):
+            click.echo(
+                "--check or --in-place are required "
+                "if two or more input files are given",
+                err=True,
+            )
+            sys.exit(1)
+        elif output != _STD_STREAM:
+            click.echo(
+                "Cannot specify output file "
+                "if two or more input files are given",
+                err=True,
+            )
+            sys.exit(1)
+    elif _STD_STREAM in filenames and sys.stdin.isatty():
         error_message_if_terminal = """
 toml-sort: missing FILENAME, and no stdin
 Usage: toml-sort [OPTIONS] [FILENAME]
@@ -102,24 +120,31 @@ Try `toml-sort --help` for more information
 """.strip()
         click.echo(error_message_if_terminal, err=True)
         sys.exit(1)
-    elif in_place and filename == _STD_STREAM:
+    elif in_place and _STD_STREAM in filenames:
         click.echo("Cannot format stdin in-place", err=True)
         sys.exit(1)
     elif in_place and output != _STD_STREAM:
         click.echo("Cannot specify output file with in-place", err=True)
         sys.exit(1)
-    original_toml = _read_file(filename)
-    sorted_toml = TomlSort(
-        input_toml=original_toml,
-        only_sort_tables=not bool(_all),
-        no_header=bool(no_header),
-    ).sorted()
-    if check:
-        if original_toml != sorted_toml:
-            click.echo("File would be re-formatted", err=True)
-            sys.exit(1)
-        return
-    if in_place:
-        _write_file(filename, sorted_toml)
-        return
-    _write_file(output, sorted_toml)
+
+    check_failed = False
+
+    for filename in filenames:
+        original_toml = _read_file(filename)
+        sorted_toml = TomlSort(
+            input_toml=original_toml,
+            only_sort_tables=not bool(_all),
+            no_header=bool(no_header),
+        ).sorted()
+        if check and original_toml != sorted_toml:
+            click.echo(f"File '{filename}' would be re-formatted", err=True)
+            check_failed = True
+            continue
+        if in_place:
+            _write_file(filename, sorted_toml)
+            continue
+        if len(filenames) == 1:
+            _write_file(output, sorted_toml)
+
+    if check and check_failed:
+        sys.exit(1)
