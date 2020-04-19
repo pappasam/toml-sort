@@ -11,6 +11,7 @@ Note: in this release, we've discovered a strange bug (we believe in tomlkit) wh
 ### Added
 
 - Support for multiple FILENAME arguments in the CLI. Used for precommit / linting multiple files. Thanks @atugushev!
+- Pre-commit hook
 
 ### Changed
 
