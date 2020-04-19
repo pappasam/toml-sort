@@ -27,6 +27,11 @@ def _write_file(path: str, content: str) -> None:
         fileobj.write(content)
 
 
+# in docstring, I've placed a "\b". This causes the following lines to be
+# broken as-is. See the Click documentation for more details:
+# https://click.palletsprojects.com/en/7.x/documentation/#preventing-rewrapping
+
+
 @click.command()
 @click.option(
     "-o",
@@ -83,14 +88,11 @@ def cli(output, _all, in_place, no_header, check, filenames) -> None:
 
     FILENAME a filepath or standard input (-)
 
+    \b
     Examples (non-exhaustive list):
-
         Stdin -> Stdout : cat input.toml | toml-sort
-
         Disk -> Disk    : toml-sort -o output.toml input.toml
-
         Linting         : toml-sort --check input.toml
-
         Inplace Disk    : toml-sort --in-place input.toml
     """
     if not filenames:
