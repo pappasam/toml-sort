@@ -1,0 +1,6 @@
+-   id: toml-sort
+    name: toml-sort
+    entry: toml-sort
+    args: [--check]
+    language: python
+    types: [toml]
