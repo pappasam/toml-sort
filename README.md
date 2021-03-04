@@ -17,7 +17,7 @@ Read the latest documentation here: https://toml-sort.readthedocs.io/en/latest/
 pip install toml-sort
 
 # With poetry
-poetry add toml-sort
+poetry add --dev toml-sort
 ```
 
 ## Motivation
