@@ -8,7 +8,7 @@
 
 A command line utility to sort and format your toml files. Requires Python 3.6+.
 
-Read the latest documentation here: https://toml-sort.readthedocs.io/en/latest/
+Read the latest documentation here: <https://toml-sort.readthedocs.io/en/latest/>
 
 ## Installation
 
@@ -24,28 +24,52 @@ poetry add --dev toml-sort
 
 This library sorts TOML files, providing the following features:
 
-* Sort tables and Arrays of Tables (AoT)
-* Option to sort non-tables / non-AoT's, or not
-* Preserve inline comments
-* Option to preserve top-level document comments, or not
-* Standardize whitespace and indentation
+- Sort tables and Arrays of Tables (AoT)
+- Option to sort non-tables / non-AoT's, or not
+- Preserve inline comments
+- Option to preserve top-level document comments, or not
+- Standardize whitespace and indentation
 
 I wrote this library/application because I couldn't find any "good" sorting utilities for TOML files. Now, I use this as part of my daily workflow. Hopefully it helps you too!
 
-## Usage
+## Command line usage
 
-This project can be used as either a command line utility or a Python library.
+This project can be used as either a command line utility or a Python library. Read the docs for an overview of its library capabilities. For command line usage, see below:
 
-### Command line interface
+```console
+$ toml-sort --help
+Usage: toml-sort [OPTIONS] [FILENAMES]...
 
-```text
-Stdin -> Stdout : cat input.toml | toml-sort
+  Sort toml file FILENAME(s), writing to file(s) or stdout (default)
 
-Disk -> Disk    : toml-sort -o output.toml input.toml
+  FILENAME a filepath or standard input (-)
 
-Linting         : toml-sort --check input.toml
+  Examples (non-exhaustive list):
+    Stdin -> Stdout : cat input.toml | toml-sort
+    Disk -> Disk    : toml-sort -o output.toml input.toml
+    Linting         : toml-sort --check input.toml input2.toml input3.toml
+    Inplace Disk    : toml-sort --in-place input.toml input2.toml
 
-Inplace Disk    : toml-sort --in-place input.toml
+Options:
+  -o, --output PATH  The output filepath. Choose stdout with '-' (the
+                     default).
+
+  -a, --all          Sort all keys. Default is to only sort non-inline 'tables
+                     and arrays of tables'.
+
+  -i, --in-place     Makes changes to the original input file. Note: you
+                     cannot redirect from a file to itself in Bash. POSIX
+                     shells process redirections first, then execute the
+                     command.
+
+  --no-header        Do not keep a document's leading comments.
+  --check            Check if an original file is changed by the formatter.
+                     Return code 0 means it would not change. Return code 1
+                     means it would change.
+
+  -I, --ignore-case  When sorting, ignore case.
+  --version          Show the version and exit.
+  --help             Show this message and exit.
 ```
 
 ## Example
@@ -110,12 +134,12 @@ Local development for this project is quite simple.
 
 Install the following tools manually.
 
-* [Poetry>=1.0](https://github.com/sdispater/poetry#installation)
-* [GNU Make](https://www.gnu.org/software/make/)
+- [Poetry>=1.0](https://github.com/sdispater/poetry#installation)
+- [GNU Make](https://www.gnu.org/software/make/)
 
-*Recommended*
+_Recommended_
 
-* [asdf](https://github.com/asdf-vm/asdf)
+- [asdf](https://github.com/asdf-vm/asdf)
 
 **Set up development environment**
 
@@ -132,3 +156,8 @@ make test
 ## Written by
 
 Samuel Roeca, *samuel.roeca@gmail.com*
+npm notice
+npm notice New minor version of npm available! 7.6.0 -> 7.8.0
+npm notice Changelog: <https://github.com/npm/cli/releases/tag/v7.8.0>
+npm notice Run `npm install -g npm@7.8.0` to update!
+npm notice
