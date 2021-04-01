@@ -1,4 +1,4 @@
-"""Toml Sort command line interface"""
+"""Toml Sort command line interface."""
 
 import sys
 
@@ -11,7 +11,7 @@ _STD_STREAM = "-"
 
 
 def _read_file(path: str) -> str:
-    """Read contents from a file"""
+    """Read contents from a file."""
     if path == _STD_STREAM:
         return sys.stdin.read()
     with open(path, "r") as fileobj:
@@ -19,7 +19,7 @@ def _read_file(path: str) -> str:
 
 
 def _write_file(path: str, content: str) -> None:
-    """Write content to a path"""
+    """Write content to a path."""
     if path == _STD_STREAM:
         click.echo(content, nl=False)
         return

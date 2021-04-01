@@ -1,4 +1,4 @@
-"""Toml Sort
+"""Toml Sort.
 
 A library to easily sort toml files.
 """

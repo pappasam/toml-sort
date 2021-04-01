@@ -1,4 +1,4 @@
-"""Test the CLI"""
+"""Test the CLI."""
 
 import os
 import shutil
@@ -28,10 +28,10 @@ PATH_EXAMPLES = "tests/examples"
     ],
 )
 def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
-    """Test the basic cli behavior with default arguments
+    """Test the basic cli behavior with default arguments.
 
-    Test parameters are relative to the tests/examples directory within this
-    project.
+    Test parameters are relative to the tests/examples directory within
+    this project.
     """
     path_unsorted = os.path.join(PATH_EXAMPLES, path_unsorted)
     path_sorted = os.path.join(PATH_EXAMPLES, path_sorted)
@@ -116,7 +116,10 @@ def test_multiple_files_in_place(tmpdir):
 @pytest.mark.parametrize(
     "options",
     (
-        pytest.param([], id="--check or --in-place must be specified",),
+        pytest.param(
+            [],
+            id="--check or --in-place must be specified",
+        ),
         pytest.param(
             ["--check", "--output", "output.toml"],
             id="cannot specify output with --check",
