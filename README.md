@@ -156,8 +156,3 @@ make test
 ## Written by
 
 Samuel Roeca, *samuel.roeca@gmail.com*
-npm notice
-npm notice New minor version of npm available! 7.6.0 -> 7.8.0
-npm notice Changelog: <https://github.com/npm/cli/releases/tag/v7.8.0>
-npm notice Run `npm install -g npm@7.8.0` to update!
-npm notice
