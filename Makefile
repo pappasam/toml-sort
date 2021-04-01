@@ -23,9 +23,9 @@ publish:  ## Build & publish the new version
 
 .PHONY: format
 format:  ## Autoformat all files in the repo. WARNING: changes files in-place
-	poetry run black jedi_language_server tests
-	poetry run isort jedi_language_server tests
-	poetry run docformatter --recursive --in-place jedi_language_server tests
+	poetry run black toml_sort tests
+	poetry run isort toml_sort tests
+	poetry run docformatter --recursive --in-place toml_sort tests
 
 .PHONY: build-docs
 build-docs: docs/autogen-requirements.txt  ## Build the Sphinx docs
