@@ -32,7 +32,7 @@ master_doc = "index"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "m2r",
+    "m2r2",
     "sphinx.ext.autodoc",
     "sphinx_click.ext",
     "sphinx_rtd_theme",

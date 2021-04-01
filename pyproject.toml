@@ -36,18 +36,18 @@ tomlkit = ">=0.5.8"
 click = ">=7.0"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.3"
-black = {version = "^19.10b0", allow-prereleases = true}
-mypy = "^0.720.0"
+pylint = "^2.7.4"
+black = {version = "^20.8b1", allow-prereleases = true}
+mypy = "^0.812.0"
 pre-commit = "^1.18"
 tox = "^3.13"
-pytest = "^5.0"
+pytest = "^6.2.2"
 tox-asdf = "^0.1.0"
-isort = "^4.3.21"
-sphinx = "^2.2.2"
-sphinx-rtd-theme = "^0.4.3"
-m2r = "^0.2.1"
-sphinx-click = "^2.3.1"
+isort = "^5.8.0"
+sphinx = "^3.5.3"
+sphinx-rtd-theme = "^0.5.1"
+m2r2 = "^0.2.7"
+sphinx-click = "^2.7.1"
 
 [tool.poetry.scripts]
 toml-sort = 'toml_sort.cli:cli'
@@ -55,7 +55,7 @@ toml-sort = 'toml_sort.cli:cli'
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py36,py37,py38
+envlist = py36,py37,py38,py39
 isolated_build = true
 skipsdist = true
 [testenv]
