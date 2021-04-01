@@ -49,6 +49,7 @@ sphinx-rtd-theme = "^0.5.1"
 m2r2 = "^0.2.7"
 sphinx-click = "^2.7.1"
 docformatter = "^1.4"
+pytest-cov = "^2.11.1"
 
 [tool.poetry.scripts]
 toml-sort = 'toml_sort.cli:cli'
