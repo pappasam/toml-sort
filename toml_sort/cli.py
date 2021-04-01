@@ -32,6 +32,9 @@ def _write_file(path: str, content: str) -> None:
 # https://click.palletsprojects.com/en/7.x/documentation/#preventing-rewrapping
 
 
+# pylint: disable=too-many-arguments
+
+
 @click.command()
 @click.option(
     "-o",
@@ -73,6 +76,12 @@ def _write_file(path: str, content: str) -> None:
         "Return code 1 means it would change. "
     ),
 )
+@click.option(
+    "-I",
+    "--ignore-case",
+    is_flag=True,
+    help="When sorting, ignore case.",
+)
 @click.argument(
     "filenames",
     nargs=-1,
@@ -81,7 +90,15 @@ def _write_file(path: str, content: str) -> None:
     ),
 )
 @click.version_option()
-def cli(output, _all, in_place, no_header, check, filenames) -> None:
+def cli(
+    output,
+    _all,
+    in_place,
+    no_header,
+    check,
+    ignore_case,
+    filenames,
+) -> None:
     """Sort toml file FILENAME(s), writing to file(s) or stdout (default)
 
     FILENAME a filepath or standard input (-)
@@ -138,6 +155,7 @@ Try `toml-sort --help` for more information
             input_toml=original_toml,
             only_sort_tables=not bool(_all),
             no_header=bool(no_header),
+            ignore_case=ignore_case,
         ).sorted()
         if check:
             if original_toml != sorted_toml:

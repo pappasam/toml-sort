@@ -50,12 +50,23 @@ def convert_tomlkit_buggy_types(in_value: object, parent: Item) -> Item:
     return item(in_value, parent)
 
 
+def sort_case_sensitive(value: Tuple[str, Item]) -> str:
+    """Case sensitive function to pass to 'sorted' function."""
+    return value[0]
+
+
+def sort_case_insensitive(value: Tuple[str, Item]) -> str:
+    """Case insensitive function to pass to 'sorted' function."""
+    return value[0].lower()
+
+
 class TomlSort:
     """API to manage sorting toml files.
 
     :var str input_toml: the input toml data for processing
     :var bool only_sort_tables: turns on sorting for only tables
     :var bool no_header: omit leading comments from the output
+    :var callable sort_func: the sorting function to use for lists of items
     """
 
     def __init__(
@@ -63,11 +74,15 @@ class TomlSort:
         input_toml: str,
         only_sort_tables: bool = False,
         no_header: bool = False,
+        ignore_case: bool = False,
     ) -> None:
         """Initializer."""
         self.input_toml = input_toml
         self.only_sort_tables = only_sort_tables
         self.no_header = no_header
+        self.sort_func = (
+            sort_case_insensitive if ignore_case else sort_case_sensitive
+        )
 
     def sorted_children_table(
         self, parent: Table
@@ -93,12 +108,12 @@ class TomlSort:
             if not isinstance(value, (Table, AoT))
         )
         non_tables_final = (
-            sorted(non_tables, key=lambda x: x[0])
+            sorted(non_tables, key=self.sort_func)
             if not self.only_sort_tables
             else non_tables
         )
         return itertools.chain(
-            non_tables_final, sorted(tables, key=lambda x: x[0])
+            non_tables_final, sorted(tables, key=self.sort_func)
         )
 
     def toml_elements_sorted(self, original: Item) -> Item:
