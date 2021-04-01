@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.19.0
+
+### Added
+
+- CLI option to ignore case while sorting
+
 ## 0.18.0
 
 Note: in this release, we've discovered a strange bug (we believe in tomlkit) where, sometimes, AOT elements are ordered without our consent. One of the cli tests has been marked `xfail`. If you'd like to help figure out why, we're always looking for contributors!
