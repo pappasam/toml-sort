@@ -37,7 +37,7 @@ click = ">=7.0"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.7.4"
-black = {version = "^20.8b1", allow-prereleases = true}
+black = {version = "^21.12b0", allow-prereleases = true, python = "^3.6.2"}
 mypy = "^0.812.0"
 pre-commit = "^1.18"
 tox = "^3.13"
