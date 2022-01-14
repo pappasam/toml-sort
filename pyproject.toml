@@ -52,7 +52,7 @@ docformatter = "^1.4"
 pytest-cov = "^2.11.1"
 
 [tool.poetry.scripts]
-toml-sort = 'toml_sort.cli:cli'
+toml-sort = 'toml_sort.cli:entrypoint'
 
 [tool.tox]
 legacy_tox_ini = """

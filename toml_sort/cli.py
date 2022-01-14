@@ -1,178 +1,204 @@
 """Toml Sort command line interface."""
 
+import argparse
 import sys
 
-import click
+from .tomlsort import TomlSort
 
-from . import TomlSort
+__all__ = ["cli", "entrypoint"]
 
-# The standard stream
-_STD_STREAM = "-"
+STD_STREAM = "-"  # The standard stream
+ENCODING = "UTF-8"  # Currently, we only support UTF-8
 
 
-def _read_file(path: str) -> str:
+def get_version() -> str:
+    """Get the program version."""
+    # pylint: disable=import-outside-toplevel
+    try:
+        # Type checker for Python < 3.8 fails.
+        # Since this ony happens here, we just ignore.
+        from importlib.metadata import version  # type: ignore
+    except ImportError:
+        try:
+            # Below ignored both because this a redefinition from above, and
+            # because importlib_metadata isn't known by mypy. Ignored because
+            # this is intentional.
+            from importlib_metadata import version  # type: ignore
+        except ImportError:
+            print(
+                "Error: unable to get version. "
+                "If using Python < 3.8, you must install "
+                "`importlib_metadata` to get the version.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+    return version("toml-sort")
+
+
+def printerr(arg: str) -> None:
+    """Print to stderr."""
+    print(arg, file=sys.stderr)
+
+
+def read_file(path: str) -> str:
     """Read contents from a file."""
-    if path == _STD_STREAM:
+    if path == STD_STREAM:
         return sys.stdin.read()
-    with open(path, "r") as fileobj:
+    with open(path, "r", encoding=ENCODING) as fileobj:
         return fileobj.read()
 
 
-def _write_file(path: str, content: str) -> None:
+def write_file(path: str, content: str) -> None:
     """Write content to a path."""
-    if path == _STD_STREAM:
-        click.echo(content, nl=False)
+    if path == STD_STREAM:
+        print(content, end="")
         return
-    with open(path, "w") as fileobj:
+    with open(path, "w", encoding=ENCODING) as fileobj:
         fileobj.write(content)
 
 
-# in docstring, I've placed a "\b". This causes the following lines to be
-# broken as-is. See the Click documentation for more details:
-# https://click.palletsprojects.com/en/7.x/documentation/#preventing-rewrapping
+def cli(args: List[str]) -> None:
+    """Toml sort cli implementation."""
+    parser = argparse.ArgumentParser(
+        prog="toml-sort",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="Toml sort: a sorting utility for toml files.",
+        epilog="""\
+Examples:
 
+  Stdin -> Stdout : cat input.toml | toml-sort
+  Disk -> Disk    : toml-sort -o output.toml input.toml
+  Linting         : toml-sort --check input.toml input2.toml input3.toml
+  Inplace Disk    : toml-sort --in-place input.toml input2.toml
 
-# pylint: disable=too-many-arguments
+Return codes:
 
+  0 : success
+  1 : errors were found
 
-@click.command()
-@click.option(
-    "-o",
-    "--output",
-    type=click.Path(file_okay=True, writable=True, allow_dash=True),
-    help="The output filepath. Choose stdout with '-' (the default).",
-)
-@click.option(
-    "-a",
-    "--all",
-    "_all",
-    is_flag=True,
-    help=(
-        "Sort all keys. "
-        "Default is to only sort non-inline 'tables and arrays of tables'."
-    ),
-)
-@click.option(
-    "-i",
-    "--in-place",
-    is_flag=True,
-    help=(
-        "Makes changes to the original input file. "
-        "Note: you cannot redirect from a file to itself in Bash. "
-        "POSIX shells process redirections first, then execute the command."
-    ),
-)
-@click.option(
-    "--no-header",
-    is_flag=True,
-    help="Do not keep a document's leading comments.",
-)
-@click.option(
-    "--check",
-    is_flag=True,
-    help=(
-        "Check if an original file is changed by the formatter. "
-        "Return code 0 means it would not change. "
-        "Return code 1 means it would change. "
-    ),
-)
-@click.option(
-    "-I",
-    "--ignore-case",
-    is_flag=True,
-    help="When sorting, ignore case.",
-)
-@click.argument(
-    "filenames",
-    nargs=-1,
-    type=click.Path(
-        exists=True, file_okay=True, readable=True, allow_dash=True
-    ),
-)
-@click.version_option()
-def cli(
-    output,
-    _all,
-    in_place,
-    no_header,
-    check,
-    ignore_case,
-    filenames,
-) -> None:
-    """Sort toml file FILENAME(s), writing to file(s) or stdout (default)
+Notes:
 
-    FILENAME a filepath or standard input (-)
+  - You cannot redirect from a file to itself in Bash. POSIX shells process
+    redirections first, then execute commands. --in-place exists for this
+    reason
+""",
+    )
+    parser.add_argument(
+        "--version",
+        help="display version information and exit",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        help=f"output filepath (default: '{STD_STREAM}')",
+        type=str,
+        default=STD_STREAM,
+    )
+    parser.add_argument(
+        "-a",
+        "--all",
+        help=(
+            "sort ALL keys "
+            "(default: only sort non-inline 'tables and arrays of tables')"
+        ),
+        action="store_true",
+    )
+    parser.add_argument(
+        "-i",
+        "--in-place",
+        help="overwrite the original input file with changes",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-header",
+        help="do not keep a document's leading comments",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--check",
+        help=(
+            "silently check if a file's contents would be "
+            "changed by the formatter"
+        ),
+        action="store_true",
+    )
+    parser.add_argument(
+        "-I",
+        "--ignore-case",
+        help="ignore case when sorting",
+        action="store_true",
+    )
+    parser.add_argument(
+        "filenames",
+        metavar="F",
+        help=(
+            f"filename(s) to be processed by toml-sort (default: {STD_STREAM})"
+        ),
+        type=str,
+        nargs="*",
+    )
+    args = parser.parse_args()
+    if args.version:
+        print(get_version())
+        sys.exit(0)
 
-    \b
-    Examples (non-exhaustive list):
-      Stdin -> Stdout : cat input.toml | toml-sort
-      Disk -> Disk    : toml-sort -o output.toml input.toml
-      Linting         : toml-sort --check input.toml input2.toml input3.toml
-      Inplace Disk    : toml-sort --in-place input.toml input2.toml
-    """
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-branches
-    if not filenames and sys.stdin.isatty():
-        error_message_if_terminal = """
-toml-sort: missing FILENAME, and no stdin
-Usage: toml-sort [OPTIONS] [FILENAME]
-
-Try `toml-sort --help` for more information
-""".strip()
-        click.echo(error_message_if_terminal, err=True)
-        sys.exit(1)
-
-    filenames_clean = filenames if filenames else (_STD_STREAM,)
+    filenames_clean = args.filenames if args.filenames else (STD_STREAM,)
 
     usage_errors = []
 
     if len(filenames_clean) > 1:
-        if not (in_place or check):
+        if not (args.in_place or args.check):
             usage_errors.append(
                 "'--check' or '--in-place' required if using 2+ FILENAME args"
             )
-        if output is not None:
+        if args.output is not None:
             usage_errors.append("'--output' not allowed with 2+ FILENAME args")
-    if in_place and _STD_STREAM in filenames_clean:
-        usage_errors.append("'--in-place' not allowed with stdin FILENAME '-'")
-    if in_place and output is not None:
+    if args.in_place and STD_STREAM in args.filenames_clean:
+        usage_errors.append(
+            f"'--in-place' not allowed with stdin FILENAME '{STD_STREAM}'"
+        )
+    if args.in_place and args.output is not None:
         usage_errors.append(
             "'--output' and '--in-place' cannot be used together"
         )
 
     if usage_errors:
-        click.echo("Usage error(s):", err=True)
+        printerr("Usage error(s):")
         for errno, usage_error in enumerate(usage_errors):
-            click.echo(f"{errno + 1}. {usage_error}", err=True)
+            printerr(f"{errno + 1}. {usage_error}")
         sys.exit(1)
 
-    output_clean = output if output is not None else _STD_STREAM
+    output_clean = args.output if args.output is not None else STD_STREAM
     check_failures = []
 
     for filename in filenames_clean:
-        original_toml = _read_file(filename)
+        original_toml = read_file(filename)
         sorted_toml = TomlSort(
             input_toml=original_toml,
-            only_sort_tables=not bool(_all),
-            no_header=bool(no_header),
-            ignore_case=ignore_case,
+            only_sort_tables=not bool(args.all),
+            no_header=bool(args.no_header),
+            ignore_case=args.ignore_case,
         ).sorted()
-        if check:
+        if args.check:
             if original_toml != sorted_toml:
                 check_failures.append(filename)
-        elif in_place:
-            _write_file(filename, sorted_toml)
+        elif args.in_place:
+            write_file(filename, sorted_toml)
         elif len(filenames_clean) == 1:
-            _write_file(output_clean, sorted_toml)
+            write_file(output_clean, sorted_toml)
         else:
-            click.echo("Uncaught error. Please submit GitHub issue:", err=True)
-            click.echo(
-                "https://github.com/pappasam/toml-sort/issues", err=True
-            )
+            printerr("Uncaught error. Please submit GitHub issue:")
+            printerr("<https://github.com/pappasam/toml-sort/issues>")
             sys.exit(1)
 
-    if check and check_failures:
-        click.echo(f"{len(check_failures)} check failure(s):", err=True)
+    if args.check and check_failures:
+        printerr(f"{len(check_failures)} check failure(s):")
         for check_failure in check_failures:
-            click.echo(f"  - {check_failure}", err=True)
+            printerr(f"  - {check_failure}")
         sys.exit(1)
+
+
+def entrypoint() -> None:
+    """Toml sort cli entrypoint."""
+    cli(sys.argv)
