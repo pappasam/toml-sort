@@ -3,6 +3,7 @@
 import sys
 
 import click
+import tomlkit
 
 from . import TomlSort
 
@@ -25,6 +26,23 @@ def _write_file(path: str, content: str) -> None:
         return
     with open(path, "w") as fileobj:
         fileobj.write(content)
+
+
+def _load_config() -> dict:
+    """Load the configuration from pyproject.toml."""
+    try:
+        with open("pyproject.toml") as file:
+            content = file.read()
+    except OSError:
+        return {}
+
+    document = tomlkit.parse(content)
+    tool_section = document.get("tool", tomlkit.document())
+    toml_sort_section = tool_section.get("toml_sort", tomlkit.document())
+    if "all" in toml_sort_section:
+        toml_sort_section["_all"] = toml_sort_section["all"]
+        del toml_sort_section["all"]
+    return dict(toml_sort_section.items())
 
 
 # in docstring, I've placed a "\b". This causes the following lines to be
@@ -90,15 +108,7 @@ def _write_file(path: str, content: str) -> None:
     ),
 )
 @click.version_option()
-def cli(
-    output,
-    _all,
-    in_place,
-    no_header,
-    check,
-    ignore_case,
-    filenames,
-) -> None:
+def cli(**kwargs) -> None:
     """Sort toml file FILENAME(s), writing to file(s) or stdout (default)
 
     FILENAME a filepath or standard input (-)
@@ -112,6 +122,22 @@ def cli(
     """
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
+    final_config = _load_config()
+
+    for key, value in kwargs.items():
+        if not final_config.get(key):
+            final_config[key] = value
+
+    filenames = final_config["filenames"]
+    in_place = final_config["in_place"]
+    check = final_config["check"]
+    output = final_config["output"]
+    no_header = final_config["no_header"]
+    ignore_case = final_config["ignore_case"]
+    _all = final_config["_all"]
+
+    print(final_config)
+
     if not filenames and sys.stdin.isatty():
         error_message_if_terminal = """
 toml-sort: missing FILENAME, and no stdin
