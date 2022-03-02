@@ -136,8 +136,6 @@ def cli(**kwargs) -> None:
     ignore_case = final_config["ignore_case"]
     _all = final_config["_all"]
 
-    print(final_config)
-
     if not filenames and sys.stdin.isatty():
         error_message_if_terminal = """
 toml-sort: missing FILENAME, and no stdin
