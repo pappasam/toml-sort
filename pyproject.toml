@@ -33,7 +33,6 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.6"
 tomlkit = ">=0.10.0"
-click = ">=7.0"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.7.4"
