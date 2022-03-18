@@ -1,6 +1,7 @@
 """Test the CLI."""
 
 import os
+import shutil
 import subprocess
 from typing import List, NamedTuple, Optional
 
@@ -106,62 +107,57 @@ def test_multiple_files_check(paths, expected_exit_code):
     assert result.returncode == expected_exit_code, result.stderr
 
 
-# def test_multiple_files_in_place(tmpdir):
-#     """Unsorted files should be sorted in-place."""
-#     paths_sorted = [
-#         os.path.join(PATH_EXAMPLES, "defaults/from-toml-lang.toml"),
-#         os.path.join(PATH_EXAMPLES, "defaults/pyproject-weird-order.toml"),
-#     ]
+def test_multiple_files_in_place(tmpdir):
+    """Unsorted files should be sorted in-place."""
+    paths_sorted = [
+        os.path.join(PATH_EXAMPLES, "defaults/from-toml-lang.toml"),
+        os.path.join(PATH_EXAMPLES, "defaults/pyproject-weird-order.toml"),
+    ]
 
-#     filenames_unsorted = [
-#         "from-toml-lang.toml",
-#         "pyproject-weird-order.toml",
-#     ]
-#     temp_paths_unsorted = []
-#     for filename in filenames_unsorted:
-#         orig_path = os.path.join(PATH_EXAMPLES, filename)
-#         temp_path = tmpdir / filename
-#         shutil.copy(orig_path, temp_path)
-#         temp_paths_unsorted.append(str(temp_path))
+    filenames_unsorted = [
+        "from-toml-lang.toml",
+        "pyproject-weird-order.toml",
+    ]
+    temp_paths_unsorted = []
+    for filename in filenames_unsorted:
+        orig_path = os.path.join(PATH_EXAMPLES, filename)
+        temp_path = tmpdir / filename
+        shutil.copy(orig_path, temp_path)
+        temp_paths_unsorted.append(str(temp_path))
 
-#     runner = CliRunner()
+    result = capture(["toml-sort", "--in-place"] + temp_paths_unsorted)
+    assert result.returncode == 0, result.stderr
 
-#     result = runner.invoke(cli, ["--in-place"] + temp_paths_unsorted)
-#     assert result.exit_code == 0, result.output
-
-#     for path_unsorted, path_sorted in zip(temp_paths_unsorted, paths_sorted):
-#         with open(path_unsorted, encoding="UTF-8") as file_unsorted:
-#             actual = file_unsorted.read()
-#         with open(path_sorted, encoding="UTF-8") as file_sorted:
-#             expected = file_sorted.read()
-#         assert actual == expected
+    for path_unsorted, path_sorted in zip(temp_paths_unsorted, paths_sorted):
+        with open(path_unsorted, encoding="UTF-8") as file_unsorted:
+            actual = file_unsorted.read()
+        with open(path_sorted, encoding="UTF-8") as file_sorted:
+            expected = file_sorted.read()
+        assert actual == expected
 
 
-# @pytest.mark.parametrize(
-#     "options",
-#     (
-#         pytest.param(
-#             [],
-#             id="--check or --in-place must be specified",
-#         ),
-#         pytest.param(
-#             ["--check", "--output", "output.toml"],
-#             id="cannot specify output with --check",
-#         ),
-#         pytest.param(
-#             ["--in-place", "--output", "output.toml"],
-#             id="cannot specify output with --in-place",
-#         ),
-#     ),
-# )
-# def test_multiple_files_and_errors(options):
-#     """Test errors if two or more files are given."""
-#     paths = [
-#         os.path.join(PATH_EXAMPLES, "from-toml-lang.toml"),
-#         os.path.join(PATH_EXAMPLES, "weird.toml"),
-#     ]
-#     runner = CliRunner()
-
-#     result = runner.invoke(cli, options + paths)
-
-#     assert result.exit_code == 1, result.output
+@pytest.mark.parametrize(
+    "options",
+    (
+        pytest.param(
+            [],
+            id="--check or --in-place must be specified",
+        ),
+        pytest.param(
+            ["--check", "--output", "output.toml"],
+            id="cannot specify output with --check",
+        ),
+        pytest.param(
+            ["--in-place", "--output", "output.toml"],
+            id="cannot specify output with --in-place",
+        ),
+    ),
+)
+def test_multiple_files_and_errors(options):
+    """Test errors if two or more files are given."""
+    paths = [
+        os.path.join(PATH_EXAMPLES, "from-toml-lang.toml"),
+        os.path.join(PATH_EXAMPLES, "weird.toml"),
+    ]
+    result = capture(["toml-sort"] + options + paths)
+    assert result.returncode == 1, result.stdout
