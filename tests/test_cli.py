@@ -2,11 +2,10 @@
 
 import os
 import shutil
+import subprocess
+from typing import List, NamedTuple, Optional
 
 import pytest
-from click.testing import CliRunner
-
-from toml_sort.cli import cli
 
 PATH_EXAMPLES = "tests/examples"
 
@@ -15,6 +14,35 @@ PATH_EXAMPLES = "tests/examples"
 # doesn't handle edge cases elegantly here and sometimes elements in AOT's are
 # ordered randomly or sorted somewhere in tomlkit itself. I've xfail'd the test
 # case for now.
+
+
+class SubprocessReturn(NamedTuple):
+    """Organize the return results when of running a cli subprocess."""
+
+    stdout: str
+    stderr: str
+    returncode: int
+
+
+def capture(
+    command: List[str],
+    stdin: Optional[str] = None,
+) -> SubprocessReturn:
+    """Capture the output of a subprocess."""
+    with subprocess.Popen(
+        command,
+        text=True,
+        encoding="UTF-8",
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as proc:
+        stdout, stderr = proc.communicate(input=stdin)
+        return SubprocessReturn(
+            stdout=stdout,
+            stderr=stderr,
+            returncode=proc.returncode,
+        )
 
 
 @pytest.mark.parametrize(
@@ -35,19 +63,18 @@ def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
     """
     path_unsorted = os.path.join(PATH_EXAMPLES, path_unsorted)
     path_sorted = os.path.join(PATH_EXAMPLES, path_sorted)
-    runner = CliRunner()
 
-    with open(path_sorted) as infile:
+    with open(path_sorted, encoding="UTF-8") as infile:
         expected = infile.read()
-    result_filepath = runner.invoke(cli, [path_unsorted])
-    assert result_filepath.exit_code == 0
-    assert result_filepath.output == expected
+    result_filepath = capture(["toml-sort", path_unsorted])
+    assert result_filepath.returncode == 0
+    assert result_filepath.stdout == expected
 
-    with open(path_unsorted) as infile:
+    with open(path_unsorted, encoding="UTF-8") as infile:
         original = infile.read()
-    result_stdin = runner.invoke(cli, input=original)
-    assert result_stdin.exit_code == 0
-    assert result_stdin.output == expected
+    result_stdin = capture(["toml-sort"], stdin=original)
+    assert result_stdin.returncode == 0
+    assert result_stdin.stdout == expected
 
 
 @pytest.mark.parametrize(
@@ -76,10 +103,8 @@ def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
 def test_multiple_files_check(paths, expected_exit_code):
     """Unsorted files should be checked."""
     paths_unsorted = [os.path.join(PATH_EXAMPLES, path) for path in paths]
-    runner = CliRunner()
-
-    result = runner.invoke(cli, ["--check"] + paths_unsorted)
-    assert result.exit_code == expected_exit_code, result.output
+    result = capture(["toml-sort", "--check"] + paths_unsorted)
+    assert result.returncode == expected_exit_code, result.stderr
 
 
 def test_multiple_files_in_place(tmpdir):
@@ -100,15 +125,13 @@ def test_multiple_files_in_place(tmpdir):
         shutil.copy(orig_path, temp_path)
         temp_paths_unsorted.append(str(temp_path))
 
-    runner = CliRunner()
-
-    result = runner.invoke(cli, ["--in-place"] + temp_paths_unsorted)
-    assert result.exit_code == 0, result.output
+    result = capture(["toml-sort", "--in-place"] + temp_paths_unsorted)
+    assert result.returncode == 0, result.stderr
 
     for path_unsorted, path_sorted in zip(temp_paths_unsorted, paths_sorted):
-        with open(path_unsorted) as file_unsorted:
+        with open(path_unsorted, encoding="UTF-8") as file_unsorted:
             actual = file_unsorted.read()
-        with open(path_sorted) as file_sorted:
+        with open(path_sorted, encoding="UTF-8") as file_sorted:
             expected = file_sorted.read()
         assert actual == expected
 
@@ -136,8 +159,5 @@ def test_multiple_files_and_errors(options):
         os.path.join(PATH_EXAMPLES, "from-toml-lang.toml"),
         os.path.join(PATH_EXAMPLES, "weird.toml"),
     ]
-    runner = CliRunner()
-
-    result = runner.invoke(cli, options + paths)
-
-    assert result.exit_code == 1, result.output
+    result = capture(["toml-sort"] + options + paths)
+    assert result.returncode == 1, result.stdout
