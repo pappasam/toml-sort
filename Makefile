@@ -41,6 +41,10 @@ serve-docs: build-docs  ## Simple development server for Sphinx docs
 open-docs:  ## Open Sphinx docs index in a browser
 	gio open docs/_build/html/index.html
 
+.PHONY: clean-docs
+clean-docs:  ## Clean the docs
+	rm -r docs/_build
+
 docs/autogen-requirements.txt:  ## Autogenerate the requirements.txt
 	poetry export --dev --format requirements.txt --output $@ && git add $@
 	exit 1

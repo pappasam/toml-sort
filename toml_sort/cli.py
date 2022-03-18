@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+from argparse import ArgumentParser
 from typing import List
 
 from .tomlsort import TomlSort
@@ -58,24 +59,24 @@ def write_file(path: str, content: str) -> None:
         fileobj.write(content)
 
 
-def cli(arguments: List[str]) -> None:  # pylint: disable=too-many-branches
-    """Toml sort cli implementation."""
-    parser = argparse.ArgumentParser(
+def get_parser() -> ArgumentParser:
+    """Get the argument parser."""
+    parser = ArgumentParser(
         prog="toml-sort",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="Toml sort: a sorting utility for toml files.",
         epilog="""\
 Examples:
 
-  Stdin -> Stdout : cat input.toml | toml-sort
-  Disk -> Disk    : toml-sort -o output.toml input.toml
-  Linting         : toml-sort --check input.toml input2.toml input3.toml
-  Inplace Disk    : toml-sort --in-place input.toml input2.toml
+  - **Stdin -> Stdout**: cat input.toml | toml-sort
+  - **Disk -> Disk**: toml-sort -o output.toml input.toml
+  - **Linting**: toml-sort --check input.toml input2.toml input3.toml
+  - **Inplace Disk**: toml-sort --in-place input.toml input2.toml
 
 Return codes:
 
-  0 : success
-  1 : errors were found
+  - 0 : success.
+  - 1 : errors were found
 
 Notes:
 
@@ -138,7 +139,12 @@ Notes:
         type=str,
         nargs="*",
     )
-    args = parser.parse_args(arguments[1:])  # strip command itself
+    return parser
+
+
+def cli(arguments: List[str]) -> None:  # pylint: disable=too-many-branches
+    """Toml sort cli implementation."""
+    args = get_parser().parse_args(arguments[1:])  # strip command itself
     if args.version:
         print(get_version())
         sys.exit(0)
