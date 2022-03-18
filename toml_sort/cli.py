@@ -94,7 +94,6 @@ Notes:
         "--output",
         help=f"output filepath (default: '{STD_STREAM}')",
         type=str,
-        default=STD_STREAM,
     )
     parser.add_argument(
         "-a",
@@ -145,7 +144,6 @@ Notes:
         sys.exit(0)
 
     filenames_clean = args.filenames if args.filenames else (STD_STREAM,)
-
     usage_errors = []
 
     if len(filenames_clean) > 1:
@@ -155,7 +153,7 @@ Notes:
             )
         if args.output is not None:
             usage_errors.append("'--output' not allowed with 2+ FILENAME args")
-    if args.in_place and STD_STREAM in args.filenames_clean:
+    if args.in_place and STD_STREAM in filenames_clean:
         usage_errors.append(
             f"'--in-place' not allowed with stdin FILENAME '{STD_STREAM}'"
         )

@@ -66,49 +66,44 @@ def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
     with open(path_sorted, encoding="UTF-8") as infile:
         expected = infile.read()
     result_filepath = capture(["toml-sort", path_unsorted])
-    # result_filepath = invoke(args=[path_unsorted])
-    print(result_filepath)
     assert result_filepath.returncode == 0
     assert result_filepath.stdout == expected
 
     with open(path_unsorted, encoding="UTF-8") as infile:
         original = infile.read()
     result_stdin = capture(["toml-sort"], stdin=original)
-    print(result_stdin)
     assert result_stdin.returncode == 0
     assert result_stdin.stdout == expected
 
 
-# @pytest.mark.parametrize(
-#     "paths, expected_exit_code",
-#     (
-#         pytest.param(
-#             ["from-toml-lang.toml", "weird.toml"],
-#             1,
-#             id="multiple unsorted files failed",
-#         ),
-#         pytest.param(
-#             ["from-toml-lang.toml", "defaults/weird.toml"],
-#             1,
-#             id="single unsorted file failed",
-#         ),
-#         pytest.param(
-#             [
-#                 "defaults/from-toml-lang.toml",
-#                 "defaults/pyproject-weird-order.toml",
-#             ],
-#             0,
-#             id="none failed, no output",
-#         ),
-#     ),
-# )
-# def test_multiple_files_check(paths, expected_exit_code):
-#     """Unsorted files should be checked."""
-#     paths_unsorted = [os.path.join(PATH_EXAMPLES, path) for path in paths]
-#     runner = CliRunner()
-
-#     result = runner.invoke(cli, ["--check"] + paths_unsorted)
-#     assert result.exit_code == expected_exit_code, result.output
+@pytest.mark.parametrize(
+    "paths, expected_exit_code",
+    (
+        pytest.param(
+            ["from-toml-lang.toml", "weird.toml"],
+            1,
+            id="multiple unsorted files failed",
+        ),
+        pytest.param(
+            ["from-toml-lang.toml", "defaults/weird.toml"],
+            1,
+            id="single unsorted file failed",
+        ),
+        pytest.param(
+            [
+                "defaults/from-toml-lang.toml",
+                "defaults/pyproject-weird-order.toml",
+            ],
+            0,
+            id="none failed, no output",
+        ),
+    ),
+)
+def test_multiple_files_check(paths, expected_exit_code):
+    """Unsorted files should be checked."""
+    paths_unsorted = [os.path.join(PATH_EXAMPLES, path) for path in paths]
+    result = capture(["toml-sort", "--check"] + paths_unsorted)
+    assert result.returncode == expected_exit_code, result.stderr
 
 
 # def test_multiple_files_in_place(tmpdir):
