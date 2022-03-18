@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 
 - Moved CLI from click to argparse.
+- Update minimum version of tomlkit to 0.8.0. This drops support for Python 3.6.
 
 ## 0.19.0
 
