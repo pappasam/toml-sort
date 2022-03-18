@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+from typing import List
 
 from .tomlsort import TomlSort
 
@@ -57,7 +58,7 @@ def write_file(path: str, content: str) -> None:
         fileobj.write(content)
 
 
-def cli(args: List[str]) -> None:
+def cli(arguments: List[str]) -> None:  # pylint: disable=too-many-branches
     """Toml sort cli implementation."""
     parser = argparse.ArgumentParser(
         prog="toml-sort",
@@ -138,7 +139,7 @@ Notes:
         type=str,
         nargs="*",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(arguments[1:])  # strip command itself
     if args.version:
         print(get_version())
         sys.exit(0)

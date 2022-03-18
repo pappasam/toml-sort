@@ -1,13 +1,10 @@
 """Test the CLI."""
 
 import os
-import shutil
 import subprocess
+from typing import List, NamedTuple, Optional
 
 import pytest
-from click.testing import CliRunner
-
-from toml_sort.cli import cli
 
 PATH_EXAMPLES = "tests/examples"
 
@@ -18,14 +15,33 @@ PATH_EXAMPLES = "tests/examples"
 # case for now.
 
 
-def invoke(args=None, stdin=None) -> subprocess.CompletedProcess:
-    args = ["toml-sort"] + ([] if args is None else args)
-    return subprocess.run(
-        args,
+class SubprocessReturn(NamedTuple):
+    """Organize the return results when of running a cli subprocess."""
+
+    stdout: str
+    stderr: str
+    returncode: int
+
+
+def capture(
+    command: List[str],
+    stdin: Optional[str] = None,
+) -> SubprocessReturn:
+    """Capture the output of a subprocess."""
+    with subprocess.Popen(
+        command,
         text=True,
-        stdin=stdin,
-        capture_output=True,
-    )
+        encoding="UTF-8",
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as proc:
+        stdout, stderr = proc.communicate(input=stdin)
+        return SubprocessReturn(
+            stdout=stdout,
+            stderr=stderr,
+            returncode=proc.returncode,
+        )
 
 
 @pytest.mark.parametrize(
@@ -49,13 +65,16 @@ def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
 
     with open(path_sorted, encoding="UTF-8") as infile:
         expected = infile.read()
-    result_filepath = invoke(args=[path_unsorted])
+    result_filepath = capture(["toml-sort", path_unsorted])
+    # result_filepath = invoke(args=[path_unsorted])
+    print(result_filepath)
     assert result_filepath.returncode == 0
     assert result_filepath.stdout == expected
 
     with open(path_unsorted, encoding="UTF-8") as infile:
         original = infile.read()
-    result_stdin = invoke(stdin=original)
+    result_stdin = capture(["toml-sort"], stdin=original)
+    print(result_stdin)
     assert result_stdin.returncode == 0
     assert result_stdin.stdout == expected
 
