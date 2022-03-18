@@ -45,6 +45,5 @@ open-docs:  ## Open Sphinx docs index in a browser
 clean-docs:  ## Clean the docs
 	rm -r docs/_build
 
-docs/autogen-requirements.txt:  ## Autogenerate the requirements.txt
+docs/autogen-requirements.txt:  poetry.lock ## Autogenerate the requirements.txt
 	poetry export --dev --format requirements.txt --output $@ && git add $@
-	exit 1
