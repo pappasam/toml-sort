@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from typing import List
 
 import tomlkit
@@ -37,6 +37,7 @@ def get_version() -> str:
             )
             sys.exit(1)
     return version("toml-sort")
+
 
 def printerr(arg: str) -> None:
     """Print to stderr."""
@@ -143,12 +144,31 @@ Notes:
     return parser
 
 
+def _load_config() -> Namespace:
+    """Load the configuration from pyproject.toml."""
+    try:
+        with open("pyproject.toml") as file:
+            content = file.read()
+    except OSError:
+        return Namespace()
+
+    document = tomlkit.parse(content)
+    tool_section = document.get("tool", tomlkit.document())
+    toml_sort_section = tool_section.get("toml_sort", tomlkit.document())
+    return Namespace(**toml_sort_section)
+
+
 def cli(arguments: List[str]) -> None:  # pylint: disable=too-many-branches
     """Toml sort cli implementation."""
     args = get_parser().parse_args(arguments[1:])  # strip command itself
     if args.version:
         print(get_version())
         sys.exit(0)
+
+    config = _load_config()
+    for key, value in vars(args).items():
+        if not value and hasattr(config, key):
+            setattr(args, key, getattr(config, key))
 
     filenames_clean = args.filenames if args.filenames else (STD_STREAM,)
     usage_errors = []
