@@ -2,7 +2,7 @@
 
 import itertools
 import re
-from typing import Iterable, Tuple
+from typing import Any, Iterable, Tuple, Union
 
 import tomlkit
 from tomlkit.api import aot, item, ws
@@ -37,7 +37,7 @@ def write_header_comment(from_doc: TOMLDocument, to_doc: TOMLDocument) -> None:
             return
 
 
-def convert_tomlkit_buggy_types(in_value: object, parent: Item) -> Item:
+def convert_tomlkit_buggy_types(in_value: Any, parent: Any) -> Item:
     """Fix buggy items while iterating through tomlkit items.
 
     Iterating through tomlkit items can often be buggy; this function
@@ -85,7 +85,7 @@ class TomlSort:
         )
 
     def sorted_children_table(
-        self, parent: Table
+        self, parent: Union[Table, TOMLDocument]
     ) -> Iterable[Tuple[str, Item]]:
         """Get the sorted children of a table.
 
