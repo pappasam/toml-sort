@@ -36,9 +36,9 @@ tomlkit = ">=0.8.0"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.7.4"
-black = {version = "^21.12b0", allow-prereleases = true, python = "^3.6.2"}
-mypy = "^0.812.0"
-pre-commit = "^1.18"
+black = "^22.1.0"
+mypy = "^0.941"
+pre-commit = "^2.17.0"
 tox = "^3.13"
 pytest = "^6.2.2"
 tox-asdf = "^0.1.0"
