@@ -3,11 +3,11 @@
 import argparse
 import sys
 from argparse import ArgumentParser
-from typing import List
+from typing import List, Optional
 
 from .tomlsort import TomlSort
 
-__all__ = ["cli", "entrypoint"]
+__all__ = ["cli"]
 
 STD_STREAM = "-"  # The standard stream
 ENCODING = "UTF-8"  # Currently, we only support UTF-8
@@ -142,9 +142,11 @@ Notes:
     return parser
 
 
-def cli(arguments: List[str]) -> None:  # pylint: disable=too-many-branches
+def cli(  # pylint: disable=too-many-branches
+    arguments: Optional[List[str]] = None,
+) -> None:
     """Toml sort cli implementation."""
-    args = get_parser().parse_args(arguments[1:])  # strip command itself
+    args = get_parser().parse_args(args=arguments)  # strip command itself
     if args.version:
         print(get_version())
         sys.exit(0)
@@ -202,8 +204,3 @@ def cli(arguments: List[str]) -> None:  # pylint: disable=too-many-branches
         for check_failure in check_failures:
             printerr(f"  - {check_failure}")
         sys.exit(1)
-
-
-def entrypoint() -> None:
-    """Toml sort cli entrypoint."""
-    cli(sys.argv)
