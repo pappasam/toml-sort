@@ -51,12 +51,12 @@ pytest-cov = "^2.11.1"
 sphinx-argparse = "^0.3.1"
 
 [tool.poetry.scripts]
-toml-sort = 'toml_sort.cli:entrypoint'
+toml-sort = 'toml_sort.cli:cli'
 
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py36,py37,py38,py39
+envlist = py37,py38,py39,py310
 isolated_build = true
 skipsdist = true
 [testenv]
