@@ -3,7 +3,7 @@
 import argparse
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import tomlkit
 
@@ -59,6 +59,20 @@ def write_file(path: str, content: str) -> None:
         return
     with open(path, "w", encoding=ENCODING) as fileobj:
         fileobj.write(content)
+
+
+def load_config_file() -> Dict[str, Any]:
+    """Load the configuration from pyproject.toml."""
+    try:
+        with open("pyproject.toml") as file:
+            content = file.read()
+    except OSError:
+        return Namespace()
+
+    document = tomlkit.parse(content)
+    tool_section = document.get("tool", tomlkit.document())
+    toml_sort_section = tool_section.get("tomlsort", tomlkit.document())
+    return dict(toml_sort_section)
 
 
 def get_parser() -> ArgumentParser:
@@ -141,21 +155,9 @@ Notes:
         type=str,
         nargs="*",
     )
+    parser.set_defaults(**load_config_file())
     return parser
 
-
-def _load_config() -> Namespace:
-    """Load the configuration from pyproject.toml."""
-    try:
-        with open("pyproject.toml") as file:
-            content = file.read()
-    except OSError:
-        return Namespace()
-
-    document = tomlkit.parse(content)
-    tool_section = document.get("tool", tomlkit.document())
-    toml_sort_section = tool_section.get("tomlsort", tomlkit.document())
-    return Namespace(**toml_sort_section)
 
 
 def cli(  # pylint: disable=too-many-branches
@@ -166,11 +168,6 @@ def cli(  # pylint: disable=too-many-branches
     if args.version:
         print(get_version())
         sys.exit(0)
-
-    config = _load_config()
-    for key, value in vars(args).items():
-        if not value and hasattr(config, key):
-            setattr(args, key, getattr(config, key))
 
     filenames_clean = args.filenames if args.filenames else (STD_STREAM,)
     usage_errors = []
