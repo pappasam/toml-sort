@@ -70,3 +70,6 @@ commands =
   poetry run pylint toml_sort tests
   poetry run pytest -vv
 """
+
+[tool.tomlsort]
+a = 1
