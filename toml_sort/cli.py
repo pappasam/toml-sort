@@ -67,7 +67,7 @@ def validate_and_copy(
     """Validate a configuration key."""
     if key not in data:
         return
-    if not isinstance(data[key], type_):
+    if not isinstance(data[key].value, type_):
         printerr(f"Value of tool.tomlsort.{key} should be of type {type_}.")
         sys.exit(1)
     target[key] = data.pop(key)
