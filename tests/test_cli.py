@@ -4,8 +4,11 @@ import os
 import shutil
 import subprocess
 from typing import List, NamedTuple, Optional
+from unittest import mock
 
 import pytest
+
+from toml_sort import cli
 
 PATH_EXAMPLES = "tests/examples"
 
@@ -161,3 +164,36 @@ def test_multiple_files_and_errors(options):
     ]
     result = capture(["toml-sort"] + options + paths)
     assert result.returncode == 1, result.stdout
+
+
+def test_load_config_file_read():
+    """Test no error if pyproject.toml cannot be read."""
+    with mock.patch("toml_sort.cli.open", side_effect=OSError):
+        assert not cli.load_config_file()
+
+
+@pytest.mark.parametrize(
+    "toml,expected",
+    [
+        ("", {}),
+        ("[tool.other]\nfoo=2", {}),
+        ("[tool.tomlsort]", {}),
+        ("[tool.tomlsort]\nall=true", {"all": True}),
+    ],
+)
+def test_load_config_file(toml, expected):
+    """Test load_config_file."""
+    open_mock = mock.mock_open(read_data=toml)
+    with mock.patch("toml_sort.cli.open", open_mock):
+        assert cli.load_config_file() == expected
+
+
+@pytest.mark.parametrize(
+    "toml", ["[tool.tomlsort]\nunknown=2", "[tool.tomlsort]\nall=42"]
+)
+def test_load_config_file_invalid(toml):
+    """Test error if pyproject.toml is not valid."""
+    open_mock = mock.mock_open(read_data=toml)
+    with mock.patch("toml_sort.cli.open", open_mock):
+        with pytest.raises(SystemExit):
+            cli.load_config_file()
