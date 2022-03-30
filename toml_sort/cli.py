@@ -67,7 +67,7 @@ def validate_and_copy(
     """Validate a configuration key."""
     if key not in data:
         return
-    if not isinstance(data[key].value, type_):
+    if not isinstance(data[key], type_):
         printerr(f"Value of tool.tomlsort.{key} should be of type {type_}.")
         sys.exit(1)
     target[key] = data.pop(key)
@@ -76,7 +76,7 @@ def validate_and_copy(
 def load_config_file() -> Dict[str, Any]:
     """Load the configuration from pyproject.toml."""
     try:
-        with open("pyproject.toml") as file:
+        with open("pyproject.toml", encoding="utf-8") as file:
             content = file.read()
     except OSError:
         return {}

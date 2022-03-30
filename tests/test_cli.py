@@ -169,7 +169,7 @@ def test_multiple_files_and_errors(options):
 def test_load_config_file_read():
     """Test no error if pyproject.toml cannot be read."""
     with mock.patch("toml_sort.cli.open", side_effect=OSError):
-        assert cli.load_config_file() == {}
+        assert not cli.load_config_file()
 
 
 @pytest.mark.parametrize(
