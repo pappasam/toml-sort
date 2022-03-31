@@ -3,7 +3,9 @@
 import argparse
 import sys
 from argparse import ArgumentParser
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Type
+
+import tomlkit
 
 from .tomlsort import TomlSort
 
@@ -57,6 +59,45 @@ def write_file(path: str, content: str) -> None:
         return
     with open(path, "w", encoding=ENCODING) as fileobj:
         fileobj.write(content)
+
+
+def validate_and_copy(
+    data: Dict[str, Any], target: Dict[str, Any], key: str, type_: Type
+) -> None:
+    """Validate a configuration key."""
+    if key not in data:
+        return
+    if not isinstance(data[key], type_):
+        printerr(f"Value of tool.tomlsort.{key} should be of type {type_}.")
+        sys.exit(1)
+    target[key] = data.pop(key)
+
+
+def load_config_file() -> Dict[str, Any]:
+    """Load the configuration from pyproject.toml."""
+    try:
+        with open("pyproject.toml", encoding="utf-8") as file:
+            content = file.read()
+    except OSError:
+        return {}
+
+    document = tomlkit.parse(content)
+    tool_section = document.get("tool", tomlkit.document())
+    toml_sort_section = tool_section.get("tomlsort", tomlkit.document())
+    config = dict(toml_sort_section)
+
+    clean_config: Dict[str, Any] = {}
+    validate_and_copy(config, clean_config, "all", bool)
+    validate_and_copy(config, clean_config, "in_place", bool)
+    validate_and_copy(config, clean_config, "no_header", bool)
+    validate_and_copy(config, clean_config, "check", bool)
+    validate_and_copy(config, clean_config, "ignore_case", bool)
+
+    if config:
+        printerr(f"Unexpected configuration values: {config}")
+        sys.exit(1)
+
+    return clean_config
 
 
 def get_parser() -> ArgumentParser:
@@ -139,6 +180,7 @@ Notes:
         type=str,
         nargs="*",
     )
+    parser.set_defaults(**load_config_file())
     return parser
 
 
