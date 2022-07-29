@@ -214,9 +214,9 @@ markupsafe==2.1.1; python_version >= "3.7" \
 mccabe==0.7.0; python_version >= "3.6" and python_full_version >= "3.6.2" \
     --hash=sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e \
     --hash=sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325
-mistune==0.8.4 \
-    --hash=sha256:88a1051873018da288eee8538d476dffe1262495144b33ecb586c4ab266bb8d4 \
-    --hash=sha256:59a3429db53c50b5c6bcc8a07f8848cb00d7dc8bdb431a4ab41920d201d4756e
+mistune==2.0.3 \
+    --hash=sha256:d7605b46b6156b53b7d52a465202b29a6f00f4ea4130ad5d25e9d5547d6b7e50 \
+    --hash=sha256:e3964140c0775535fba50bd616fe180920044a64bc21850253267b07bff89924
 mypy-extensions==0.4.3; python_full_version >= "3.6.2" and python_version >= "3.6" \
     --hash=sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d \
     --hash=sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8
