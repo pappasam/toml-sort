@@ -37,12 +37,16 @@ def write_header_comment(from_doc: TOMLDocument, to_doc: TOMLDocument) -> None:
             return
 
 
-def convert_tomlkit_buggy_types(in_value: Any, parent: Any) -> Item:
+def convert_tomlkit_buggy_types(in_value: Any, parent: Any, key: str) -> Item:
     """Fix buggy items while iterating through tomlkit items.
 
     Iterating through tomlkit items can often be buggy; this function
     fixes it
     """
+    if isinstance(in_value, bool):
+        # Bool items don't have trivia and are resolved to Python's `bool`
+        # https://github.com/sdispater/tomlkit/issues/119#issuecomment-955840942
+        return parent.value.item(key)
     if isinstance(in_value, Item):
         return in_value
     if isinstance(in_value, Container):
@@ -94,7 +98,7 @@ class TomlSort:
         is not necessary.
         """
         table_items = [
-            (key, convert_tomlkit_buggy_types(parent[key], parent))
+            (key, convert_tomlkit_buggy_types(parent[key], parent, key))
             for key in parent.keys()
         ]
         tables = (

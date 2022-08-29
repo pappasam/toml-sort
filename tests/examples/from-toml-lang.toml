@@ -12,7 +12,7 @@ dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 server = "192.168.1.1"
 ports = [ 8001, 8001, 8002 ]
 connection_max = 5000
-enabled = true
+enabled = true # Commend after a boolean
 
 [servers]
 
