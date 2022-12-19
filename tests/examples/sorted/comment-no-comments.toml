@@ -1,0 +1,32 @@
+title = "The example"
+
+[POWER]
+play = true
+
+[a-section]
+date = "2019"
+name = "Samuel Roeca"
+
+[[a-section.hello]]
+dob = 1979-05-27T07:32:00Z
+ports = [ 8001, 8001, 8002 ]
+
+[[a-section.hello]]
+dob = 1920-05-27T07:32:00Z
+ports = [ 80 ]
+
+[b-section]
+date = "2018"
+name = "Richard Stallman"
+
+[c-section]
+foo = "bar"
+
+[c-section.test]
+name = "Jonathan Green"
+
+[c-section.test.x.y.z.bar]
+foo = "foo"
+
+[c-section.test.x.y.z.baz]
+foo = "bar"

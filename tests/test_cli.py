@@ -1,9 +1,11 @@
 """Test the CLI."""
+from __future__ import annotations
 
 import os
 import shutil
 import subprocess
-from typing import List, NamedTuple, Optional
+from pathlib import Path
+from typing import Callable, List, NamedTuple, Optional
 from unittest import mock
 
 import pytest
@@ -51,29 +53,29 @@ def capture(
 @pytest.mark.parametrize(
     "path_unsorted,path_sorted",
     [
-        ("from-toml-lang.toml", "defaults/from-toml-lang.toml"),
-        pytest.param(
-            "weird.toml", "defaults/weird.toml", marks=pytest.mark.xfail
-        ),
-        ("pyproject-weird-order.toml", "defaults/pyproject-weird-order.toml"),
+        ("from-toml-lang", "sorted/from-toml-lang"),
+        pytest.param("weird", "sorted/weird", marks=[pytest.mark.xfail]),
+        ("pyproject-weird-order", "sorted/pyproject-weird-order"),
     ],
 )
-def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
+def test_cli_defaults(
+    get_fixture: Callable[[str | List[str]], Path],
+    path_unsorted: str,
+    path_sorted: str,
+) -> None:
     """Test the basic cli behavior with default arguments.
 
     Test parameters are relative to the tests/examples directory within
     this project.
     """
-    path_unsorted = os.path.join(PATH_EXAMPLES, path_unsorted)
-    path_sorted = os.path.join(PATH_EXAMPLES, path_sorted)
 
-    with open(path_sorted, encoding="UTF-8") as infile:
+    with get_fixture(path_sorted).open(encoding="UTF-8") as infile:
         expected = infile.read()
-    result_filepath = capture(["toml-sort", path_unsorted])
+    result_filepath = capture(["toml-sort", str(get_fixture(path_unsorted))])
     assert result_filepath.returncode == 0
     assert result_filepath.stdout == expected
 
-    with open(path_unsorted, encoding="UTF-8") as infile:
+    with get_fixture(path_unsorted).open(encoding="UTF-8") as infile:
         original = infile.read()
     result_stdin = capture(["toml-sort"], stdin=original)
     assert result_stdin.returncode == 0
@@ -89,14 +91,14 @@ def test_cli_defaults(path_unsorted: str, path_sorted: str) -> None:
             id="multiple unsorted files failed",
         ),
         pytest.param(
-            ["from-toml-lang.toml", "defaults/weird.toml"],
+            ["from-toml-lang.toml", "sorted/weird.toml"],
             1,
             id="single unsorted file failed",
         ),
         pytest.param(
             [
-                "defaults/from-toml-lang.toml",
-                "defaults/pyproject-weird-order.toml",
+                "sorted/from-toml-lang.toml",
+                "sorted/pyproject-weird-order.toml",
             ],
             0,
             id="none failed, no output",
@@ -113,8 +115,8 @@ def test_multiple_files_check(paths, expected_exit_code):
 def test_multiple_files_in_place(tmpdir):
     """Unsorted files should be sorted in-place."""
     paths_sorted = [
-        os.path.join(PATH_EXAMPLES, "defaults/from-toml-lang.toml"),
-        os.path.join(PATH_EXAMPLES, "defaults/pyproject-weird-order.toml"),
+        os.path.join(PATH_EXAMPLES, "sorted/from-toml-lang.toml"),
+        os.path.join(PATH_EXAMPLES, "sorted/pyproject-weird-order.toml"),
     ]
 
     filenames_unsorted = [

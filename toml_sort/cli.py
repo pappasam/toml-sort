@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Type
 
 import tomlkit
 
-from .tomlsort import TomlSort
+from .tomlsort import CommentConfiguration, TomlSort
 
 __all__ = ["cli"]
 
@@ -226,8 +226,13 @@ def cli(  # pylint: disable=too-many-branches
         sorted_toml = TomlSort(
             input_toml=original_toml,
             only_sort_tables=not bool(args.all),
-            no_header=bool(args.no_header),
             ignore_case=args.ignore_case,
+            comment_config=CommentConfiguration(
+                header=not bool(args.no_header),
+                footer=False,
+                spaces_before_comment=1,
+                inline_attached=False,
+            ),
         ).sorted()
         if args.check:
             if original_toml != sorted_toml:
