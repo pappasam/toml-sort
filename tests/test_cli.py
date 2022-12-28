@@ -56,6 +56,7 @@ def capture(
         ("from-toml-lang", "sorted/from-toml-lang"),
         pytest.param("weird", "sorted/weird", marks=[pytest.mark.xfail]),
         ("pyproject-weird-order", "sorted/pyproject-weird-order"),
+        ("comment", "sorted/comment-header-footer"),
     ],
 )
 def test_cli_defaults(

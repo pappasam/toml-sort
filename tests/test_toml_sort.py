@@ -40,7 +40,16 @@ def test_sort_toml_is_str() -> None:
                 )
             },
         ),
-        ("comment", "comment-header-footer", {}),
+        (
+            "comment",
+            "comment-header-footer",
+            {
+                "only_sort_tables": True,
+                "comment_config": CommentConfiguration(
+                    spaces_before_comment=1
+                ),
+            },
+        ),
         (
             "from-toml-lang",
             "from-toml-lang",
