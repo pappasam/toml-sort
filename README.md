@@ -63,6 +63,16 @@ Options:
                      command.
 
   --no-header        Do not keep a document's leading comments.
+  
+  --no-footer        Do not keep a document's trailing comments.
+  
+  --no-end-of-line   Do not keep a document's end of line comments.
+  
+  --no-inline        Do not keep a document's inline comments.
+  
+  --spaces-before-comment {1,2,3,4}
+                     The number of spaces before an end of line comment. (default: 1)
+                        
   --check            Check if an original file is changed by the formatter.
                      Return code 0 means it would not change. Return code 1
                      means it would change.
@@ -88,9 +98,80 @@ Please note, that only the below options are supported:
 all = true
 in_place = true
 no_header = true
+no_footer = true
+no_end_of_line = true
+no_inline = true
+spaces_before_comment = 2
 check = true
 ignore_case = true
 ```
+
+## Comments
+
+Due to the free form nature of comments, it is hard to include them in a sort in 
+a generic way that will work for everyone. `toml-sort` deals with four different 
+types of comments. They are all enabled by default, but can be disabled using CLI
+switches, in which case comments of that type will be removed from the output.
+
+### Header
+
+The first comments in a document, that are followed by a blank line, are treated
+as a header, and will always remain at the top of the document. If there is no 
+blank line, the comment will be treated as an inline comment instead.
+
+```toml
+# This is a header
+# it can be multiple lines, as long as it is followed with a blank line
+# it will always stay at the top of the sorted document
+
+title = "The example"
+```
+
+### Footer
+
+Any comments at the end of the document, after the last item in the toml, will be 
+treated as a footer, and will always remain at the bottom of the document.
+
+```toml
+title = "The example"
+
+# this is a footer comment
+```
+
+### End of line
+
+End of line comments are comments that are at the end of a line where the start of the 
+line is a toml item. These comments are by default included in the output.
+
+```toml
+title = "The example" # This is an end of line comment
+```
+
+### Inline Comment
+
+Inline comments, are any comments that are on their own line. These comments are treated 
+as "attached" to the item in the toml that is directly below them, not seperated by whitespace. 
+These comments can be multiple lines. Inline comments will appear in the sorted output above the
+item they were attached to in the input toml.
+
+```toml
+# Comment attached to title
+title = "The example"
+
+# This comment is an orphan because it 
+# is seperated from a-section by whitespace
+
+# This comment is attached to a-section
+# attached comments can be multiple lines
+[a-section]
+# This comment is attached to date
+date = "2019"
+```
+
+### Orphan Comment
+
+Orphan comments are any comments that don't fall into the above categories, they will be removed
+from the output document.
 
 ## Example
 
@@ -108,13 +189,14 @@ ports = [ 8001, 8001, 8002 ]
 dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 
 
-
+     # Attached to b-section
   [b-section]
   date = "2018"
   name = "Richard Stallman"
 
 [[a-section.hello]]
 ports = [ 80 ]
+    #Attched to dob
 dob = 1920-05-27T07:32:00Z # Another date!
 
                           [a-section]
@@ -139,8 +221,10 @@ dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 
 [[a-section.hello]]
 ports = [ 80 ]
+# Attched to dob
 dob = 1920-05-27T07:32:00Z # Another date!
 
+# Attached to b-section
 [b-section]
 date = "2018"
 name = "Richard Stallman"

@@ -90,6 +90,10 @@ def load_config_file() -> Dict[str, Any]:
     validate_and_copy(config, clean_config, "all", bool)
     validate_and_copy(config, clean_config, "in_place", bool)
     validate_and_copy(config, clean_config, "no_header", bool)
+    validate_and_copy(config, clean_config, "no_footer", bool)
+    validate_and_copy(config, clean_config, "no_end_of_line", bool)
+    validate_and_copy(config, clean_config, "no_inline", bool)
+    validate_and_copy(config, clean_config, "spaces_before_comment", int)
     validate_and_copy(config, clean_config, "check", bool)
     validate_and_copy(config, clean_config, "ignore_case", bool)
 
@@ -156,6 +160,31 @@ Notes:
         "--no-header",
         help="do not keep a document's leading comments",
         action="store_true",
+    )
+    parser.add_argument(
+        "--no-footer",
+        help="do not keep a document's trailing comments",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-end-of-line",
+        help="do not keep a document's end of line comments",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-inline",
+        help="do not keep a document's inline comments",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--spaces-before-comment",
+        help=(
+            "The number of spaces before an end of line comment. "
+            "(default: 1)"
+        ),
+        type=int,
+        choices=range(1, 5),
+        default=1,
     )
     parser.add_argument(
         "--check",
@@ -229,9 +258,10 @@ def cli(  # pylint: disable=too-many-branches
             ignore_case=args.ignore_case,
             comment_config=CommentConfiguration(
                 header=not bool(args.no_header),
-                footer=False,
-                spaces_before_comment=1,
-                inline_attached=False,
+                footer=not bool(args.no_footer),
+                spaces_before_comment=args.spaces_before_comment,
+                inline_attached=not bool(args.no_inline),
+                end_of_line=not bool(args.no_end_of_line),
             ),
         ).sorted()
         if args.check:

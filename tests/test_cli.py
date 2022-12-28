@@ -181,6 +181,10 @@ def test_load_config_file_read():
         ("[tool.other]\nfoo=2", {}),
         ("[tool.tomlsort]", {}),
         ("[tool.tomlsort]\nall=true", {"all": True}),
+        (
+            "[tool.tomlsort]\nspaces_before_comment=4",
+            {"spaces_before_comment": 4},
+        ),
     ],
 )
 def test_load_config_file(toml, expected):

@@ -47,7 +47,7 @@ def test_sort_toml_is_str() -> None:
             {
                 "only_sort_tables": True,
                 "comment_config": CommentConfiguration(
-                    inline_attached=False, spaces_before_comment=1
+                    spaces_before_comment=1
                 ),
             },
         ),
