@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.20.2
+
+### Fixed
+
+- An issue where the sorter fails with boolean values in file. See <https://github.com/pappasam/toml-sort/issues/29> and <https://github.com/pappasam/toml-sort/pull/31>
+
 ## 0.20.1
 
 ### Fixed
