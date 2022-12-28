@@ -46,7 +46,10 @@ def convert_tomlkit_buggy_types(in_value: Any, parent: Any, key: str) -> Item:
     if isinstance(in_value, bool):
         # Bool items don't have trivia and are resolved to Python's `bool`
         # https://github.com/sdispater/tomlkit/issues/119#issuecomment-955840942
-        return parent.value.item(key)
+        try:
+            return parent.value.item(key)
+        except AttributeError:
+            return item(parent.value[key], parent)
     if isinstance(in_value, Item):
         return in_value
     if isinstance(in_value, Container):
