@@ -34,7 +34,7 @@ def convert_tomlkit_buggy_types(in_value: Any, parent: Any, key: str) -> Item:
         try:
             return parent.value.item(key)
         except AttributeError:
-            return item(parent.value[key], parent)
+            return tomlkit_item(parent.value[key], parent)
     if isinstance(in_value, Item):
         return in_value
     if isinstance(in_value, Container):
