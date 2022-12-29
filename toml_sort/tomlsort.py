@@ -174,7 +174,7 @@ class TomlSort:
         input_toml: str,
         only_sort_tables: bool = False,
         ignore_case: bool = False,
-        comment_config: CommentConfiguration = None,
+        comment_config: Optional[CommentConfiguration] = None,
     ) -> None:
         """Initializer."""
         self.input_toml = input_toml
