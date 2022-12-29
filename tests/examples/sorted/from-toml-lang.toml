@@ -4,6 +4,7 @@ title = "TOML Example"
 
 [clients]
 data = [ ["gamma", "delta"], [1, 2] ] # just an update to make sure parsers support it
+# Line breaks are OK when inside arrays
 hosts = [
   "alpha",
   "omega"
@@ -32,6 +33,7 @@ color = "gray"
 
 [servers]
 
+# You can indent as you please. Tabs or spaces. TOML don't care.
 [servers.alpha]
 ip = "10.0.0.1"
 dc = "eqdc10"

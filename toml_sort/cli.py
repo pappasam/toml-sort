@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Type
 
 import tomlkit
 
-from .tomlsort import TomlSort
+from .tomlsort import CommentConfiguration, TomlSort
 
 __all__ = ["cli"]
 
@@ -90,6 +90,11 @@ def load_config_file() -> Dict[str, Any]:
     validate_and_copy(config, clean_config, "all", bool)
     validate_and_copy(config, clean_config, "in_place", bool)
     validate_and_copy(config, clean_config, "no_header", bool)
+    validate_and_copy(config, clean_config, "no_header_comments", bool)
+    validate_and_copy(config, clean_config, "no_footer_comments", bool)
+    validate_and_copy(config, clean_config, "no_inline_comments", bool)
+    validate_and_copy(config, clean_config, "no_block_comments", bool)
+    validate_and_copy(config, clean_config, "spaces_before_comment", int)
     validate_and_copy(config, clean_config, "check", bool)
     validate_and_copy(config, clean_config, "ignore_case", bool)
 
@@ -154,8 +159,43 @@ Notes:
     )
     parser.add_argument(
         "--no-header",
-        help="do not keep a document's leading comments",
+        help="Deprecated. See --no-header-comments.",
         action="store_true",
+    )
+    parser.add_argument(
+        "--no-comments",
+        help=(
+            "Remove all comments. Implies no header, footer, inline, or "
+            "block comments."
+        ),
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-header-comments",
+        help="Remove a document's leading comments.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-footer-comments",
+        help="Remove a document's trailing comments.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-inline-comments",
+        help="Remove a document's inline comments.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-block-comments",
+        help="Remove a document's block comments.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--spaces-before-comment",
+        help=("The number of spaces before a inline comment. " "(default: 1)"),
+        type=int,
+        choices=range(1, 5),
+        default=1,
     )
     parser.add_argument(
         "--check",
@@ -226,8 +266,18 @@ def cli(  # pylint: disable=too-many-branches
         sorted_toml = TomlSort(
             input_toml=original_toml,
             only_sort_tables=not bool(args.all),
-            no_header=bool(args.no_header),
             ignore_case=args.ignore_case,
+            comment_config=CommentConfiguration(
+                header=not bool(
+                    args.no_header
+                    or args.no_header_comments
+                    or args.no_comments
+                ),
+                footer=not bool(args.no_footer_comments or args.no_comments),
+                spaces_before_comment=args.spaces_before_comment,
+                block=not bool(args.no_block_comments or args.no_comments),
+                inline=not bool(args.no_inline_comments or args.no_comments),
+            ),
         ).sorted()
         if args.check:
             if original_toml != sorted_toml:

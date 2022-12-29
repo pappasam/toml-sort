@@ -1,0 +1,51 @@
+# My great TOML example
+# it has multiple lines
+
+# Comment attached to title
+title = "The example" # test
+
+# Wacky Waving Inflatable Arm-Flailing Tubeman
+[POWER]
+play = true # test
+
+# I have a comment as well
+[a-section]
+# last one
+date = "2019"
+name = "Samuel Roeca"
+
+# start test
+[[a-section.hello]]
+# test comment
+ports = [ 8001, 8001, 8002 ]
+dob = 1979-05-27T07:32:00Z # First class dates? Why not?
+
+# Another test comment
+# make sure multiline comments work
+[[a-section.hello]] # Comment here?
+ports = [ 80 ]
+# multi line comment
+# test comment
+dob = 1920-05-27T07:32:00Z # Another date!
+
+# Another comment
+[b-section] # Comment there?
+date = "2018" # one more test
+name = "Richard Stallman"
+
+[c-section]
+foo = "bar"
+
+# Comment 123
+[c-section.test]
+name = "Jonathan Green"
+
+# Comment 213
+[c-section.test.x.y.z.bar]
+foo = "foo"
+
+# Comment 321
+[c-section.test.x.y.z.baz]
+foo = "bar"
+
+# end test

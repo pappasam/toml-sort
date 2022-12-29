@@ -26,7 +26,7 @@ This library sorts TOML files, providing the following features:
 
 - Sort tables and Arrays of Tables (AoT)
 - Option to sort non-tables / non-AoT's, or not
-- Preserve inline comments
+- Preserve inline & block comments
 - Option to preserve top-level document comments, or not
 - Standardize whitespace and indentation
 
@@ -51,25 +51,41 @@ Usage: toml-sort [OPTIONS] [FILENAMES]...
     Inplace Disk    : toml-sort --in-place input.toml input2.toml
 
 Options:
-  -o, --output PATH  The output filepath. Choose stdout with '-' (the
-                     default).
+  -o, --output PATH     The output filepath. Choose stdout with '-' (the
+                        default).
 
-  -a, --all          Sort all keys. Default is to only sort non-inline 'tables
-                     and arrays of tables'.
+  -a, --all             Sort all keys. Default is to only sort non-inline 'tables
+                        and arrays of tables'.
 
-  -i, --in-place     Makes changes to the original input file. Note: you
-                     cannot redirect from a file to itself in Bash. POSIX
-                     shells process redirections first, then execute the
-                     command.
+  -i, --in-place        Makes changes to the original input file. Note: you
+                        cannot redirect from a file to itself in Bash. POSIX
+                        shells process redirections first, then execute the
+                        command.
 
-  --no-header        Do not keep a document's leading comments.
-  --check            Check if an original file is changed by the formatter.
-                     Return code 0 means it would not change. Return code 1
-                     means it would change.
+  --no-header           Deprecated. See --no-header-comments.
+  
+  --no-comments         Remove all comments. Implies no header, footer, inline, 
+                        or block comments.
+  
+  --no-header-comments  Remove a document's leading comments.
+  
+  --no-footer-comments  Remove a document's trailing comments.
+  
+  --no-inline-comments  Remove a document's inline comments.
+  
+  --no-block-comments   Remove a document's block comments.
+  
+  
+  --spaces-before-comment {1,2,3,4}
+                        The number of spaces before an end of line comment. (default: 1)
+                        
+  --check               Check if an original file is changed by the formatter.
+                        Return code 0 means it would not change. Return code 1
+                        means it would change.
 
-  -I, --ignore-case  When sorting, ignore case.
-  --version          Show the version and exit.
-  --help             Show this message and exit.
+  -I, --ignore-case     When sorting, ignore case.
+  --version             Show the version and exit.
+  --help                Show this message and exit.
 ```
 
 ## Configuration file
@@ -87,9 +103,95 @@ Please note, that only the below options are supported:
 [tool.tomlsort]
 all = true
 in_place = true
-no_header = true
+no_header_comments = true
+no_footer_comments = true
+no_inline_comments = true
+no_block_comments = true
+spaces_before_comment = 2
 check = true
 ignore_case = true
+```
+
+## Comments
+
+Due to the free form nature of comments, it is hard to include them in a sort in 
+a generic way that will work for everyone. `toml-sort` deals with four different 
+types of comments. They are all enabled by default, but can be disabled using CLI
+switches, in which case comments of that type will be removed from the output.
+
+### Header
+
+The first comments in a document, that are followed by a blank line, are treated
+as a header, and will always remain at the top of the document. If there is no 
+blank line, the comment will be treated as a block comment instead.
+
+```toml
+# This is a header
+# it can be multiple lines, as long as it is followed with a blank line
+# it will always stay at the top of the sorted document
+
+title = "The example"
+```
+
+### Footer
+
+Any comments at the end of the document, after the last item in the toml, will be 
+treated as a footer, and will always remain at the bottom of the document.
+
+```toml
+title = "The example"
+
+# this is a footer comment
+```
+
+### Inline
+
+Inline comments are comments that are at the end of a line where the start of the 
+line is a toml item.
+
+```toml
+title = "The example" # This is a inline comment
+```
+
+### Block
+
+Block comments, are any comments that are on their own line. These comments are treated 
+as *attached* to the item in the toml that is directly below them, not seperated by whitespace. 
+These comments can be multiple lines. Inline comments will appear in the sorted output above the
+item they were attached to in the input toml.
+
+```toml
+# Comment attached to title
+title = "The example"
+
+# This comment is an orphan because it 
+# is seperated from a-section by whitespace
+
+# This comment is attached to a-section
+# attached comments can be multiple lines
+[a-section]
+# This comment is attached to date
+date = "2019"
+```
+
+### Orphan
+
+Orphan comments are any comments that don't fall into the above categories, they will be removed
+from the output document.
+
+```toml
+# Header comment
+
+# Orphan comment, not attached to any item
+# because there is whitespace before title
+
+title = "The example"
+
+# This comment is an orphan because it 
+# is seperated from a-section by whitespace
+
+# This comment is attached to a-section
+[a-section]
 ```
 
 ## Example
@@ -108,13 +210,14 @@ ports = [ 8001, 8001, 8002 ]
 dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 
 
-
+     # Attached to b-section
   [b-section]
   date = "2018"
   name = "Richard Stallman"
 
 [[a-section.hello]]
 ports = [ 80 ]
+    #Attched to dob
 dob = 1920-05-27T07:32:00Z # Another date!
 
                           [a-section]
@@ -139,8 +242,10 @@ dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 
 [[a-section.hello]]
 ports = [ 80 ]
+# Attched to dob
 dob = 1920-05-27T07:32:00Z # Another date!
 
+# Attached to b-section
 [b-section]
 date = "2018"
 name = "Richard Stallman"
