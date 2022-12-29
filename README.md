@@ -26,7 +26,7 @@ This library sorts TOML files, providing the following features:
 
 - Sort tables and Arrays of Tables (AoT)
 - Option to sort non-tables / non-AoT's, or not
-- Preserve inline comments
+- Preserve inline & block comments
 - Option to preserve top-level document comments, or not
 - Standardize whitespace and indentation
 
@@ -51,35 +51,40 @@ Usage: toml-sort [OPTIONS] [FILENAMES]...
     Inplace Disk    : toml-sort --in-place input.toml input2.toml
 
 Options:
-  -o, --output PATH  The output filepath. Choose stdout with '-' (the
-                     default).
+  -o, --output PATH     The output filepath. Choose stdout with '-' (the
+                        default).
 
-  -a, --all          Sort all keys. Default is to only sort non-inline 'tables
-                     and arrays of tables'.
+  -a, --all             Sort all keys. Default is to only sort non-inline 'tables
+                        and arrays of tables'.
 
-  -i, --in-place     Makes changes to the original input file. Note: you
-                     cannot redirect from a file to itself in Bash. POSIX
-                     shells process redirections first, then execute the
-                     command.
+  -i, --in-place        Makes changes to the original input file. Note: you
+                        cannot redirect from a file to itself in Bash. POSIX
+                        shells process redirections first, then execute the
+                        command.
 
-  --no-header        Do not keep a document's leading comments.
+  --no-header           Deprecated. See --no-header-comments.
   
-  --no-footer        Do not keep a document's trailing comments.
+  --no-comments         Remove all comments. Implies no header, footer, inline, or block comments.
   
-  --no-end-of-line   Do not keep a document's end of line comments.
+  --no-header-comments  Remove a document's leading comments.
   
-  --no-inline        Do not keep a document's inline comments.
+  --no-footer-comments  Remove a document's trailing comments.
+  
+  --no-inline-comments  Remove a document's inline comments.
+  
+  --no-block-comments   Remove a document's block comments.
+  
   
   --spaces-before-comment {1,2,3,4}
-                     The number of spaces before an end of line comment. (default: 1)
+                        The number of spaces before an end of line comment. (default: 1)
                         
-  --check            Check if an original file is changed by the formatter.
-                     Return code 0 means it would not change. Return code 1
-                     means it would change.
+  --check               Check if an original file is changed by the formatter.
+                        Return code 0 means it would not change. Return code 1
+                        means it would change.
 
-  -I, --ignore-case  When sorting, ignore case.
-  --version          Show the version and exit.
-  --help             Show this message and exit.
+  -I, --ignore-case     When sorting, ignore case.
+  --version             Show the version and exit.
+  --help                Show this message and exit.
 ```
 
 ## Configuration file
@@ -97,10 +102,10 @@ Please note, that only the below options are supported:
 [tool.tomlsort]
 all = true
 in_place = true
-no_header = true
-no_footer = true
-no_end_of_line = true
-no_inline = true
+no_header_comments = true
+no_footer_comments = true
+no_inline_comments = true
+no_block_comments = true
 spaces_before_comment = 2
 check = true
 ignore_case = true
@@ -117,7 +122,7 @@ switches, in which case comments of that type will be removed from the output.
 
 The first comments in a document, that are followed by a blank line, are treated
 as a header, and will always remain at the top of the document. If there is no 
-blank line, the comment will be treated as an inline comment instead.
+blank line, the comment will be treated as a block comment instead.
 
 ```toml
 # This is a header
@@ -138,19 +143,19 @@ title = "The example"
 # this is a footer comment
 ```
 
-### End of line
+### Inline
 
-End of line comments are comments that are at the end of a line where the start of the 
-line is a toml item. These comments are by default included in the output.
+Inline comments are comments that are at the end of a line where the start of the 
+line is a toml item.
 
 ```toml
-title = "The example" # This is an end of line comment
+title = "The example" # This is a inline comment
 ```
 
-### Inline Comment
+### Block
 
-Inline comments, are any comments that are on their own line. These comments are treated 
-as "attached" to the item in the toml that is directly below them, not seperated by whitespace. 
+Block comments, are any comments that are on their own line. These comments are treated 
+as *attached* to the item in the toml that is directly below them, not seperated by whitespace. 
 These comments can be multiple lines. Inline comments will appear in the sorted output above the
 item they were attached to in the input toml.
 
@@ -168,10 +173,25 @@ title = "The example"
 date = "2019"
 ```
 
-### Orphan Comment
+### Orphan
 
 Orphan comments are any comments that don't fall into the above categories, they will be removed
 from the output document.
+
+```toml
+# Header comment
+
+# Orphan comment, not attached to any item
+# because there is whitespace before title
+
+title = "The example"
+
+# This comment is an orphan because it 
+# is seperated from a-section by whitespace
+
+# This comment is attached to a-section
+[a-section]
+```
 
 ## Example
 

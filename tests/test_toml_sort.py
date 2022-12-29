@@ -35,8 +35,8 @@ def test_sort_toml_is_str() -> None:
                 "comment_config": CommentConfiguration(
                     header=False,
                     footer=False,
-                    inline_attached=False,
-                    end_of_line=False,
+                    block=False,
+                    inline=False,
                 )
             },
         ),
@@ -66,7 +66,7 @@ def test_sort_toml_is_str() -> None:
             {
                 "only_sort_tables": True,
                 "comment_config": CommentConfiguration(
-                    inline_attached=False, spaces_before_comment=1
+                    block=False, spaces_before_comment=1
                 ),
             },
         ),
@@ -76,7 +76,7 @@ def test_sort_toml_is_str() -> None:
             {
                 "only_sort_tables": True,
                 "comment_config": CommentConfiguration(
-                    inline_attached=False, spaces_before_comment=1
+                    block=False, spaces_before_comment=1
                 ),
             },
             marks=[pytest.mark.xfail],

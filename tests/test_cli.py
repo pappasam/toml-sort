@@ -84,6 +84,55 @@ def test_cli_defaults(
 
 
 @pytest.mark.parametrize(
+    "path_unsorted,path_sorted,args",
+    [
+        (
+            "comment",
+            ["sorted", "comment-no-comments"],
+            ["--no-comments", "--all"],
+        ),
+        (
+            "comment",
+            ["sorted", "comment-no-comments"],
+            [
+                "--no-inline-comments",
+                "--no-block-comments",
+                "--no-header-comments",
+                "--no-footer-comments",
+                "--all",
+            ],
+        ),
+        (
+            "comment",
+            ["sorted", "comment-comments-preserved"],
+            [
+                "--no-header-comments",
+                "--no-footer-comments",
+                "--spaces-before-comment",
+                "2",
+                "--all",
+            ],
+        ),
+    ],
+)
+def test_cli_args(
+    get_fixture: Callable[[str | List[str]], Path],
+    path_unsorted: str,
+    path_sorted: List[str],
+    args: List[str],
+) -> None:
+    """Test the basic cli behavior with different arguments."""
+
+    with get_fixture(path_sorted).open(encoding="UTF-8") as infile:
+        expected = infile.read()
+    result_filepath = capture(
+        ["toml-sort"] + args + [str(get_fixture(path_unsorted))]
+    )
+    assert result_filepath.returncode == 0
+    assert result_filepath.stdout == expected
+
+
+@pytest.mark.parametrize(
     "paths, expected_exit_code",
     (
         pytest.param(

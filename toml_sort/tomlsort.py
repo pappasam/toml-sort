@@ -161,8 +161,8 @@ class CommentConfiguration:
 
     header: bool = True
     footer: bool = True
-    end_of_line: bool = True
-    inline_attached: bool = True
+    inline: bool = True
+    block: bool = True
     spaces_before_comment: int = 2
 
 
@@ -245,7 +245,7 @@ class TomlSort:
         if original.is_aot:
             new_aot = normalize_trivia(
                 original.aot,
-                self.comment_config.end_of_line,
+                self.comment_config.inline,
                 self.comment_config.spaces_before_comment,
             )
             for table in original.children:
@@ -311,10 +311,7 @@ class TomlSort:
             if key is None:
                 if isinstance(value, Whitespace):
                     comments = []
-                elif (
-                    isinstance(value, Comment)
-                    and self.comment_config.inline_attached
-                ):
+                elif isinstance(value, Comment) and self.comment_config.block:
                     comment_spaces = self.comment_config.spaces_before_comment
                     value = normalize_trivia(
                         value,
@@ -326,7 +323,7 @@ class TomlSort:
             value = convert_tomlkit_buggy_types(value, parent, key.key)
             value = normalize_trivia(
                 value,
-                self.comment_config.end_of_line,
+                self.comment_config.inline,
                 comment_spaces=self.comment_config.spaces_before_comment,
             )
 
