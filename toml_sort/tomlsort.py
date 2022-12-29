@@ -213,8 +213,7 @@ class TomlSort:
         """Write header comment from the FROM doc to the TO doc.
 
         Only writes comments / whitespace from the beginning of a TOML
-        document. Anything from later in the document is ambiguous and
-        cannot be sorted accurately.
+        document.
         """
         for _, value in from_doc_body:
             if isinstance(value, Comment):
