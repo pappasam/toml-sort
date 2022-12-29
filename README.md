@@ -33,54 +33,55 @@ This project can be used as either a command line utility or a Python library. R
 
 ```console
 $ toml-sort --help
-Usage: toml-sort [OPTIONS] [FILENAMES]...
+usage: toml-sort [-h] [--version] [-o OUTPUT] [-a] [-i]
+                 [--no-comments] [--no-header-comments] [--no-footer-comments]
+                 [--no-inline-comments] [--no-block-comments]
+                 [--spaces-before-inline-comment {1,2,3,4}] [--check] [-I]
+                 [F ...]
 
-  Sort toml file FILENAME(s), writing to file(s) or stdout (default)
+Toml sort: a sorting utility for toml files.
 
-  FILENAME a filepath or standard input (-)
+positional arguments:
+  F                     filename(s) to be processed by toml-sort (default: -)
 
-  Examples (non-exhaustive list):
-    Stdin -> Stdout : cat input.toml | toml-sort
-    Disk -> Disk    : toml-sort -o output.toml input.toml
-    Linting         : toml-sort --check input.toml input2.toml input3.toml
-    Inplace Disk    : toml-sort --in-place input.toml input2.toml
+options:
+  -h, --help            show this help message and exit
+  --version             display version information and exit
+  -o OUTPUT, --output OUTPUT
+                        output filepath (default: '-')
+  -a, --all             sort ALL keys (default: only sort non-inline 'tables
+                        and arrays of tables')
+  -i, --in-place        overwrite the original input file with changes
+  --no-comments         remove all comments. Implies no header, footer,
+                        inline, or block comments
+  --no-header-comments  remove a document's leading comments
+  --no-footer-comments  remove a document's trailing comments
+  --no-inline-comments  remove a document's inline comments
+  --no-block-comments   remove a document's block comments
+  --spaces-before-inline-comment {1,2,3,4}
+                        the number of spaces before an inline comment
+                        (default: 1)
+  --check               silently check if an original file would be changed by
+                        the formatter
+  -I, --ignore-case     ignore case when sorting
 
-Options:
-  -o, --output PATH     The output filepath. Choose stdout with '-' (the
-                        default).
+Examples:
 
-  -a, --all             Sort all keys. Default is to only sort non-inline 'tables
-                        and arrays of tables'.
+  - **Stdin -> Stdout**: cat input.toml | toml-sort
+  - **Disk -> Disk**: toml-sort -o output.toml input.toml
+  - **Linting**: toml-sort --check input.toml input2.toml input3.toml
+  - **Inplace Disk**: toml-sort --in-place input.toml input2.toml
 
-  -i, --in-place        Makes changes to the original input file. Note: you
-                        cannot redirect from a file to itself in Bash. POSIX
-                        shells process redirections first, then execute the
-                        command.
+Return codes:
 
-  --no-header           Deprecated. See --no-header-comments.
+  - 0 : success.
+  - 1 : errors were found
 
-  --no-comments         Remove all comments. Implies no header, footer, inline,
-                        or block comments.
+Notes:
 
-  --no-header-comments  Remove a document's leading comments.
-
-  --no-footer-comments  Remove a document's trailing comments.
-
-  --no-inline-comments  Remove a document's inline comments.
-
-  --no-block-comments   Remove a document's block comments.
-
-
-  --spaces-before-comment {1,2,3,4}
-                        The number of spaces before an end of line comment. (default: 1)
-
-  --check               Check if an original file is changed by the formatter.
-                        Return code 0 means it would not change. Return code 1
-                        means it would change.
-
-  -I, --ignore-case     When sorting, ignore case.
-  --version             Show the version and exit.
-  --help                Show this message and exit.
+  - You cannot redirect from a file to itself in Bash. POSIX shells process
+    redirections first, then execute commands. --in-place exists for this
+    reason
 ```
 
 ## Configuration file
@@ -98,7 +99,7 @@ no_header_comments = true
 no_footer_comments = true
 no_inline_comments = true
 no_block_comments = true
-spaces_before_comment = 2
+spaces_before_inline_comment = 2
 check = true
 ignore_case = true
 ```

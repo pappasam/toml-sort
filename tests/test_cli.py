@@ -108,7 +108,7 @@ def test_cli_defaults(
             [
                 "--no-header-comments",
                 "--no-footer-comments",
-                "--spaces-before-comment",
+                "--spaces-before-inline-comment",
                 "2",
                 "--all",
             ],
@@ -232,8 +232,8 @@ def test_load_config_file_read():
         ("[tool.tomlsort]", {}),
         ("[tool.tomlsort]\nall=true", {"all": True}),
         (
-            "[tool.tomlsort]\nspaces_before_comment=4",
-            {"spaces_before_comment": 4},
+            "[tool.tomlsort]\nspaces_before_inline_comment=4",
+            {"spaces_before_inline_comment": 4},
         ),
     ],
 )

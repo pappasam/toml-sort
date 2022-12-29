@@ -95,7 +95,9 @@ def load_config_file() -> Dict[str, Any]:
     validate_and_copy(config, clean_config, "no_footer_comments", bool)
     validate_and_copy(config, clean_config, "no_inline_comments", bool)
     validate_and_copy(config, clean_config, "no_block_comments", bool)
-    validate_and_copy(config, clean_config, "spaces_before_comment", int)
+    validate_and_copy(
+        config, clean_config, "spaces_before_inline_comment", int
+    )
     validate_and_copy(config, clean_config, "check", bool)
     validate_and_copy(config, clean_config, "ignore_case", bool)
 
@@ -160,40 +162,40 @@ Notes:
     )
     parser.add_argument(
         "--no-header",
-        help="Deprecated. See --no-header-comments.",
+        help="Deprecated. See --no-header-comments",
         action="store_true",
     )
     parser.add_argument(
         "--no-comments",
         help=(
-            "Remove all comments. Implies no header, footer, inline, or "
-            "block comments."
+            "remove all comments. Implies no header, footer, inline, or "
+            "block comments"
         ),
         action="store_true",
     )
     parser.add_argument(
         "--no-header-comments",
-        help="Remove a document's leading comments.",
+        help="remove a document's leading comments",
         action="store_true",
     )
     parser.add_argument(
         "--no-footer-comments",
-        help="Remove a document's trailing comments.",
+        help="remove a document's trailing comments",
         action="store_true",
     )
     parser.add_argument(
         "--no-inline-comments",
-        help="Remove a document's inline comments.",
+        help="remove a document's inline comments",
         action="store_true",
     )
     parser.add_argument(
         "--no-block-comments",
-        help="Remove a document's block comments.",
+        help="remove a document's block comments",
         action="store_true",
     )
     parser.add_argument(
-        "--spaces-before-comment",
-        help=("The number of spaces before a inline comment. " "(default: 1)"),
+        "--spaces-before-inline-comment",
+        help=("the number of spaces before an inline comment (default: 1)"),
         type=int,
         choices=range(1, 5),
         default=1,
@@ -201,7 +203,7 @@ Notes:
     parser.add_argument(
         "--check",
         help=(
-            "silently check if a file's contents would be "
+            "silently check if an original file would be "
             "changed by the formatter"
         ),
         action="store_true",
@@ -275,7 +277,7 @@ def cli(  # pylint: disable=too-many-branches
                     or args.no_comments
                 ),
                 footer=not bool(args.no_footer_comments or args.no_comments),
-                spaces_before_comment=args.spaces_before_comment,
+                spaces_before_inline=args.spaces_before_inline_comment,
                 block=not bool(args.no_block_comments or args.no_comments),
                 inline=not bool(args.no_inline_comments or args.no_comments),
             ),

@@ -45,9 +45,7 @@ def test_sort_toml_is_str() -> None:
             "comment-header-footer",
             {
                 "only_sort_tables": True,
-                "comment_config": CommentConfiguration(
-                    spaces_before_comment=1
-                ),
+                "comment_config": CommentConfiguration(spaces_before_inline=1),
             },
         ),
         (
@@ -55,9 +53,7 @@ def test_sort_toml_is_str() -> None:
             "from-toml-lang",
             {
                 "only_sort_tables": True,
-                "comment_config": CommentConfiguration(
-                    spaces_before_comment=1
-                ),
+                "comment_config": CommentConfiguration(spaces_before_inline=1),
             },
         ),
         (
@@ -66,7 +62,7 @@ def test_sort_toml_is_str() -> None:
             {
                 "only_sort_tables": True,
                 "comment_config": CommentConfiguration(
-                    block=False, spaces_before_comment=1
+                    block=False, spaces_before_inline=1
                 ),
             },
         ),
@@ -76,7 +72,7 @@ def test_sort_toml_is_str() -> None:
             {
                 "only_sort_tables": True,
                 "comment_config": CommentConfiguration(
-                    block=False, spaces_before_comment=1
+                    block=False, spaces_before_inline=1
                 ),
             },
             marks=[pytest.mark.xfail],

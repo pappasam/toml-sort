@@ -163,7 +163,7 @@ class CommentConfiguration:
     footer: bool = True
     inline: bool = True
     block: bool = True
-    spaces_before_comment: int = 2
+    spaces_before_inline: int = 2
 
 
 class TomlSort:
@@ -219,7 +219,7 @@ class TomlSort:
             if isinstance(value, Comment):
                 value = normalize_trivia(
                     value,
-                    comment_spaces=self.comment_config.spaces_before_comment,
+                    comment_spaces=self.comment_config.spaces_before_inline,
                 )
                 to_doc.add(value)
             else:
@@ -245,7 +245,7 @@ class TomlSort:
             new_aot = normalize_trivia(
                 original.aot,
                 self.comment_config.inline,
-                self.comment_config.spaces_before_comment,
+                self.comment_config.spaces_before_inline,
             )
             for table in original.children:
                 previous_item = next(iter(new_aot), parent)
@@ -311,7 +311,7 @@ class TomlSort:
                 if isinstance(value, Whitespace):
                     comments = []
                 elif isinstance(value, Comment) and self.comment_config.block:
-                    comment_spaces = self.comment_config.spaces_before_comment
+                    comment_spaces = self.comment_config.spaces_before_inline
                     value = normalize_trivia(
                         value,
                         comment_spaces=comment_spaces,
@@ -323,7 +323,7 @@ class TomlSort:
             value = normalize_trivia(
                 value,
                 self.comment_config.inline,
-                comment_spaces=self.comment_config.spaces_before_comment,
+                comment_spaces=self.comment_config.spaces_before_inline,
             )
 
             if isinstance(value, Table):
