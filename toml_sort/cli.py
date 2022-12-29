@@ -90,6 +90,7 @@ def load_config_file() -> Dict[str, Any]:
     validate_and_copy(config, clean_config, "all", bool)
     validate_and_copy(config, clean_config, "in_place", bool)
     validate_and_copy(config, clean_config, "no_header", bool)
+    validate_and_copy(config, clean_config, "no_comments", bool)
     validate_and_copy(config, clean_config, "no_header_comments", bool)
     validate_and_copy(config, clean_config, "no_footer_comments", bool)
     validate_and_copy(config, clean_config, "no_inline_comments", bool)
