@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.21.0
+
+This is a pretty big comment-related release. Resolves the long-standing issue: <https://github.com/pappasam/toml-sort/issues/11>.
+
+### Changed
+
+- Header, Footer, and Block comments are retained by default and can be disabled with new CLI options.
+
+### Added
+
+- New CLI comment-removal options: `--no-comments`, `--no-header-comments`, `--no-footer-comments`, `--no-inline-comments`, `--no-block-comments`
+- The ability to configure spaces before inline comments with `--spaces-before-inline-comment`
+
+### Deprecated
+
+- The CLI option: `--no-header`. This will be removed in a future release and is replaced by `--no-header-comments`
+
 ## 0.20.2
 
 ### Fixed
