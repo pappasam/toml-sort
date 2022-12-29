@@ -2,7 +2,7 @@
 
 [![pypi-version](https://img.shields.io/pypi/v/toml-sort.svg)](https://python.org/pypi/toml-sort)
 [![license](https://img.shields.io/pypi/l/toml-sort.svg)](https://python.org/pypi/toml-sort)
-[![python-versions](https://img.shields.io/pypi/pyversions/toml-sort.svg)](https://python.org/pypi/toml-sort)
+[![image-python-versions](https://img.shields.io/badge/python->=3.7-blue)](https://python.org/pypi/jedi-language-server)
 [![image-pypi-downloads](https://pepy.tech/badge/toml-sort)](https://pepy.tech/project/toml-sort)
 [![readthedocs-status](https://readthedocs.org/projects/toml-sort/badge/?version=latest)](https://toml-sort.readthedocs.io/en/latest/?badge=latest)
 
@@ -13,11 +13,7 @@ Read the latest documentation here: <https://toml-sort.readthedocs.io/en/latest/
 ## Installation
 
 ```bash
-# With pip
 pip install toml-sort
-
-# With poetry
-poetry add --dev toml-sort
 ```
 
 ## Motivation
@@ -26,8 +22,7 @@ This library sorts TOML files, providing the following features:
 
 - Sort tables and Arrays of Tables (AoT)
 - Option to sort non-tables / non-AoT's, or not
-- Preserve inline & block comments
-- Option to preserve top-level document comments, or not
+- Preserve comments, where possible
 - Standardize whitespace and indentation
 
 I wrote this library/application because I couldn't find any "good" sorting utilities for TOML files. Now, I use this as part of my daily workflow. Hopefully it helps you too!
@@ -90,14 +85,9 @@ Options:
 
 ## Configuration file
 
-toml-sort can also be configured by using the `pyproject.toml` file.
-If the file exists and has a `tool.tomlsort` section, the configuration is used.
-If both command line arguments and the configuration are used, the options are merged.
-In the case of conflicts, the command line option is used.
+toml-sort can also be configured by using the `pyproject.toml` file. If the file exists and has a `tool.tomlsort` section, the configuration is used. If both command line arguments and the configuration are used, the options are merged. In the case of conflicts, the command line option is used.
 
-In short, the names are the same as on the command line (and have the same meaning),
-but `-` is replaced with `_`.
-Please note, that only the below options are supported:
+In short, the names are the same as on the command line (and have the same meaning), but `-` is replaced with `_`. Please note, that only the below options are supported:
 
 ```toml
 [tool.tomlsort]
@@ -115,16 +105,11 @@ ignore_case = true
 
 ## Comments
 
-Due to the free form nature of comments, it is hard to include them in a sort in
-a generic way that will work for everyone. `toml-sort` deals with four different
-types of comments. They are all enabled by default, but can be disabled using CLI
-switches, in which case comments of that type will be removed from the output.
+Due to the free form nature of comments, it is hard to include them in a sort in a generic way that will work for everyone. `toml-sort` deals with four different types of comments. They are all enabled by default, but can be disabled using CLI switches, in which case comments of that type will be removed from the output.
 
 ### Header
 
-The first comments in a document, that are followed by a blank line, are treated
-as a header, and will always remain at the top of the document. If there is no
-blank line, the comment will be treated as a block comment instead.
+The first comments in a document, that are followed by a blank line, are treated as a header, and will always remain at the top of the document. If there is no blank line, the comment will be treated as a block comment instead.
 
 ```toml
 # This is a header
@@ -136,8 +121,7 @@ title = "The example"
 
 ### Footer
 
-Any comments at the end of the document, after the last item in the toml, will be
-treated as a footer, and will always remain at the bottom of the document.
+Any comments at the end of the document, after the last item in the toml, will be treated as a footer, and will always remain at the bottom of the document.
 
 ```toml
 title = "The example"
@@ -147,8 +131,7 @@ title = "The example"
 
 ### Inline
 
-Inline comments are comments that are at the end of a line where the start of the
-line is a toml item.
+Inline comments are comments that are at the end of a line where the start of the line is a toml item.
 
 ```toml
 title = "The example" # This is a inline comment
@@ -156,10 +139,7 @@ title = "The example" # This is a inline comment
 
 ### Block
 
-Block comments, are any comments that are on their own line. These comments are treated
-as _attached_ to the item in the toml that is directly below them, not seperated by whitespace.
-These comments can be multiple lines. Inline comments will appear in the sorted output above the
-item they were attached to in the input toml.
+Block comments, are any comments that are on their own line. These comments are treated as _attached_ to the item in the toml that is directly below them, not seperated by whitespace. These comments can be multiple lines. Inline comments will appear in the sorted output above the item they were attached to in the input toml.
 
 ```toml
 # Comment attached to title
@@ -177,8 +157,7 @@ date = "2019"
 
 ### Orphan
 
-Orphan comments are any comments that don't fall into the above categories, they will be removed
-from the output document.
+Orphan comments are any comments that don't fall into the above categories, they will be removed from the output document.
 
 ```toml
 # Header comment
