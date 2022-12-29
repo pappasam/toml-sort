@@ -64,7 +64,8 @@ Options:
 
   --no-header           Deprecated. See --no-header-comments.
   
-  --no-comments         Remove all comments. Implies no header, footer, inline, or block comments.
+  --no-comments         Remove all comments. Implies no header, footer, inline, 
+                        or block comments.
   
   --no-header-comments  Remove a document's leading comments.
   
