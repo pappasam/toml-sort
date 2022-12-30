@@ -1,0 +1,33 @@
+[b]
+aaalist = [
+  [
+    {a-test = "Did this sort?", name = "Lisa Simpson", town = "Springfield"}
+  ],
+  [
+    {name = "Bart Simpson", town = "Springfield"}
+  ],
+  [
+    {name = "Homer Simpson", town = "Springfield"}
+  ]
+]
+'aalist' = {a = "another test", c = "test"}
+alist = [
+  'a',
+  'g',
+  'w'
+]
+blist = ['a', 'b', 'c']
+
+[a]
+test = [
+  {a = [
+    ""
+  ], x = [
+    "bar",
+    "foo"
+  ]},
+  {y = [
+    "baz",
+    "foo"
+  ]}
+]

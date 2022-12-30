@@ -15,7 +15,7 @@ name = "Samuel Roeca"
 [[a-section.hello]]
 dob = 1979-05-27T07:32:00Z  # First class dates? Why not?
 # test comment
-ports = [ 8001, 8001, 8002 ]
+ports = [8001, 8001, 8002]
 
 # Another test comment
 # make sure multiline comments work
@@ -23,7 +23,7 @@ ports = [ 8001, 8001, 8002 ]
 # multi line comment
 # test comment
 dob = 1920-05-27T07:32:00Z  # Another date!
-ports = [ 80 ]
+ports = [80]
 
 # Another comment
 [b-section]  # Comment there?

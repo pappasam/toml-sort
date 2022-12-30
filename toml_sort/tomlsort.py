@@ -10,7 +10,19 @@ import tomlkit
 from tomlkit.api import item as tomlkit_item
 from tomlkit.api import ws
 from tomlkit.container import Container
-from tomlkit.items import AoT, Comment, Item, Key, Table, Trivia, Whitespace
+from tomlkit.items import (
+    AoT,
+    Array,
+    Comment,
+    InlineTable,
+    Item,
+    Key,
+    Null,
+    Table,
+    Trivia,
+    Whitespace,
+    _ArrayItemGroup,
+)
 from tomlkit.toml_document import TOMLDocument
 
 __all__ = ["TomlSort"]
@@ -42,16 +54,6 @@ def convert_tomlkit_buggy_types(in_value: Any, parent: Any, key: str) -> Item:
     return tomlkit_item(in_value, parent)
 
 
-def sort_case_sensitive(value: TomlSortItem) -> str:
-    """Case sensitive function to pass to 'sorted' function."""
-    return value.key.key
-
-
-def sort_case_insensitive(value: TomlSortItem) -> str:
-    """Case insensitive function to pass to 'sorted' function."""
-    return value.key.key.lower()
-
-
 def attach_comments(item: TomlSortItem, previous_item: Table | TOMLDocument):
     """Attach the comments on item to the previous item, making sure that the
     formatting is correct for tables."""
@@ -63,6 +65,11 @@ def attach_comments(item: TomlSortItem, previous_item: Table | TOMLDocument):
 
 
 T = TypeVar("T", bound=Item)
+
+
+def format_comment(comment: str) -> str:
+    """Reformats a comment string removing extra whitespace."""
+    return f"# {comment[1:].strip()}"
 
 
 def normalize_trivia(
@@ -77,7 +84,7 @@ def normalize_trivia(
         if trivia.comment != "":
             if include_comments:
                 trivia.comment_ws = " " * comment_spaces
-                trivia.comment = f"# {trivia.comment[1:].strip()}"
+                trivia.comment = format_comment(trivia.comment)
             else:
                 trivia.comment = ""
                 trivia.comment_ws = ""
@@ -166,25 +173,194 @@ class CommentConfiguration:
     spaces_before_inline: int = 2
 
 
+@dataclass
+class SortConfiguration:
+    """Configures how TomlSort sorts the input toml."""
+
+    tables: bool = True
+    table_keys: bool = True
+    inline_tables: bool = False
+    inline_arrays: bool = False
+    ignore_case: bool = False
+
+
 class TomlSort:
     """API to manage sorting toml files."""
 
     def __init__(
         self,
         input_toml: str,
-        only_sort_tables: bool = False,
-        ignore_case: bool = False,
         comment_config: Optional[CommentConfiguration] = None,
+        sort_config: Optional[SortConfiguration] = None,
     ) -> None:
         """Initializer."""
         self.input_toml = input_toml
-        self.only_sort_tables = only_sort_tables
-        self.sort_func = (
-            sort_case_insensitive if ignore_case else sort_case_sensitive
-        )
+
         if comment_config is None:
             comment_config = CommentConfiguration()
         self.comment_config = comment_config
+
+        if sort_config is None:
+            sort_config = SortConfiguration()
+        self.sort_config = sort_config
+
+    def sort_array(self, array: Array, indent_depth: int = 0) -> Array:
+        """Sort and format an inline array item while preserving comments."""
+        multiline = "\n" in array.as_string()
+        indent_size = 2
+        indent = (
+            "\n" + " " * indent_size * (indent_depth + 1) if multiline else ""
+        )
+        comma = "," if multiline else ", "
+
+        comments: List[_ArrayItemGroup] = []
+        new_array_items = []
+        for array_item in array._value:  # pylint: disable=protected-access
+            if isinstance(array_item.value, Null) and isinstance(
+                array_item.comment, Comment
+            ):
+                # Previous comments are orphaned if there is whitespace
+                if (
+                    array_item.indent is not None
+                    and "\n\n" in array_item.indent.as_string()
+                ):
+                    comments = []
+
+                # Comment on its own line within the array
+                array_item.indent = Whitespace(indent)
+                array_item.comma = Whitespace("")
+                array_item.comment.trivia.comment = format_comment(
+                    array_item.comment.trivia.comment
+                )
+                comments.append(array_item)
+            elif array_item.value is not None and not isinstance(
+                array_item.value, Null
+            ):
+                # Actual array item
+                array_item.indent = Whitespace(indent)
+                array_item.comma = Whitespace(comma)
+                if array_item.comment is not None:
+                    if self.comment_config.inline:
+                        array_item.comment.trivia.comment = format_comment(
+                            array_item.comment.trivia.comment
+                        )
+                        array_item.comment.trivia.indent = (
+                            " " * self.comment_config.spaces_before_inline
+                        )
+                    else:
+                        array_item.comment = None
+                new_array_items.append((array_item, comments))
+                comments = []
+                array_item.value = self.sort_item(
+                    array_item.value,
+                    indent_depth=indent_depth + 1
+                    if multiline
+                    else indent_depth,
+                )
+
+        if self.sort_config.inline_arrays:
+            new_array_items = sorted(new_array_items, key=self.array_sort_func)
+        new_array_value = []
+        for array_item, comments in new_array_items:
+            if comments and self.comment_config.block:
+                new_array_value.extend(comments)
+            new_array_value.append(array_item)
+
+        new_array_value[-1].comma = Whitespace("")
+
+        if multiline:
+            array_item = _ArrayItemGroup()
+            array_item.value = Whitespace(
+                "\n" + " " * indent_size * indent_depth
+            )
+            new_array_value.append(array_item)
+
+        array._value = new_array_value  # pylint: disable=protected-access
+        array._reindex()  # pylint: disable=protected-access
+        array = normalize_trivia(
+            array,
+            include_comments=self.comment_config.inline,
+            comment_spaces=self.comment_config.spaces_before_inline,
+        )
+        return array
+
+    def sort_item(self, item: Item, indent_depth: int = 0) -> Item:
+        """Sort an item, recursing down if the item is an inline table or
+        array."""
+        if isinstance(item, Array):
+            return self.sort_array(item, indent_depth=indent_depth)
+
+        if isinstance(item, InlineTable):
+            return self.sort_inline_table(item, indent_depth=indent_depth)
+
+        return item
+
+    def sort_inline_table(self, item, indent_depth: int = 0):
+        """Sort an inline table, recursing into its items."""
+        tomlsort_items = [
+            TomlSortItem(
+                key=k, value=self.sort_item(v, indent_depth=indent_depth)
+            )
+            for k, v in item.value.body
+            if not isinstance(v, Whitespace) and k is not None
+        ]
+        if self.sort_config.inline_tables:
+            tomlsort_items = sorted(tomlsort_items, key=self.key_sort_func)
+        new_table = InlineTable(
+            Container(parsed=True), trivia=item.trivia, new=True
+        )
+        for tomlsort_item in tomlsort_items:
+            normalize_trivia(tomlsort_item.value, include_comments=False)
+            new_table.append(
+                self.format_key(tomlsort_item.key), tomlsort_item.value
+            )
+        new_table = normalize_trivia(
+            new_table,
+            include_comments=self.comment_config.inline,
+            comment_spaces=self.comment_config.spaces_before_inline,
+        )
+        return new_table
+
+    @staticmethod
+    def format_key(key: Key) -> Key:
+        """
+        Format a key, removing any extra whitespace, and making sure that it
+        will be formatted like: key = value with one space on either side of
+        the equal sign.
+        """
+        key.sep = " = "
+        key._original = (  # pylint: disable=protected-access
+            key.as_string().strip()
+        )
+        return key
+
+    def sort_items(
+        self, items: Iterable[TomlSortItem]
+    ) -> Iterable[TomlSortItem]:
+        """Sort an iterable full of TomlSortItem, making sure the key is
+        correctly formatted and recursing into any sub-items."""
+        for item in items:
+            item.key = self.format_key(item.key)
+            item.value = self.sort_item(item.value)
+        return items
+
+    def key_sort_func(self, value: TomlSortItem) -> str:
+        """Sort function that looks at TomlSortItems keys, respecting the
+        configured value for ignore_case."""
+        key = value.key.key
+        if self.sort_config.ignore_case:
+            key = key.lower()
+        return key
+
+    def array_sort_func(self, value: Tuple[_ArrayItemGroup, Any]) -> str:
+        """Sort function that operates on the .value member of an
+        ArrayItemGroup respects the class setting for ignore_case."""
+        if value[0].value is None:
+            return ""
+        ret = value[0].value.as_string()
+        if self.sort_config.ignore_case:
+            ret = ret.lower()
+        return ret
 
     def sorted_children_table(
         self, parent: List[TomlSortItem]
@@ -193,17 +369,24 @@ class TomlSort:
         tables = coalesce_tables(
             item for item in parent if isinstance(item.value, (Table, AoT))
         )
-        non_tables = (
-            item for item in parent if not isinstance(item.value, (Table, AoT))
+        non_tables = self.sort_items(
+            [
+                item
+                for item in parent
+                if not isinstance(item.value, (Table, AoT))
+            ]
         )
         non_tables_final = (
-            sorted(non_tables, key=self.sort_func)
-            if not self.only_sort_tables
+            sorted(non_tables, key=self.key_sort_func)
+            if self.sort_config.table_keys
             else non_tables
         )
-        return itertools.chain(
-            non_tables_final, sorted(tables, key=self.sort_func)
+        tables_final = (
+            sorted(tables, key=self.key_sort_func)
+            if self.sort_config.tables
+            else tables
         )
+        return itertools.chain(non_tables_final, tables_final)
 
     def write_header_comment(
         self,

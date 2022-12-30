@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, List
 import pytest
 
 from toml_sort import TomlSort
-from toml_sort.tomlsort import CommentConfiguration
+from toml_sort.tomlsort import CommentConfiguration, SortConfiguration
 
 
 def test_sort_toml_is_str() -> None:
@@ -19,6 +19,15 @@ def test_sort_toml_is_str() -> None:
 @pytest.mark.parametrize(
     "unsorted_fixture,sorted_fixture,args",
     [
+        (
+            "inline",
+            "inline",
+            {
+                "sort_config": SortConfiguration(
+                    inline_arrays=True, inline_tables=True
+                ),
+            },
+        ),
         (
             "comment",
             "comment-comments-preserved",
@@ -44,7 +53,7 @@ def test_sort_toml_is_str() -> None:
             "comment",
             "comment-header-footer",
             {
-                "only_sort_tables": True,
+                "sort_config": SortConfiguration(table_keys=False),
                 "comment_config": CommentConfiguration(spaces_before_inline=1),
             },
         ),
@@ -52,7 +61,7 @@ def test_sort_toml_is_str() -> None:
             "from-toml-lang",
             "from-toml-lang",
             {
-                "only_sort_tables": True,
+                "sort_config": SortConfiguration(table_keys=False),
                 "comment_config": CommentConfiguration(spaces_before_inline=1),
             },
         ),
@@ -60,7 +69,7 @@ def test_sort_toml_is_str() -> None:
             "pyproject-weird-order",
             "pyproject-weird-order",
             {
-                "only_sort_tables": True,
+                "sort_config": SortConfiguration(table_keys=False),
                 "comment_config": CommentConfiguration(
                     block=False, spaces_before_inline=1
                 ),
@@ -70,7 +79,7 @@ def test_sort_toml_is_str() -> None:
             "weird",
             "weird",
             {
-                "only_sort_tables": True,
+                "sort_config": SortConfiguration(table_keys=False),
                 "comment_config": CommentConfiguration(
                     block=False, spaces_before_inline=1
                 ),

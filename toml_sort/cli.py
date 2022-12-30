@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Type
 
 import tomlkit
 
-from .tomlsort import CommentConfiguration, TomlSort
+from .tomlsort import CommentConfiguration, SortConfiguration, TomlSort
 
 __all__ = ["cli"]
 
@@ -100,6 +100,10 @@ def load_config_file() -> Dict[str, Any]:
     )
     validate_and_copy(config, clean_config, "check", bool)
     validate_and_copy(config, clean_config, "ignore_case", bool)
+    validate_and_copy(config, clean_config, "no_sort_tables", bool)
+    validate_and_copy(config, clean_config, "sort_inline_tables", bool)
+    validate_and_copy(config, clean_config, "sort_inline_arrays", bool)
+    validate_and_copy(config, clean_config, "sort_table_keys", bool)
 
     if config:
         printerr(f"Unexpected configuration values: {config}")
@@ -146,26 +150,64 @@ Notes:
         type=str,
     )
     parser.add_argument(
-        "-a",
-        "--all",
-        help=(
-            "sort ALL keys "
-            "(default: only sort non-inline 'tables and arrays of tables')"
-        ),
-        action="store_true",
-    )
-    parser.add_argument(
         "-i",
         "--in-place",
         help="overwrite the original input file with changes",
         action="store_true",
     )
-    parser.add_argument(
+    sort = parser.add_argument_group("sort", "change sorting behavior")
+    sort.add_argument(
+        "-I",
+        "--ignore-case",
+        help="ignore case when sorting",
+        action="store_true",
+    )
+    sort.add_argument(
+        "-a",
+        "--all",
+        help=(
+            "sort ALL keys. This implies sort table-keys, inline-tables and "
+            "inline arrays. (default: only sort non-inline 'tables and arrays "
+            "of tables')"
+        ),
+        action="store_true",
+    )
+    sort.add_argument(
+        "--no-sort-tables",
+        help=(
+            "Disables the default behavior of sorting tables and arrays of "
+            "tables by their header value. Setting this option will keep the "
+            "order of tables in the toml file the same."
+        ),
+        action="store_true",
+    )
+    sort.add_argument(
+        "--sort-table-keys",
+        help=(
+            "Sort the keys in tables and arrays of tables (excluding inline "
+            "tables and arrays)."
+        ),
+        action="store_true",
+    )
+    sort.add_argument(
+        "--sort-inline-tables",
+        help=("Sort inline tables."),
+        action="store_true",
+    )
+    sort.add_argument(
+        "--sort-inline-arrays",
+        help=("Sort inline arrays."),
+        action="store_true",
+    )
+    comments = parser.add_argument_group(
+        "comments", "exclude comments from output"
+    )
+    comments.add_argument(
         "--no-header",
         help="Deprecated. See --no-header-comments",
         action="store_true",
     )
-    parser.add_argument(
+    comments.add_argument(
         "--no-comments",
         help=(
             "remove all comments. Implies no header, footer, inline, or "
@@ -173,27 +215,27 @@ Notes:
         ),
         action="store_true",
     )
-    parser.add_argument(
+    comments.add_argument(
         "--no-header-comments",
         help="remove a document's leading comments",
         action="store_true",
     )
-    parser.add_argument(
+    comments.add_argument(
         "--no-footer-comments",
         help="remove a document's trailing comments",
         action="store_true",
     )
-    parser.add_argument(
+    comments.add_argument(
         "--no-inline-comments",
         help="remove a document's inline comments",
         action="store_true",
     )
-    parser.add_argument(
+    comments.add_argument(
         "--no-block-comments",
         help="remove a document's block comments",
         action="store_true",
     )
-    parser.add_argument(
+    comments.add_argument(
         "--spaces-before-inline-comment",
         help=("the number of spaces before an inline comment (default: 1)"),
         type=int,
@@ -206,12 +248,6 @@ Notes:
             "silently check if an original file would be "
             "changed by the formatter"
         ),
-        action="store_true",
-    )
-    parser.add_argument(
-        "-I",
-        "--ignore-case",
-        help="ignore case when sorting",
         action="store_true",
     )
     parser.add_argument(
@@ -268,8 +304,6 @@ def cli(  # pylint: disable=too-many-branches
         original_toml = read_file(filename)
         sorted_toml = TomlSort(
             input_toml=original_toml,
-            only_sort_tables=not bool(args.all),
-            ignore_case=args.ignore_case,
             comment_config=CommentConfiguration(
                 header=not bool(
                     args.no_header
@@ -280,6 +314,13 @@ def cli(  # pylint: disable=too-many-branches
                 spaces_before_inline=args.spaces_before_inline_comment,
                 block=not bool(args.no_block_comments or args.no_comments),
                 inline=not bool(args.no_inline_comments or args.no_comments),
+            ),
+            sort_config=SortConfiguration(
+                ignore_case=args.ignore_case,
+                tables=not bool(args.no_sort_tables),
+                table_keys=bool(args.sort_table_keys or args.all),
+                inline_tables=bool(args.sort_inline_tables or args.all),
+                inline_arrays=bool(args.sort_inline_arrays or args.all),
             ),
         ).sorted()
         if args.check:

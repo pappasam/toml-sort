@@ -9,11 +9,11 @@ name = "Samuel Roeca"
 
 [[a-section.hello]]
 dob = 1979-05-27T07:32:00Z
-ports = [ 8001, 8001, 8002 ]
+ports = [8001, 8001, 8002]
 
 [[a-section.hello]]
 dob = 1920-05-27T07:32:00Z
-ports = [ 80 ]
+ports = [80]
 
 [b-section]
 date = "2018"
