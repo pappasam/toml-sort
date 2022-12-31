@@ -36,7 +36,8 @@ $ toml-sort --help
 usage: toml-sort [-h] [--version] [-o OUTPUT] [-i] [-I] [-a] [--no-sort-tables] [--sort-table-keys]
                  [--sort-inline-tables] [--sort-inline-arrays] [--no-header] [--no-comments] [--no-header-comments]
                  [--no-footer-comments] [--no-inline-comments] [--no-block-comments]
-                 [--spaces-before-inline-comment {1,2,3,4}] [--check]
+                 [--spaces-before-inline-comment {1,2,3,4}] [--spaces-indent-inline-array {2,4,6,8}]
+                 [--trailing-comma-inline-array] [--check]
                  [F [F ...]]
 
 Toml sort: a sorting utility for toml files.
@@ -73,8 +74,16 @@ comments:
   --no-footer-comments  remove a document's trailing comments
   --no-inline-comments  remove a document's inline comments
   --no-block-comments   remove a document's block comments
+
+formatting:
+  options to change output formatting
+
   --spaces-before-inline-comment {1,2,3,4}
                         the number of spaces before an inline comment (default: 1)
+  --spaces-indent-inline-array {2,4,6,8}
+                        the number of spaces to indent a multiline inline array (default: 2)
+  --trailing-comma-inline-array
+                        add trailing comma to the last item in a multiline inline array
 
 Examples:
 
@@ -110,7 +119,13 @@ no_header_comments = true
 no_footer_comments = true
 no_inline_comments = true
 no_block_comments = true
+no_sort_tables = true
+sort_table_keys = true
+sort_inline_tables = true
+sort_inline_arrays = true
 spaces_before_inline_comment = 2
+spaces_indent_inline_array = 4
+trailing_comma_inline_array = true
 check = true
 ignore_case = true
 ```
