@@ -280,7 +280,9 @@ class TomlSort:
                 new_array_value.extend(comments)
             new_array_value.append(array_item)
 
-        if not (multiline and self.format_config.trailing_comma_inline_array):
+        if len(new_array_value) != 0 and not (
+            multiline and self.format_config.trailing_comma_inline_array
+        ):
             new_array_value[-1].comma = Whitespace("")
 
         if multiline:
