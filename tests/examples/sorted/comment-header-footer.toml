@@ -17,13 +17,13 @@ name = "Samuel Roeca"
 # start test
 [[a-section.hello]]
 # test comment
-ports = [ 8001, 8001, 8002 ]
+ports = [8001, 8001, 8002]
 dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 
 # Another test comment
 # make sure multiline comments work
 [[a-section.hello]] # Comment here?
-ports = [ 80 ]
+ports = [80]
 # multi line comment
 # test comment
 dob = 1920-05-27T07:32:00Z # Another date!

@@ -1,0 +1,39 @@
+[a]
+test = [
+  {a = [
+    ""
+  ], x = [
+    "bar",
+    "foo"
+  ]},
+  {y = [
+    "baz",
+    "foo"
+  ]}
+]
+
+[b]
+# Multilevel inline array
+aaalist = [
+  # Weird block comment
+  [
+    # Another weird block comment
+    {a-test = "Did this sort?", name = "Lisa Simpson", town = "Springfield"}  # Should get sorted
+  ],
+  [
+    {name = "Bart Simpson", town = "Springfield"}
+  ],
+  [
+    {name = "Homer Simpson", town = "Springfield"}
+  ]
+]
+'aalist' = {a = "another test", c = "test"}  # list comment
+alist = [
+  # Multiline
+  # Second attached comment
+  'a',
+  'g',
+  # Comment attached
+  'w'  # Comment inline
+]
+blist = ['a', 'b', 'c']  # Comment

@@ -33,37 +33,57 @@ This project can be used as either a command line utility or a Python library. R
 
 ```console
 $ toml-sort --help
-usage: toml-sort [-h] [--version] [-o OUTPUT] [-a] [-i]
-                 [--no-comments] [--no-header-comments] [--no-footer-comments]
-                 [--no-inline-comments] [--no-block-comments]
-                 [--spaces-before-inline-comment {1,2,3,4}] [--check] [-I]
-                 [F ...]
+usage: toml-sort [-h] [--version] [-o OUTPUT] [-i] [-I] [-a] [--no-sort-tables] [--sort-table-keys]
+                 [--sort-inline-tables] [--sort-inline-arrays] [--no-header] [--no-comments] [--no-header-comments]
+                 [--no-footer-comments] [--no-inline-comments] [--no-block-comments]
+                 [--spaces-before-inline-comment {1,2,3,4}] [--spaces-indent-inline-array {2,4,6,8}]
+                 [--trailing-comma-inline-array] [--check]
+                 [F [F ...]]
 
 Toml sort: a sorting utility for toml files.
 
 positional arguments:
   F                     filename(s) to be processed by toml-sort (default: -)
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   --version             display version information and exit
   -o OUTPUT, --output OUTPUT
                         output filepath (default: '-')
-  -a, --all             sort ALL keys (default: only sort non-inline 'tables
-                        and arrays of tables')
   -i, --in-place        overwrite the original input file with changes
-  --no-comments         remove all comments. Implies no header, footer,
-                        inline, or block comments
+  --check               silently check if an original file would be changed by the formatter
+
+sort:
+  change sorting behavior
+
+  -I, --ignore-case     ignore case when sorting
+  -a, --all             sort ALL keys. This implies sort table-keys, inline-tables and inline arrays. (default: only
+                        sort non-inline 'tables and arrays of tables')
+  --no-sort-tables      Disables the default behavior of sorting tables and arrays of tables by their header value.
+                        Setting this option will keep the order of tables in the toml file the same.
+  --sort-table-keys     Sort the keys in tables and arrays of tables (excluding inline tables and arrays).
+  --sort-inline-tables  Sort inline tables.
+  --sort-inline-arrays  Sort inline arrays.
+
+comments:
+  exclude comments from output
+
+  --no-header           Deprecated. See --no-header-comments
+  --no-comments         remove all comments. Implies no header, footer, inline, or block comments
   --no-header-comments  remove a document's leading comments
   --no-footer-comments  remove a document's trailing comments
   --no-inline-comments  remove a document's inline comments
   --no-block-comments   remove a document's block comments
+
+formatting:
+  options to change output formatting
+
   --spaces-before-inline-comment {1,2,3,4}
-                        the number of spaces before an inline comment
-                        (default: 1)
-  --check               silently check if an original file would be changed by
-                        the formatter
-  -I, --ignore-case     ignore case when sorting
+                        the number of spaces before an inline comment (default: 1)
+  --spaces-indent-inline-array {2,4,6,8}
+                        the number of spaces to indent a multiline inline array (default: 2)
+  --trailing-comma-inline-array
+                        add trailing comma to the last item in a multiline inline array
 
 Examples:
 
@@ -99,7 +119,13 @@ no_header_comments = true
 no_footer_comments = true
 no_inline_comments = true
 no_block_comments = true
+no_sort_tables = true
+sort_table_keys = true
+sort_inline_tables = true
+sort_inline_arrays = true
 spaces_before_inline_comment = 2
+spaces_indent_inline_array = 4
+trailing_comma_inline_array = true
 check = true
 ignore_case = true
 ```

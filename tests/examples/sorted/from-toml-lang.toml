@@ -3,7 +3,7 @@
 title = "TOML Example"
 
 [clients]
-data = [ ["gamma", "delta"], [1, 2] ] # just an update to make sure parsers support it
+data = [["gamma", "delta"], [1, 2]] # just an update to make sure parsers support it
 # Line breaks are OK when inside arrays
 hosts = [
   "alpha",
@@ -12,7 +12,7 @@ hosts = [
 
 [database]
 server = "192.168.1.1"
-ports = [ 8001, 8001, 8002 ]
+ports = [8001, 8001, 8002]
 connection_max = 5000
 enabled = true # Comment after a boolean
 

@@ -57,6 +57,7 @@ def capture(
         pytest.param("weird", "sorted/weird", marks=[pytest.mark.xfail]),
         ("pyproject-weird-order", "sorted/pyproject-weird-order"),
         ("comment", "sorted/comment-header-footer"),
+        ("inline", "sorted/inline-default"),
     ],
 )
 def test_cli_defaults(
@@ -111,6 +112,38 @@ def test_cli_defaults(
                 "--spaces-before-inline-comment",
                 "2",
                 "--all",
+            ],
+        ),
+        (
+            "inline",
+            ["sorted", "inline"],
+            [
+                "--all",
+                "--spaces-before-inline-comment",
+                "2",
+            ],
+        ),
+        (
+            "inline",
+            ["sorted", "inline"],
+            [
+                "--sort-table-keys",
+                "--sort-inline-array",
+                "--sort-inline-table",
+                "--spaces-before-inline-comment",
+                "2",
+            ],
+        ),
+        (
+            "inline",
+            ["sorted", "inline-no-comments-no-table-sort"],
+            [
+                "--no-sort-tables",
+                "--sort-table-keys",
+                "--sort-inline-array",
+                "--sort-inline-table",
+                "--no-comments",
+                "--trailing-comma-inline-array",
             ],
         ),
     ],
