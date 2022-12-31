@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.22.0
+
+Release entirely related to this PR: <https://github.com/pappasam/toml-sort/pull/33>
+
+### Added
+
+- Optionally add the ability to sort inline tables and arrays. New switches added for this functionality: `--sort-inline-tables` and `--sort-inline-arrays`, which are implied by the existing `--all` option
+- New options groups to the CLI, to group the related formatting, comment, and sorting arguments
+- Switch to add trailing comma to multi-line inline arrays `--trailing-comma-inline-array`
+- Some additional formatting checks
+
+### Changed
+
+- Make sure inline arrays and tables are consistently formatted
+- Normalize the formatting for `key = value` pairs, always one space on either side of equals sign
+
 ## 0.21.0
 
 This is a pretty big comment-related release. Resolves the long-standing issue: <https://github.com/pappasam/toml-sort/issues/11>.
@@ -37,12 +53,12 @@ This is a pretty big comment-related release. Resolves the long-standing issue: 
 
 ### Added
 
-- Support configuring cli with `pyproject.toml` configuration file.
+- Support configuring CLI with `pyproject.toml` configuration file.
 
 ### Changed
 
-- Moved CLI from click to argparse.
-- Update minimum version of tomlkit to 0.8.0. This drops support for Python 3.6.
+- Moved CLI from click to `argparse`.
+- Update minimum version of `tomlkit` to 0.8.0. This drops support for Python 3.6.
 
 ## 0.19.0
 
@@ -52,11 +68,11 @@ This is a pretty big comment-related release. Resolves the long-standing issue: 
 
 ## 0.18.0
 
-Note: in this release, we've discovered a strange bug (we believe in tomlkit) where, sometimes, AOT elements are ordered without our consent. One of the cli tests has been marked `xfail`. If you'd like to help figure out why, we're always looking for contributors!
+Note: in this release, we've discovered a strange bug (we believe in `tomlkit`) where, sometimes, AOT elements are ordered without our consent. One of the CLI tests has been marked `xfail`. If you'd like to help figure out why, we're always looking for contributors!
 
 ### Added
 
-- Support for multiple FILENAME arguments in the CLI. Used for precommit / linting multiple files. Thanks @atugushev!
+- Support for multiple FILENAME arguments in the CLI. Used for `precommit` / linting multiple files. Thanks @atugushev!
 - Pre-commit hook
 
 ### Changed
@@ -80,4 +96,4 @@ Note: in this release, we've discovered a strange bug (we believe in tomlkit) wh
 
 ### Removed
 
-- AOT workaround in AOT parser. Latest version of tomlkit no longer spits out duplicate elements for AOT.
+- AOT workaround in AOT parser. Latest version of `tomlkit` no longer spits out duplicate elements for AOT.
