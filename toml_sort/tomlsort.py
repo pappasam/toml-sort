@@ -170,7 +170,6 @@ class CommentConfiguration:
     footer: bool = True
     inline: bool = True
     block: bool = True
-    spaces_before_inline: int = 2
 
 
 @dataclass
@@ -184,6 +183,15 @@ class SortConfiguration:
     ignore_case: bool = False
 
 
+@dataclass
+class FormattingConfiguration:
+    """Configures how TomlSort formats its output."""
+
+    spaces_before_inline_comment: int = 2
+    spaces_indent_inline_array: int = 2
+    trailing_comma_inline_array: bool = False
+
+
 class TomlSort:
     """API to manage sorting toml files."""
 
@@ -192,6 +200,7 @@ class TomlSort:
         input_toml: str,
         comment_config: Optional[CommentConfiguration] = None,
         sort_config: Optional[SortConfiguration] = None,
+        format_config: Optional[FormattingConfiguration] = None,
     ) -> None:
         """Initializer."""
         self.input_toml = input_toml
@@ -204,10 +213,14 @@ class TomlSort:
             sort_config = SortConfiguration()
         self.sort_config = sort_config
 
+        if format_config is None:
+            format_config = FormattingConfiguration()
+        self.format_config = format_config
+
     def sort_array(self, array: Array, indent_depth: int = 0) -> Array:
         """Sort and format an inline array item while preserving comments."""
         multiline = "\n" in array.as_string()
-        indent_size = 2
+        indent_size = self.format_config.spaces_indent_inline_array
         indent = (
             "\n" + " " * indent_size * (indent_depth + 1) if multiline else ""
         )
@@ -245,7 +258,8 @@ class TomlSort:
                             array_item.comment.trivia.comment
                         )
                         array_item.comment.trivia.indent = (
-                            " " * self.comment_config.spaces_before_inline
+                            " "
+                            * self.format_config.spaces_before_inline_comment
                         )
                     else:
                         array_item.comment = None
@@ -266,7 +280,8 @@ class TomlSort:
                 new_array_value.extend(comments)
             new_array_value.append(array_item)
 
-        new_array_value[-1].comma = Whitespace("")
+        if not (multiline and self.format_config.trailing_comma_inline_array):
+            new_array_value[-1].comma = Whitespace("")
 
         if multiline:
             array_item = _ArrayItemGroup()
@@ -280,7 +295,7 @@ class TomlSort:
         array = normalize_trivia(
             array,
             include_comments=self.comment_config.inline,
-            comment_spaces=self.comment_config.spaces_before_inline,
+            comment_spaces=self.format_config.spaces_before_inline_comment,
         )
         return array
 
@@ -317,7 +332,7 @@ class TomlSort:
         new_table = normalize_trivia(
             new_table,
             include_comments=self.comment_config.inline,
-            comment_spaces=self.comment_config.spaces_before_inline,
+            comment_spaces=self.format_config.spaces_before_inline_comment,
         )
         return new_table
 
@@ -400,9 +415,10 @@ class TomlSort:
         """
         for _, value in from_doc_body:
             if isinstance(value, Comment):
+                spaces = self.format_config.spaces_before_inline_comment
                 value = normalize_trivia(
                     value,
-                    comment_spaces=self.comment_config.spaces_before_inline,
+                    comment_spaces=spaces,
                 )
                 to_doc.add(value)
             else:
@@ -428,7 +444,7 @@ class TomlSort:
             new_aot = normalize_trivia(
                 original.aot,
                 self.comment_config.inline,
-                self.comment_config.spaces_before_inline,
+                self.format_config.spaces_before_inline_comment,
             )
             for table in original.children:
                 previous_item = next(iter(new_aot), parent)
@@ -494,7 +510,9 @@ class TomlSort:
                 if isinstance(value, Whitespace):
                     comments = []
                 elif isinstance(value, Comment) and self.comment_config.block:
-                    comment_spaces = self.comment_config.spaces_before_inline
+                    comment_spaces = (
+                        self.format_config.spaces_before_inline_comment
+                    )
                     value = normalize_trivia(
                         value,
                         comment_spaces=comment_spaces,
@@ -506,7 +524,7 @@ class TomlSort:
             value = normalize_trivia(
                 value,
                 self.comment_config.inline,
-                comment_spaces=self.comment_config.spaces_before_inline,
+                comment_spaces=self.format_config.spaces_before_inline_comment,
             )
 
             if isinstance(value, Table):

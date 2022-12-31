@@ -7,7 +7,12 @@ from typing import Any, Dict, List, Optional, Type
 
 import tomlkit
 
-from .tomlsort import CommentConfiguration, SortConfiguration, TomlSort
+from .tomlsort import (
+    CommentConfiguration,
+    FormattingConfiguration,
+    SortConfiguration,
+    TomlSort,
+)
 
 __all__ = ["cli"]
 
@@ -95,15 +100,19 @@ def load_config_file() -> Dict[str, Any]:
     validate_and_copy(config, clean_config, "no_footer_comments", bool)
     validate_and_copy(config, clean_config, "no_inline_comments", bool)
     validate_and_copy(config, clean_config, "no_block_comments", bool)
-    validate_and_copy(
-        config, clean_config, "spaces_before_inline_comment", int
-    )
     validate_and_copy(config, clean_config, "check", bool)
     validate_and_copy(config, clean_config, "ignore_case", bool)
     validate_and_copy(config, clean_config, "no_sort_tables", bool)
     validate_and_copy(config, clean_config, "sort_inline_tables", bool)
     validate_and_copy(config, clean_config, "sort_inline_arrays", bool)
     validate_and_copy(config, clean_config, "sort_table_keys", bool)
+    validate_and_copy(
+        config, clean_config, "spaces_before_inline_comment", int
+    )
+    validate_and_copy(config, clean_config, "spaces_indent_inline_array", int)
+    validate_and_copy(
+        config, clean_config, "trailing_comma_inline_array", bool
+    )
 
     if config:
         printerr(f"Unexpected configuration values: {config}")
@@ -235,12 +244,30 @@ Notes:
         help="remove a document's block comments",
         action="store_true",
     )
-    comments.add_argument(
+    formatting = parser.add_argument_group(
+        "formatting", "options to change output formatting"
+    )
+    formatting.add_argument(
         "--spaces-before-inline-comment",
         help=("the number of spaces before an inline comment (default: 1)"),
         type=int,
         choices=range(1, 5),
         default=1,
+    )
+    formatting.add_argument(
+        "--spaces-indent-inline-array",
+        help=(
+            "the number of spaces to indent a multiline inline array "
+            "(default: 2)"
+        ),
+        type=int,
+        choices=[2, 4, 6, 8],
+        default=2,
+    )
+    formatting.add_argument(
+        "--trailing-comma-inline-array",
+        help="add trailing comma to the last item in a multiline inline array",
+        action="store_true",
     )
     parser.add_argument(
         "--check",
@@ -311,7 +338,6 @@ def cli(  # pylint: disable=too-many-branches
                     or args.no_comments
                 ),
                 footer=not bool(args.no_footer_comments or args.no_comments),
-                spaces_before_inline=args.spaces_before_inline_comment,
                 block=not bool(args.no_block_comments or args.no_comments),
                 inline=not bool(args.no_inline_comments or args.no_comments),
             ),
@@ -321,6 +347,11 @@ def cli(  # pylint: disable=too-many-branches
                 table_keys=bool(args.sort_table_keys or args.all),
                 inline_tables=bool(args.sort_inline_tables or args.all),
                 inline_arrays=bool(args.sort_inline_arrays or args.all),
+            ),
+            format_config=FormattingConfiguration(
+                spaces_before_inline_comment=args.spaces_before_inline_comment,
+                spaces_indent_inline_array=args.spaces_indent_inline_array,
+                trailing_comma_inline_array=args.trailing_comma_inline_array,
             ),
         ).sorted()
         if args.check:

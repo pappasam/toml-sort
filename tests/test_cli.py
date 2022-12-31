@@ -143,6 +143,7 @@ def test_cli_defaults(
                 "--sort-inline-array",
                 "--sort-inline-table",
                 "--no-comments",
+                "--trailing-comma-inline-array",
             ],
         ),
     ],

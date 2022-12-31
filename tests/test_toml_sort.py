@@ -7,7 +7,11 @@ from typing import Any, Callable, Dict, List
 import pytest
 
 from toml_sort import TomlSort
-from toml_sort.tomlsort import CommentConfiguration, SortConfiguration
+from toml_sort.tomlsort import (
+    CommentConfiguration,
+    FormattingConfiguration,
+    SortConfiguration,
+)
 
 
 def test_sort_toml_is_str() -> None:
@@ -54,7 +58,9 @@ def test_sort_toml_is_str() -> None:
             "comment-header-footer",
             {
                 "sort_config": SortConfiguration(table_keys=False),
-                "comment_config": CommentConfiguration(spaces_before_inline=1),
+                "format_config": FormattingConfiguration(
+                    spaces_before_inline_comment=1
+                ),
             },
         ),
         (
@@ -62,7 +68,9 @@ def test_sort_toml_is_str() -> None:
             "from-toml-lang",
             {
                 "sort_config": SortConfiguration(table_keys=False),
-                "comment_config": CommentConfiguration(spaces_before_inline=1),
+                "format_config": FormattingConfiguration(
+                    spaces_before_inline_comment=1
+                ),
             },
         ),
         (
@@ -70,8 +78,9 @@ def test_sort_toml_is_str() -> None:
             "pyproject-weird-order",
             {
                 "sort_config": SortConfiguration(table_keys=False),
-                "comment_config": CommentConfiguration(
-                    block=False, spaces_before_inline=1
+                "comment_config": CommentConfiguration(block=False),
+                "format_config": FormattingConfiguration(
+                    spaces_before_inline_comment=1
                 ),
             },
         ),
@@ -81,7 +90,10 @@ def test_sort_toml_is_str() -> None:
             {
                 "sort_config": SortConfiguration(table_keys=False),
                 "comment_config": CommentConfiguration(
-                    block=False, spaces_before_inline=1
+                    block=False,
+                ),
+                "format_config": FormattingConfiguration(
+                    spaces_before_inline_comment=1
                 ),
             },
             marks=[pytest.mark.xfail],
