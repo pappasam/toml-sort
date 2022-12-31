@@ -37,3 +37,5 @@ alist = [
   'w'  # Comment inline
 ]
 blist = ['a', 'b', 'c']  # Comment
+q = {}
+z = []

@@ -1,4 +1,6 @@
 [b]
+z = []
+q = {}
 blist=[    'c',     'a', 'b'] # Comment
 alist = [
   'g',

@@ -17,6 +17,8 @@ alist = [
   'w',
 ]
 blist = ['a', 'b', 'c']
+q = {}
+z = []
 
 [a]
 test = [
