@@ -166,14 +166,14 @@ title = "The example" # This is a inline comment
 
 ### Block
 
-Block comments, are any comments that are on their own line. These comments are treated as _attached_ to the item in the toml that is directly below them, not seperated by whitespace. These comments can be multiple lines. Inline comments will appear in the sorted output above the item they were attached to in the input toml.
+Block comments, are any comments that are on their own line. These comments are treated as _attached_ to the item in the toml that is directly below them, not separated by whitespace. These comments can be multiple lines. Inline comments will appear in the sorted output above the item they were attached to in the input toml.
 
 ```toml
 # Comment attached to title
 title = "The example"
 
 # This comment is an orphan because it
-# is seperated from a-section by whitespace
+# is separated from a-section by whitespace
 
 # This comment is attached to a-section
 # attached comments can be multiple lines
@@ -195,7 +195,7 @@ Orphan comments are any comments that don't fall into the above categories, they
 title = "The example"
 
 # This comment is an orphan because it
-# is seperated from a-section by whitespace
+# is separated from a-section by whitespace
 
 # This comment is attached to a-section
 [a-section]
@@ -224,7 +224,7 @@ dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 
 [[a-section.hello]]
 ports = [ 80 ]
-    #Attched to dob
+    #Attached to dob
 dob = 1920-05-27T07:32:00Z # Another date!
 
                           [a-section]
@@ -249,7 +249,7 @@ dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 
 [[a-section.hello]]
 ports = [ 80 ]
-# Attched to dob
+# Attached to dob
 dob = 1920-05-27T07:32:00Z # Another date!
 
 # Attached to b-section
