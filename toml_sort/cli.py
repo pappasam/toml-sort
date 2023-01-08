@@ -25,7 +25,7 @@ def get_version() -> str:
     # pylint: disable=import-outside-toplevel
     try:
         # Type checker for Python < 3.8 fails.
-        # Since this ony happens here, we just ignore.
+        # Since this only happens here, we just ignore.
         from importlib.metadata import version  # type: ignore
     except ImportError:
         try:
