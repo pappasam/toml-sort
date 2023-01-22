@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.22.3
+
+### Fixed
+
+- Turns out that, at this time, `toml-sort` is only compatible with `tomlkit` `0.11.2`+. We now make this clear in our dependencies. See: <https://github.com/pappasam/toml-sort/issues/41> and <https://github.com/sdispater/tomlkit/compare/0.11.1...0.11.2>.
+
 ## 0.22.2
 
 ### Added
