@@ -3,10 +3,12 @@
 import argparse
 import sys
 from argparse import ArgumentParser
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional
 
 import tomlkit
+from pydantic import ValidationError
 
+from .settings import TomlSortSettings
 from .tomlsort import (
     CommentConfiguration,
     FormattingConfiguration,
@@ -66,18 +68,6 @@ def write_file(path: str, content: str) -> None:
         fileobj.write(content)
 
 
-def validate_and_copy(
-    data: Dict[str, Any], target: Dict[str, Any], key: str, type_: Type
-) -> None:
-    """Validate a configuration key."""
-    if key not in data:
-        return
-    if not isinstance(data[key], type_):
-        printerr(f"Value of tool.tomlsort.{key} should be of type {type_}.")
-        sys.exit(1)
-    target[key] = data.pop(key)
-
-
 def load_config_file() -> Dict[str, Any]:
     """Load the configuration from pyproject.toml."""
     try:
@@ -91,34 +81,16 @@ def load_config_file() -> Dict[str, Any]:
     toml_sort_section = tool_section.get("tomlsort", tomlkit.document())
     config = dict(toml_sort_section)
 
-    clean_config: Dict[str, Any] = {}
-    validate_and_copy(config, clean_config, "all", bool)
-    validate_and_copy(config, clean_config, "in_place", bool)
-    validate_and_copy(config, clean_config, "no_header", bool)
-    validate_and_copy(config, clean_config, "no_comments", bool)
-    validate_and_copy(config, clean_config, "no_header_comments", bool)
-    validate_and_copy(config, clean_config, "no_footer_comments", bool)
-    validate_and_copy(config, clean_config, "no_inline_comments", bool)
-    validate_and_copy(config, clean_config, "no_block_comments", bool)
-    validate_and_copy(config, clean_config, "check", bool)
-    validate_and_copy(config, clean_config, "ignore_case", bool)
-    validate_and_copy(config, clean_config, "no_sort_tables", bool)
-    validate_and_copy(config, clean_config, "sort_inline_tables", bool)
-    validate_and_copy(config, clean_config, "sort_inline_arrays", bool)
-    validate_and_copy(config, clean_config, "sort_table_keys", bool)
-    validate_and_copy(
-        config, clean_config, "spaces_before_inline_comment", int
-    )
-    validate_and_copy(config, clean_config, "spaces_indent_inline_array", int)
-    validate_and_copy(
-        config, clean_config, "trailing_comma_inline_array", bool
-    )
-
-    if config:
-        printerr(f"Unexpected configuration values: {config}")
+    try:
+        validated_config = TomlSortSettings(**config)
+    except ValidationError as exception:
+        error_message = str(exception).replace(
+            "TomlSortSettings", "tool.tomlsort"
+        )
+        printerr(f"Unexpected configuration error: {error_message}")
         sys.exit(1)
 
-    return clean_config
+    return validated_config.dict(exclude_none=True)
 
 
 def get_parser() -> ArgumentParser:

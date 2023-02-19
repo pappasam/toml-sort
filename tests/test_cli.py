@@ -280,9 +280,11 @@ def test_load_config_file(toml, expected):
 @pytest.mark.parametrize(
     "toml", ["[tool.tomlsort]\nunknown=2", "[tool.tomlsort]\nall=42"]
 )
-def test_load_config_file_invalid(toml):
+def test_load_config_file_invalid(toml, capsys):
     """Test error if pyproject.toml is not valid."""
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
         with pytest.raises(SystemExit):
             cli.load_config_file()
+        captured = capsys.readouterr()
+        assert "validation error for tool.tomlsort" in captured.err
