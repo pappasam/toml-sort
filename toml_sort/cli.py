@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 import tomlkit
 from pydantic import ValidationError
 
-from .settings import TomlSortSettings
+from .settings import Settings
 from .tomlsort import (
     CommentConfiguration,
     FormattingConfiguration,
@@ -82,10 +82,10 @@ def load_config_file() -> Dict[str, Any]:
     config = dict(toml_sort_section)
 
     try:
-        validated_config = TomlSortSettings(**config)
+        validated_config = Settings(**config)
     except ValidationError as exception:
         error_message = str(exception).replace(
-            "TomlSortSettings", "tool.tomlsort"
+            Settings.__name__, "tool.tomlsort"
         )
         printerr(f"Unexpected configuration error: {error_message}")
         sys.exit(1)

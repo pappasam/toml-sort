@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Extra, PositiveInt
 
 
-class TomlSortSettings(BaseModel):
+class Settings(BaseModel):
     """Used to validate settings loaded from pyproject.toml."""
 
     all: None | bool
