@@ -470,18 +470,13 @@ class TomlSort:
         """
         if parent_table.is_super_table():
             if len(parent_table) == 0:
-                previous_item = grandparent
-            else:
-                last_item = parent_table.value.last_item()
-                if last_item is None or not isinstance(last_item, Table):
-                    type_str = str(type(last_item))
-                    raise TypeError(
-                        f"Unexpected type {type_str}, cannot insert comment."
-                    )
-                previous_item = last_item
-        else:
-            previous_item = parent_table
-        return previous_item
+                return grandparent
+
+            last_item = parent_table.value.last_item()
+            if isinstance(last_item, Table):
+                return last_item
+
+        return parent_table
 
     def body_to_tomlsortitems(
         self, parent: List[Tuple[Optional[Key], Item]]
