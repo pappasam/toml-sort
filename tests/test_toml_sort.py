@@ -24,6 +24,15 @@ def test_sort_toml_is_str() -> None:
     "unsorted_fixture,sorted_fixture,args",
     [
         (
+            "dotted-key",
+            "dotted-key",
+            {
+                "sort_config": SortConfiguration(
+                    inline_arrays=True, inline_tables=True
+                ),
+            },
+        ),
+        (
             "inline",
             "inline",
             {

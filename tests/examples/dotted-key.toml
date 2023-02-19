@@ -1,0 +1,14 @@
+# Header comment
+
+# Attached to project
+[project]
+# This is my homepage
+urls.homepage = "https://example.com"
+# Documentation
+urls.documentation = "https://readthedocs.org"
+
+[other-project]
+# test2
+deeply.deeply.deeply.nested.key.test2 = "test2"
+# test1
+deeply.deeply.deeply.nested.key.test1 = "test1"

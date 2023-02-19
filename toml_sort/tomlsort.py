@@ -473,12 +473,11 @@ class TomlSort:
                 previous_item = grandparent
             else:
                 last_item = parent_table.value.last_item()
-                if last_item is None or not isinstance(last_item, Table):
-                    type_str = str(type(last_item))
-                    raise TypeError(
-                        f"Unexpected type {type_str}, cannot insert comment."
-                    )
-                previous_item = last_item
+                if isinstance(last_item, Table):
+                    previous_item = last_item
+                else:
+                    # This is the case when dealing with a dotted key
+                    previous_item = parent_table
         else:
             previous_item = parent_table
         return previous_item
