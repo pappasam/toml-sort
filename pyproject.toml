@@ -60,7 +60,6 @@ envlist = py37,py38,py39,py310,py311
 isolated_build = true
 skipsdist = true
 [testenv]
-platform = linux
 whitelist_externals = poetry
 skip_install = true
 commands =
