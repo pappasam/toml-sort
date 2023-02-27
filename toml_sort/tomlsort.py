@@ -69,7 +69,7 @@ T = TypeVar("T", bound=Item)
 
 def format_comment(comment: str) -> str:
     """Reformats a comment string removing extra whitespace."""
-    return f"# {comment[1:].strip()}"
+    return f"# {comment[1:].strip()}".strip()
 
 
 def normalize_trivia(
