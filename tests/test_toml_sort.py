@@ -107,6 +107,11 @@ def test_sort_toml_is_str() -> None:
             },
             marks=[pytest.mark.xfail],
         ),
+        pytest.param(
+            "single-comment",
+            "../single-comment",  # Input is the same as the output
+            {},
+        ),
     ],
 )
 def test_tomlsort(
