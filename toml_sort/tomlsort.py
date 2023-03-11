@@ -415,11 +415,11 @@ class TomlSort:
         Only writes comments / whitespace from the beginning of a TOML
         document.
         """
-        if len(from_doc_body) == 0:
-            return from_doc_body
-
-        # Discard the first element, it is always a newline
-        from_doc_body = from_doc_body[1:]
+        # Discard leading whitespace
+        while len(from_doc_body) > 0 and isinstance(
+            from_doc_body[0][1], Whitespace
+        ):
+            from_doc_body.pop(0)
 
         # Remove the header comment from the input document, adding it to
         # the output document, followed by a newline.
