@@ -112,6 +112,11 @@ def test_sort_toml_is_str() -> None:
             "../single-comment",  # Input is the same as the output
             {},
         ),
+        pytest.param(
+            "empty",
+            "empty",
+            {},
+        ),
     ],
 )
 def test_tomlsort(
