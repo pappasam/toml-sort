@@ -126,9 +126,8 @@ def coalesce_tables(
 class TomlSortKeys:
     """Keeps track of the Keys for a particular TomlSortItem.
 
-    We use this to keep track of the full path of an item
-    so that we can find the configuration overrides that
-    apply to it.
+    We use this to keep track of the full path of an item so that we can
+    find the configuration overrides that apply to it.
     """
 
     keys: List[Key]
