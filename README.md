@@ -130,10 +130,10 @@ check = true
 ignore_case = true
 ```
 
-### Configuration overrides
-The `pyproject.toml` configuration also supports configuration overrides, which are not available as command line arguments. These overrides allow fine grained control of sort options for particular keys.
+### Configuration Overrides
+The `pyproject.toml` configuration file also supports configuration overrides, which are not available as command-line arguments. These overrides allow for fine-grained control of sort options for particular keys.
 
-Only the options below can be included in an override:
+Only the following options can be included in an override:
 
 ```toml
 [tool.tomlsort.overrides."path.to.key"]
@@ -142,9 +142,9 @@ inline_tables = true
 inline_arrays = true
 ```
 
-Where `path.to.key` in the example configuration is the key to match. Keys are matched using the [Python fnmatch function](https://docs.python.org/3/library/fnmatch.html), so glob style wildcards are supported. 
+In the example configuration, `path.to.key` is the key to match. Keys are matched using the [Python fnmatch function](https://docs.python.org/3/library/fnmatch.html), so glob-style wildcards are supported. 
 
-For example to disable the sorting the inline array in the following toml file.
+For instance, to disable sorting the table in the following TOML file:
 
 ```toml
 [servers.beta]
@@ -153,7 +153,8 @@ dc = "eqdc10"
 country = "中国"
 ```
 
-Any of the following overrides could be used
+You can use any of the following overrides:
+
 ```toml
 # Overrides in own table
 [tool.tomlsort.overrides."servers.beta"]
@@ -163,8 +164,7 @@ table_keys = false
 [tool.tomlsort]
 overrides."servers.beta".table_keys = false
 
-# Override using a wildcard if config should be 
-# applied to all servers keys
+# Override using a wildcard if config should be applied to all servers keys
 [tool.tomlsort]
 overrides."servers.*".table_keys = false
 ```
