@@ -1,10 +1,21 @@
 """Utility functions and classes to sort toml text."""
 from __future__ import annotations
 
+import fnmatch
 import itertools
 import re
-from dataclasses import dataclass, field
-from typing import Any, Iterable, List, Optional, Tuple, TypeVar, cast
+from dataclasses import asdict, dataclass, field
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import tomlkit
 from tomlkit.api import item as tomlkit_item
@@ -98,10 +109,10 @@ def coalesce_tables(
     """Merge any duplicate keys that exist in an iterable of TomlSortItem."""
     coalesced = {}
     for table in tables:
-        if table.key not in coalesced:
-            coalesced[table.key] = table
+        if table.keys.base not in coalesced:
+            coalesced[table.keys.base] = table
         else:
-            existing = coalesced[table.key]
+            existing = coalesced[table.keys.base]
             existing.children.extend(table.children)
             existing.attached_comments.extend(table.attached_comments)
 
@@ -112,12 +123,55 @@ def coalesce_tables(
     return coalesced.values()
 
 
+class TomlSortKeys:
+    """Keeps track of the Keys for a particular TomlSortItem.
+
+    We use this to keep track of the full path of an item
+    so that we can find the configuration overrides that
+    apply to it.
+    """
+
+    keys: List[Key]
+
+    def __init__(self, keys: Union[List[Key], Key]):
+        if isinstance(keys, Key):
+            self.keys = [keys]
+        else:
+            self.keys = keys
+
+    @property
+    def base(self) -> Key:
+        """Returns the last key segment.
+
+        For example: would return test for this.is.a.test
+        """
+        return self.keys[-1]
+
+    @base.setter
+    def base(self, value: Key) -> None:
+        """Setter for the base property."""
+        self.keys[-1] = value
+
+    def as_string(self) -> str:
+        """Returns the full set of keys as a string."""
+        return ".".join(k.key for k in self.keys)
+
+    def __add__(self, other: Union[TomlSortKeys, Key]) -> TomlSortKeys:
+        """Add together a TomlSortKeys object and either a Key or another
+        TomlSortKeys object."""
+        if isinstance(other, Key):
+            keys = [other]
+        else:
+            keys = other.keys
+        return TomlSortKeys(self.keys + keys)
+
+
 @dataclass
 class TomlSortItem:
     """Dataclass used to keep track of comments attached to Toml Items while
     they are being sorted."""
 
-    key: Key
+    keys: TomlSortKeys
     value: Item
     attached_comments: List[Comment] = field(default_factory=list)
     children: List[TomlSortItem] = field(default_factory=list)
@@ -192,15 +246,27 @@ class FormattingConfiguration:
     trailing_comma_inline_array: bool = False
 
 
+@dataclass
+class SortOverrideConfiguration:
+    """Configures overrides to sort configuration for a particular key."""
+
+    table_keys: Optional[bool] = None
+    inline_tables: Optional[bool] = None
+    inline_arrays: Optional[bool] = None
+
+
 class TomlSort:
     """API to manage sorting toml files."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         input_toml: str,
         comment_config: Optional[CommentConfiguration] = None,
         sort_config: Optional[SortConfiguration] = None,
         format_config: Optional[FormattingConfiguration] = None,
+        sort_config_overrides: Optional[
+            Dict[str, SortOverrideConfiguration]
+        ] = None,
     ) -> None:
         """Initializer."""
         self.input_toml = input_toml
@@ -211,13 +277,71 @@ class TomlSort:
 
         if sort_config is None:
             sort_config = SortConfiguration()
-        self.sort_config = sort_config
+        self._sort_config = sort_config
 
         if format_config is None:
             format_config = FormattingConfiguration()
         self.format_config = format_config
 
-    def sort_array(self, array: Array, indent_depth: int = 0) -> Array:
+        if sort_config_overrides is None:
+            sort_config_overrides = {}
+        self.sort_config_overrides = sort_config_overrides
+
+    def _find_config_override(
+        self, keys: Optional[TomlSortKeys]
+    ) -> Optional[SortOverrideConfiguration]:
+        """Returns a SortOverrideConfiguration for a particular TomlSortKeys
+        object, if one exists. If none exists returns None.
+
+        Override matches are evaluated as glob patterns by the python
+        fnmatch function. If there are multiple matches, return the
+        exact match first otherwise return the first match.
+        """
+        if keys is None:
+            return None
+
+        if keys.as_string() in self.sort_config_overrides:
+            return self.sort_config_overrides.get(keys.as_string())
+
+        matches = [
+            config
+            for pattern, config in self.sort_config_overrides.items()
+            if fnmatch.fnmatch(keys.as_string(), pattern)
+        ]
+
+        if len(matches) > 0:
+            return matches[0]
+
+        return None
+
+    def sort_config(
+        self, keys: Optional[TomlSortKeys] = None
+    ) -> SortConfiguration:
+        """Returns the SortConfiguration to use for particular TomlSortKeys.
+
+        This merges the global SortConfiguration with any matching
+        SortOverrideConfiguration to give the full SortConfiguration
+        that applies to this Key.
+        """
+        override = self._find_config_override(keys)
+        if override is None:
+            return self._sort_config
+
+        main_config = asdict(self._sort_config)
+        override_config = asdict(override)
+        merged_config = {}
+
+        for key, value in main_config.items():
+            if key in override_config and override_config[key] is not None:
+                merged_config[key] = override_config[key]
+            else:
+                merged_config[key] = value
+
+        return SortConfiguration(**merged_config)
+
+    def sort_array(
+        self, keys: TomlSortKeys, array: Array, indent_depth: int = 0
+    ) -> Array:
         """Sort and format an inline array item while preserving comments."""
         multiline = "\n" in array.as_string()
         indent_size = self.format_config.spaces_indent_inline_array
@@ -266,13 +390,14 @@ class TomlSort:
                 new_array_items.append((array_item, comments))
                 comments = []
                 array_item.value = self.sort_item(
+                    keys,
                     array_item.value,
                     indent_depth=indent_depth + 1
                     if multiline
                     else indent_depth,
                 )
 
-        if self.sort_config.inline_arrays:
+        if self.sort_config(keys).inline_arrays:
             new_array_items = sorted(new_array_items, key=self.array_sort_func)
         new_array_value = []
         for array_item, comments in new_array_items:
@@ -301,27 +426,34 @@ class TomlSort:
         )
         return array
 
-    def sort_item(self, item: Item, indent_depth: int = 0) -> Item:
+    def sort_item(
+        self, keys: TomlSortKeys, item: Item, indent_depth: int = 0
+    ) -> Item:
         """Sort an item, recursing down if the item is an inline table or
         array."""
         if isinstance(item, Array):
-            return self.sort_array(item, indent_depth=indent_depth)
+            return self.sort_array(keys, item, indent_depth=indent_depth)
 
         if isinstance(item, InlineTable):
-            return self.sort_inline_table(item, indent_depth=indent_depth)
+            return self.sort_inline_table(
+                keys, item, indent_depth=indent_depth
+            )
 
         return item
 
-    def sort_inline_table(self, item, indent_depth: int = 0):
+    def sort_inline_table(
+        self, keys: TomlSortKeys, item: Item, indent_depth: int = 0
+    ) -> InlineTable:
         """Sort an inline table, recursing into its items."""
         tomlsort_items = [
             TomlSortItem(
-                key=k, value=self.sort_item(v, indent_depth=indent_depth)
+                keys=keys + k,
+                value=self.sort_item(keys + k, v, indent_depth=indent_depth),
             )
             for k, v in item.value.body
             if not isinstance(v, Whitespace) and k is not None
         ]
-        if self.sort_config.inline_tables:
+        if self.sort_config(keys).inline_tables:
             tomlsort_items = sorted(tomlsort_items, key=self.key_sort_func)
         new_table = InlineTable(
             Container(parsed=True), trivia=item.trivia, new=True
@@ -329,7 +461,7 @@ class TomlSort:
         for tomlsort_item in tomlsort_items:
             normalize_trivia(tomlsort_item.value, include_comments=False)
             new_table.append(
-                self.format_key(tomlsort_item.key), tomlsort_item.value
+                self.format_key(tomlsort_item.keys.base), tomlsort_item.value
             )
         new_table = normalize_trivia(
             new_table,
@@ -357,15 +489,15 @@ class TomlSort:
         """Sort an iterable full of TomlSortItem, making sure the key is
         correctly formatted and recursing into any sub-items."""
         for item in items:
-            item.key = self.format_key(item.key)
-            item.value = self.sort_item(item.value)
+            item.keys.base = self.format_key(item.keys.base)
+            item.value = self.sort_item(item.keys, item.value)
         return items
 
     def key_sort_func(self, value: TomlSortItem) -> str:
         """Sort function that looks at TomlSortItems keys, respecting the
         configured value for ignore_case."""
-        key = value.key.key
-        if self.sort_config.ignore_case:
+        key = value.keys.base.key
+        if self.sort_config().ignore_case:
             key = key.lower()
         return key
 
@@ -375,12 +507,12 @@ class TomlSort:
         if value[0].value is None:
             return ""
         ret = value[0].value.as_string()
-        if self.sort_config.ignore_case:
+        if self.sort_config().ignore_case:
             ret = ret.lower()
         return ret
 
     def sorted_children_table(
-        self, parent: List[TomlSortItem]
+        self, parent_keys: Optional[TomlSortKeys], parent: List[TomlSortItem]
     ) -> Iterable[TomlSortItem]:
         """Get the sorted children of a table."""
         tables = coalesce_tables(
@@ -395,12 +527,12 @@ class TomlSort:
         )
         non_tables_final = (
             sorted(non_tables, key=self.key_sort_func)
-            if self.sort_config.table_keys
+            if self.sort_config(parent_keys).table_keys
             else non_tables
         )
         tables_final = (
             sorted(tables, key=self.key_sort_func)
-            if self.sort_config.tables
+            if self.sort_config(parent_keys).tables
             else tables
         )
         return itertools.chain(non_tables_final, tables_final)
@@ -434,11 +566,14 @@ class TomlSort:
         if original.is_table:
             new_table = original.table
 
-            for item in self.sorted_children_table(original.children):
+            for item in self.sorted_children_table(
+                original.keys, original.children
+            ):
                 previous_item = self.table_previous_item(new_table, parent)
                 attach_comments(item, previous_item)
                 new_table.add(
-                    item.key, self.toml_elements_sorted(item, previous_item)
+                    item.keys.base,
+                    self.toml_elements_sorted(item, previous_item),
                 )
             return new_table
 
@@ -479,7 +614,9 @@ class TomlSort:
         return parent_table
 
     def body_to_tomlsortitems(
-        self, parent: List[Tuple[Optional[Key], Item]]
+        self,
+        parent: List[Tuple[Optional[Key], Item]],
+        parent_key: Optional[TomlSortKeys] = None,
     ) -> Tuple[List[TomlSortItem], List[Comment]]:
         """Iterate over Container.body, recursing down into sub-containers
         attaching the comments that are found to the correct TomlSortItem. We
@@ -496,7 +633,7 @@ class TomlSort:
         collection, when we would like it to be attached to the [abc]
         collection.
 
-        So before sorting we have to iterated over the container, correctly
+        So before sorting we have to iterate over the container, correctly
         attaching the comments, then undo this process once everything is
         sorted.
         """
@@ -523,17 +660,20 @@ class TomlSort:
                 self.comment_config.inline,
                 comment_spaces=self.format_config.spaces_before_inline_comment,
             )
+            full_key = parent_key + key if parent_key else TomlSortKeys(key)
 
             if isinstance(value, Table):
                 comments, item = self.table_to_tomlsortitem(
-                    comments, key, value
+                    comments, full_key, value
                 )
 
             elif isinstance(value, AoT):
-                comments, item = self.aot_to_tomlsortitem(comments, key, value)
+                comments, item = self.aot_to_tomlsortitem(
+                    comments, full_key, value
+                )
 
             elif isinstance(value, Item):
-                item = TomlSortItem(key, value, comments)
+                item = TomlSortItem(full_key, value, comments)
                 comments = []
 
             else:
@@ -546,7 +686,7 @@ class TomlSort:
         return items, comments
 
     def aot_to_tomlsortitem(
-        self, comments: List[Comment], key: Key, value: AoT
+        self, comments: List[Comment], keys: TomlSortKeys, value: AoT
     ) -> Tuple[List[Comment], TomlSortItem]:
         """Turn an AoT into a TomlSortItem, recursing down through its
         collections and attaching all the comments to the correct items."""
@@ -554,21 +694,21 @@ class TomlSort:
         children = []
         for table in value.body:
             [first_child], trailing_comments = self.body_to_tomlsortitems(
-                [(key, table)]
+                [(keys.base, table)]
             )
             first_child.attached_comments = comments
             comments = trailing_comments
             children.append(first_child)
-        item = TomlSortItem(key, new_aot, children=children)
+        item = TomlSortItem(keys, new_aot, children=children)
         return comments, item
 
     def table_to_tomlsortitem(
-        self, comments: List[Comment], key: Key, value: Table
+        self, comments: List[Comment], keys: TomlSortKeys, value: Table
     ) -> Tuple[List[Comment], TomlSortItem]:
         """Turn a table into a TomlSortItem, recursing down through its
         collections and attaching all the comments to the correct items."""
         children, trailing_comments = self.body_to_tomlsortitems(
-            value.value.body
+            value.value.body, parent_key=keys
         )
         new_table = Table(
             Container(parsed=True),
@@ -598,7 +738,7 @@ class TomlSort:
             child_table.attached_comments = comments
             comments = []
 
-        item = TomlSortItem(key, new_table, comments, children)
+        item = TomlSortItem(keys, new_table, comments, children)
         comments = trailing_comments
         return comments, item
 
@@ -611,10 +751,11 @@ class TomlSort:
 
         items, footer_comment = self.body_to_tomlsortitems(original.body)
 
-        for item in self.sorted_children_table(items):
+        for item in self.sorted_children_table(None, items):
             attach_comments(item, sorted_document)
             sorted_document.add(
-                item.key, self.toml_elements_sorted(item, sorted_document)
+                item.keys.base,
+                self.toml_elements_sorted(item, sorted_document),
             )
 
         if self.comment_config.footer and footer_comment:

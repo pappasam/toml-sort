@@ -11,6 +11,7 @@ from unittest import mock
 import pytest
 
 from toml_sort import cli
+from toml_sort.tomlsort import SortOverrideConfiguration
 
 PATH_EXAMPLES = "tests/examples"
 
@@ -254,7 +255,8 @@ def test_multiple_files_and_errors(options):
 def test_load_config_file_read():
     """Test no error if pyproject.toml cannot be read."""
     with mock.patch("toml_sort.cli.open", side_effect=OSError):
-        assert not cli.load_config_file()
+        section = cli.load_pyproject()
+        assert not cli.parse_config(section)
 
 
 @pytest.mark.parametrize(
@@ -265,6 +267,15 @@ def test_load_config_file_read():
         ("[tool.tomlsort]", {}),
         ("[tool.tomlsort]\nall=true", {"all": True}),
         (
+            """
+            [tool.tomlsort]
+            all=true
+            [tool.tomlsort.overrides]
+            "a.b.c".inline_array = false
+            """,
+            {"all": True},
+        ),
+        (
             "[tool.tomlsort]\nspaces_before_inline_comment=4",
             {"spaces_before_inline_comment": 4},
         ),
@@ -274,7 +285,8 @@ def test_load_config_file(toml, expected):
     """Test load_config_file."""
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
-        assert cli.load_config_file() == expected
+        section = cli.load_pyproject()
+        assert cli.parse_config(section) == expected
 
 
 @pytest.mark.parametrize(
@@ -285,4 +297,80 @@ def test_load_config_file_invalid(toml):
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
         with pytest.raises(SystemExit):
-            cli.load_config_file()
+            section = cli.load_pyproject()
+            cli.parse_config(section)
+
+
+@pytest.mark.parametrize(
+    "toml,expected",
+    [
+        (
+            """
+            [tool.tomlsort.overrides."a.b.c"]
+            table_keys = false
+            """,
+            {"a.b.c": SortOverrideConfiguration(table_keys=False)},
+        ),
+        (
+            """
+                [tool.tomlsort.overrides."test.123"]
+                table_keys = false
+                [tool.tomlsort.overrides."test.456"]
+                inline_tables = false
+                [tool.tomlsort.overrides."test.789"]
+                inline_arrays = false
+                """,
+            {
+                "test.123": SortOverrideConfiguration(table_keys=False),
+                "test.456": SortOverrideConfiguration(inline_tables=False),
+                "test.789": SortOverrideConfiguration(inline_arrays=False),
+            },
+        ),
+        (
+            """
+                [tool.tomlsort.overrides]
+                "test.123".table_keys = false
+                "test.456".inline_tables = false
+                "test.789".inline_arrays = false
+                """,
+            {
+                "test.123": SortOverrideConfiguration(table_keys=False),
+                "test.456": SortOverrideConfiguration(inline_tables=False),
+                "test.789": SortOverrideConfiguration(inline_arrays=False),
+            },
+        ),
+    ],
+)
+def test_load_config_overrides(toml, expected):
+    """Test that we correctly turn settings in tomldocument into a
+    SortOverrideConfiguration dataclass."""
+    open_mock = mock.mock_open(read_data=toml)
+    with mock.patch("toml_sort.cli.open", open_mock):
+        section = cli.load_pyproject()
+        assert expected == cli.parse_config_overrides(section)
+
+
+@pytest.mark.parametrize(
+    "toml",
+    [
+        """
+        [tool.tomlsort.overrides."a.b.c"]
+        unknown = false
+        """,
+        """
+        [tool.tomlsort.overrides."a.b.c"]
+        table_keys = false
+        inline_tables = false
+        inline_arrays = false
+        foo = "bar"
+        """,
+    ],
+)
+def test_load_config_overrides_fail(toml):
+    """Test that parse_config_overrides exits if the config contains an
+    unexpected key."""
+    open_mock = mock.mock_open(read_data=toml)
+    with mock.patch("toml_sort.cli.open", open_mock):
+        with pytest.raises(SystemExit):
+            section = cli.load_pyproject()
+            cli.parse_config_overrides(section)
