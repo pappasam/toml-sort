@@ -130,6 +130,45 @@ check = true
 ignore_case = true
 ```
 
+### Configuration overrides
+The `pyproject.toml` configuration also supports configuration overrides, which are not available as command line arguments. These overrides allow fine grained control of sort options for particular keys.
+
+Only the options below can be included in an override:
+
+```toml
+[tool.tomlsort.overrides."path.to.key"]
+table_keys = true
+inline_tables = true
+inline_arrays = true
+```
+
+Where `path.to.key` in the example configuration is the key to match. Keys are matched using the [Python fnmatch function](https://docs.python.org/3/library/fnmatch.html), so glob style wildcards are supported. 
+
+For example to disable the sorting the inline array in the following toml file.
+
+```toml
+[servers.beta]
+ip = "10.0.0.2"
+dc = "eqdc10"
+country = "中国"
+```
+
+Any of the following overrides could be used
+```toml
+# Overrides in own table
+[tool.tomlsort.overrides."servers.beta"]
+table_keys = false
+
+# Overrides in the tomlsort table
+[tool.tomlsort]
+overrides."servers.beta".table_keys = false
+
+# Override using a wildcard if config should be 
+# applied to all servers keys
+[tool.tomlsort]
+overrides."servers.*".table_keys = false
+```
+
 ## Comments
 
 Due to the free form nature of comments, it is hard to include them in a sort in a generic way that will work for everyone. `toml-sort` deals with four different types of comments. They are all enabled by default, but can be disabled using CLI switches, in which case comments of that type will be removed from the output.
