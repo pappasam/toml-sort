@@ -104,6 +104,24 @@ def test_sort_toml_is_str() -> None:
             },
         ),
         (
+            "from-toml-lang",
+            "from-toml-lang-first",
+            {
+                "sort_config": SortConfiguration(
+                    inline_arrays=True,
+                    inline_tables=True,
+                    first=["servers", "products"],
+                ),
+                "format_config": FormattingConfiguration(
+                    spaces_before_inline_comment=1
+                ),
+                "sort_config_overrides": {
+                    "database": SortOverrideConfiguration(first=["ports"]),
+                    "owner": SortOverrideConfiguration(first=["name", "dob"]),
+                },
+            },
+        ),
+        (
             "pyproject-weird-order",
             "pyproject-weird-order",
             {

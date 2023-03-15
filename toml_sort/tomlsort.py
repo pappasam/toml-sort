@@ -234,6 +234,7 @@ class SortConfiguration:
     inline_tables: bool = False
     inline_arrays: bool = False
     ignore_case: bool = False
+    first: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -252,6 +253,7 @@ class SortOverrideConfiguration:
     table_keys: Optional[bool] = None
     inline_tables: Optional[bool] = None
     inline_arrays: Optional[bool] = None
+    first: Optional[List[str]] = None
 
 
 class TomlSort:
@@ -440,6 +442,24 @@ class TomlSort:
 
         return item
 
+    def sort_keys(
+        self, items: Iterable[TomlSortItem], sort_config: SortConfiguration
+    ) -> List[TomlSortItem]:
+        """Sorts Iterable of Tomlsort item based on keys.
+
+        The sort respects the sort_config.first setting which allows
+        overriding the sorted order of keys.
+        """
+
+        def sort_first(item):
+            if item.keys.base in sort_config.first:
+                return sort_config.first.index(item.keys.base)
+            return len(sort_config.first)
+
+        items = sorted(items, key=self.key_sort_func)
+        items = sorted(items, key=sort_first)
+        return items
+
     def sort_inline_table(
         self, keys: TomlSortKeys, item: Item, indent_depth: int = 0
     ) -> InlineTable:
@@ -452,8 +472,9 @@ class TomlSort:
             for k, v in item.value.body
             if not isinstance(v, Whitespace) and k is not None
         ]
-        if self.sort_config(keys).inline_tables:
-            tomlsort_items = sorted(tomlsort_items, key=self.key_sort_func)
+        sort_config = self.sort_config(keys)
+        if sort_config.inline_tables:
+            tomlsort_items = self.sort_keys(tomlsort_items, sort_config)
         new_table = InlineTable(
             Container(parsed=True), trivia=item.trivia, new=True
         )
@@ -514,6 +535,7 @@ class TomlSort:
         self, parent_keys: Optional[TomlSortKeys], parent: List[TomlSortItem]
     ) -> Iterable[TomlSortItem]:
         """Get the sorted children of a table."""
+        sort_config = self.sort_config(parent_keys)
         tables = coalesce_tables(
             item for item in parent if isinstance(item.value, (Table, AoT))
         )
@@ -525,12 +547,12 @@ class TomlSort:
             ]
         )
         non_tables_final = (
-            sorted(non_tables, key=self.key_sort_func)
-            if self.sort_config(parent_keys).table_keys
+            self.sort_keys(non_tables, sort_config)
+            if sort_config.table_keys
             else non_tables
         )
         tables_final = (
-            sorted(tables, key=self.key_sort_func)
+            self.sort_keys(tables, sort_config)
             if self.sort_config(parent_keys).tables
             else tables
         )
