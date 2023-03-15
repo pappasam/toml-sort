@@ -34,11 +34,11 @@ This project can be used as either a command line utility or a Python library. R
 ```console
 $ toml-sort --help
 usage: toml-sort [-h] [--version] [-o OUTPUT] [-i] [-I] [-a] [--no-sort-tables] [--sort-table-keys]
-                 [--sort-inline-tables] [--sort-inline-arrays] [--no-header] [--no-comments] [--no-header-comments]
-                 [--no-footer-comments] [--no-inline-comments] [--no-block-comments]
+                 [--sort-inline-tables] [--sort-inline-arrays] [--sort-first KEYS] [--no-header] [--no-comments]
+                 [--no-header-comments] [--no-footer-comments] [--no-inline-comments] [--no-block-comments]
                  [--spaces-before-inline-comment {1,2,3,4}] [--spaces-indent-inline-array {2,4,6,8}]
                  [--trailing-comma-inline-array] [--check]
-                 [F [F ...]]
+                 [F ...]
 
 Toml sort: a sorting utility for toml files.
 
@@ -64,6 +64,8 @@ sort:
   --sort-table-keys     Sort the keys in tables and arrays of tables (excluding inline tables and arrays).
   --sort-inline-tables  Sort inline tables.
   --sort-inline-arrays  Sort inline arrays.
+  --sort-first KEYS     Table keys that will be sorted first in the output. Multiple keys can be given separated by a
+                        comma.
 
 comments:
   exclude comments from output
@@ -120,6 +122,7 @@ no_footer_comments = true
 no_inline_comments = true
 no_block_comments = true
 no_sort_tables = true
+sort_first = ["key1", "key2"]
 sort_table_keys = true
 sort_inline_tables = true
 sort_inline_arrays = true
@@ -137,6 +140,7 @@ Only the following options can be included in an override:
 
 ```toml
 [tool.tomlsort.overrides."path.to.key"]
+first = ["key1", "key2"]
 table_keys = true
 inline_tables = true
 inline_arrays = true

@@ -279,6 +279,7 @@ def test_load_config_file_read():
             "[tool.tomlsort]\nspaces_before_inline_comment=4",
             {"spaces_before_inline_comment": 4},
         ),
+        ("[tool.tomlsort]\nsort_first=['x', 'y']", {"sort_first": "x,y"}),
     ],
 )
 def test_load_config_file(toml, expected):
@@ -337,6 +338,17 @@ def test_load_config_file_invalid(toml):
                 "test.123": SortOverrideConfiguration(table_keys=False),
                 "test.456": SortOverrideConfiguration(inline_tables=False),
                 "test.789": SortOverrideConfiguration(inline_arrays=False),
+            },
+        ),
+        (
+            """
+                    [tool.tomlsort.overrides]
+                    "test.123".first = ["one", "two", "three"]
+                    """,
+            {
+                "test.123": SortOverrideConfiguration(
+                    first=["one", "two", "three"]
+                ),
             },
         ),
     ],
