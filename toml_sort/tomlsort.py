@@ -409,23 +409,33 @@ class TomlSort:
         self,
         from_doc_body: List[Tuple[Optional[Key], Item]],
         to_doc: TOMLDocument,
-    ) -> None:
+    ) -> List[Tuple[Optional[Key], Item]]:
         """Write header comment from the FROM doc to the TO doc.
 
         Only writes comments / whitespace from the beginning of a TOML
         document.
         """
-        for _, value in from_doc_body:
-            if isinstance(value, Comment):
-                spaces = self.format_config.spaces_before_inline_comment
-                value = normalize_trivia(
-                    value,
-                    comment_spaces=spaces,
-                )
-                to_doc.add(value)
-            else:
-                to_doc.add(ws("\n"))
-                return
+        # Discard leading whitespace
+        while len(from_doc_body) > 0 and isinstance(
+            from_doc_body[0][1], Whitespace
+        ):
+            from_doc_body.pop(0)
+
+        # Remove the header comment from the input document, adding it to
+        # the output document, followed by a newline.
+        spaces = self.format_config.spaces_before_inline_comment
+        while len(from_doc_body) > 0 and isinstance(
+            from_doc_body[0][1], Comment
+        ):
+            _, value = from_doc_body.pop(0)
+            value = normalize_trivia(
+                value,
+                comment_spaces=spaces,
+            )
+            to_doc.add(value)
+
+        to_doc.add(ws("\n"))
+        return from_doc_body
 
     def toml_elements_sorted(
         self, original: TomlSortItem, parent: Table | TOMLDocument
@@ -606,10 +616,13 @@ class TomlSort:
         """Sort a TOMLDocument."""
         sorted_document = TOMLDocument(parsed=True)
 
+        original_body = original.body
         if self.comment_config.header:
-            self.write_header_comment(original.body[1:], sorted_document)
+            original_body = self.write_header_comment(
+                original_body, sorted_document
+            )
 
-        items, footer_comment = self.body_to_tomlsortitems(original.body)
+        items, footer_comment = self.body_to_tomlsortitems(original_body)
 
         for item in self.sorted_children_table(items):
             attach_comments(item, sorted_document)
