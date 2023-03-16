@@ -124,6 +124,9 @@ def parse_config(tomlsort_section: TOMLDocument) -> Dict[str, Any]:
     validate_and_copy(
         config, clean_config, "trailing_comma_inline_array", bool
     )
+    validate_and_copy(config, clean_config, "sort_first", list)
+    if "sort_first" in clean_config:
+        clean_config["sort_first"] = ",".join(clean_config["sort_first"])
 
     if config:
         printerr(f"Unexpected configuration values: {config}")
@@ -241,6 +244,16 @@ Notes:
         "--sort-inline-arrays",
         help=("Sort inline arrays."),
         action="store_true",
+    )
+    sort.add_argument(
+        "--sort-first",
+        help=(
+            "Table keys that will be sorted first in the output. Multiple "
+            "keys can be given separated by a comma."
+        ),
+        metavar="KEYS",
+        type=str,
+        default="",
     )
     comments = parser.add_argument_group(
         "comments", "exclude comments from output"
@@ -386,6 +399,7 @@ def cli(  # pylint: disable=too-many-branches
                 table_keys=bool(args.sort_table_keys or args.all),
                 inline_tables=bool(args.sort_inline_tables or args.all),
                 inline_arrays=bool(args.sort_inline_arrays or args.all),
+                first=args.sort_first.split(","),
             ),
             format_config=FormattingConfiguration(
                 spaces_before_inline_comment=args.spaces_before_inline_comment,
