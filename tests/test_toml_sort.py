@@ -11,6 +11,7 @@ from toml_sort.tomlsort import (
     CommentConfiguration,
     FormattingConfiguration,
     SortConfiguration,
+    SortOverrideConfiguration,
 )
 
 
@@ -80,6 +81,26 @@ def test_sort_toml_is_str() -> None:
                 "format_config": FormattingConfiguration(
                     spaces_before_inline_comment=1
                 ),
+            },
+        ),
+        (
+            "from-toml-lang",
+            "from-toml-lang-overrides",
+            {
+                "sort_config": SortConfiguration(
+                    inline_arrays=True, inline_tables=True
+                ),
+                "format_config": FormattingConfiguration(
+                    spaces_before_inline_comment=1
+                ),
+                "sort_config_overrides": {
+                    "servers.beta": SortOverrideConfiguration(
+                        table_keys=False
+                    ),
+                    "clients.data": SortOverrideConfiguration(
+                        inline_arrays=False
+                    ),
+                },
             },
         ),
         (

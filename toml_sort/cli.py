@@ -1,16 +1,19 @@
 """Toml Sort command line interface."""
 
 import argparse
+import dataclasses
 import sys
 from argparse import ArgumentParser
 from typing import Any, Dict, List, Optional, Type
 
 import tomlkit
+from tomlkit import TOMLDocument
 
 from .tomlsort import (
     CommentConfiguration,
     FormattingConfiguration,
     SortConfiguration,
+    SortOverrideConfiguration,
     TomlSort,
 )
 
@@ -78,18 +81,26 @@ def validate_and_copy(
     target[key] = data.pop(key)
 
 
-def load_config_file() -> Dict[str, Any]:
-    """Load the configuration from pyproject.toml."""
+def load_pyproject() -> TOMLDocument:
+    """Load pyproject file, and return tool.tomlsort section."""
     try:
         with open("pyproject.toml", encoding="utf-8") as file:
             content = file.read()
     except OSError:
-        return {}
+        return tomlkit.document()
 
     document = tomlkit.parse(content)
     tool_section = document.get("tool", tomlkit.document())
-    toml_sort_section = tool_section.get("tomlsort", tomlkit.document())
-    config = dict(toml_sort_section)
+    return tool_section.get("tomlsort", tomlkit.document())
+
+
+def parse_config(tomlsort_section: TOMLDocument) -> Dict[str, Any]:
+    """Load the toml_sort configuration from a TOMLDocument."""
+    config = dict(tomlsort_section)
+
+    # remove the overrides key, since it is parsed separately
+    # in parse_config_overrides.
+    config.pop("overrides", None)
 
     clean_config: Dict[str, Any] = {}
     validate_and_copy(config, clean_config, "all", bool)
@@ -121,7 +132,30 @@ def load_config_file() -> Dict[str, Any]:
     return clean_config
 
 
-def get_parser() -> ArgumentParser:
+def parse_config_overrides(
+    tomlsort_section: TOMLDocument,
+) -> Dict[str, SortOverrideConfiguration]:
+    """Parse the tool.tomlsort.overrides section of the config."""
+    fields = dataclasses.fields(SortOverrideConfiguration)
+    settings_definition = {field.name: field.type for field in fields}
+    override_settings = dict(
+        tomlsort_section.get("overrides", tomlkit.document())
+    )
+    overrides = {}
+    for path, settings in override_settings.items():
+        if not settings.keys() <= settings_definition.keys():
+            unknown_settings = settings.keys() - settings_definition.keys()
+            printerr("Unexpected configuration override settings:")
+            for unknown_setting in unknown_settings:
+                printerr(f'  "{path}".{unknown_setting}')
+            sys.exit(1)
+
+        overrides[path] = SortOverrideConfiguration(**settings)
+
+    return overrides
+
+
+def get_parser(defaults: Dict[str, Any]) -> ArgumentParser:
     """Get the argument parser."""
     parser = ArgumentParser(
         prog="toml-sort",
@@ -286,7 +320,7 @@ Notes:
         type=str,
         nargs="*",
     )
-    parser.set_defaults(**load_config_file())
+    parser.set_defaults(**defaults)
     return parser
 
 
@@ -294,7 +328,12 @@ def cli(  # pylint: disable=too-many-branches
     arguments: Optional[List[str]] = None,
 ) -> None:
     """Toml sort cli implementation."""
-    args = get_parser().parse_args(args=arguments)  # strip command itself
+    settings = load_pyproject()
+    configuration = parse_config(settings)
+    configuration_overrides = parse_config_overrides(settings)
+    args = get_parser(configuration).parse_args(
+        args=arguments
+    )  # strip command itself
     if args.version:
         print(get_version())
         sys.exit(0)
@@ -353,6 +392,7 @@ def cli(  # pylint: disable=too-many-branches
                 spaces_indent_inline_array=args.spaces_indent_inline_array,
                 trailing_comma_inline_array=args.trailing_comma_inline_array,
             ),
+            sort_config_overrides=configuration_overrides,
         ).sorted()
         if args.check:
             if original_toml != sorted_toml:
