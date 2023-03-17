@@ -11,6 +11,7 @@ from unittest import mock
 import pytest
 
 from toml_sort import cli
+from toml_sort.cli import parse_sort_first
 from toml_sort.tomlsort import SortOverrideConfiguration
 
 PATH_EXAMPLES = "tests/examples"
@@ -386,3 +387,25 @@ def test_load_config_overrides_fail(toml):
         with pytest.raises(SystemExit):
             section = cli.load_pyproject()
             cli.parse_config_overrides(section)
+
+
+@pytest.mark.parametrize(
+    "arg,expected_first,expected_overrides",
+    [
+        (
+            "a.b.c.d",
+            [],
+            {"a.b.c": SortOverrideConfiguration(first=["d"])},
+        ),
+        (
+            "a.b.c.d, a",
+            ["a"],
+            {"a.b.c": SortOverrideConfiguration(first=["d"])},
+        ),
+    ],
+)
+def test_parse_sort_first(arg, expected_first, expected_overrides):
+    """Test that we correctly parse the arg given for sort-first."""
+    first, overrides = parse_sort_first(arg, {})
+    assert first == expected_first
+    assert overrides == expected_overrides

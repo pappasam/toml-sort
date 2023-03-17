@@ -164,6 +164,10 @@ class TomlSortKeys:
             keys = other.keys
         return TomlSortKeys(self.keys + keys)
 
+    def __repr__(self) -> str:
+        """Representation of TomlSortKeys."""
+        return f"<{self.__class__.__name__}: {self.as_string()}>"
+
 
 @dataclass
 class TomlSortItem:
