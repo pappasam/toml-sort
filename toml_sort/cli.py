@@ -176,11 +176,7 @@ def parse_sort_first(
         else:
             path, base_key = split
             if path in overrides:
-                override = overrides[path]
-                if override.first is None:
-                    overrides[path].first = [base_key]
-                else:
-                    override.first.append(base_key)
+                overrides[path].first.append(base_key)
             else:
                 sort_override = SortOverrideConfiguration(first=[base_key])
                 overrides[path] = sort_override

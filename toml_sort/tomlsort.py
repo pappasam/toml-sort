@@ -257,7 +257,7 @@ class SortOverrideConfiguration:
     table_keys: Optional[bool] = None
     inline_tables: Optional[bool] = None
     inline_arrays: Optional[bool] = None
-    first: Optional[List[str]] = None
+    first: List[str] = field(default_factory=list)
 
 
 class TomlSort:
