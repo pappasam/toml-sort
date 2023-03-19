@@ -164,6 +164,10 @@ class TomlSortKeys:
             keys = other.keys
         return TomlSortKeys(self.keys + keys)
 
+    def __repr__(self) -> str:
+        """Representation of TomlSortKeys."""
+        return f"<{self.__class__.__name__}: {self.as_string()}>"
+
 
 @dataclass
 class TomlSortItem:
@@ -253,7 +257,7 @@ class SortOverrideConfiguration:
     table_keys: Optional[bool] = None
     inline_tables: Optional[bool] = None
     inline_arrays: Optional[bool] = None
-    first: Optional[List[str]] = None
+    first: List[str] = field(default_factory=list)
 
 
 class TomlSort:

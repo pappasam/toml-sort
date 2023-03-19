@@ -4,7 +4,7 @@ import argparse
 import dataclasses
 import sys
 from argparse import ArgumentParser
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import tomlkit
 from tomlkit import TOMLDocument
@@ -156,6 +156,32 @@ def parse_config_overrides(
         overrides[path] = SortOverrideConfiguration(**settings)
 
     return overrides
+
+
+def parse_sort_first(
+    sort_first_arg: str, overrides: Dict[str, SortOverrideConfiguration]
+) -> Tuple[List[str], Dict[str, SortOverrideConfiguration]]:
+    """Parse the sort_first arg given on the command line.
+
+    If a dotted key is given on the command line for the sort-first
+    argument this function parses it, and adds it to the appropriate
+    override.
+    """
+    sort_first = []
+    for full_key in sort_first_arg.split(","):
+        full_key = full_key.strip()
+        split = full_key.rsplit(".", 1)
+        if len(split) == 1:
+            sort_first.append(full_key)
+        else:
+            path, base_key = split
+            if path in overrides:
+                overrides[path].first.append(base_key)
+            else:
+                sort_override = SortOverrideConfiguration(first=[base_key])
+                overrides[path] = sort_override
+
+    return sort_first, overrides
 
 
 def get_parser(defaults: Dict[str, Any]) -> ArgumentParser:
@@ -337,7 +363,7 @@ Notes:
     return parser
 
 
-def cli(  # pylint: disable=too-many-branches
+def cli(  # pylint: disable=too-many-branches,too-many-locals
     arguments: Optional[List[str]] = None,
 ) -> None:
     """Toml sort cli implementation."""
@@ -350,6 +376,9 @@ def cli(  # pylint: disable=too-many-branches
     if args.version:
         print(get_version())
         sys.exit(0)
+    sort_first, configuration_overrides = parse_sort_first(
+        args.sort_first, configuration_overrides
+    )
 
     filenames_clean = args.filenames if args.filenames else (STD_STREAM,)
     usage_errors = []
@@ -399,7 +428,7 @@ def cli(  # pylint: disable=too-many-branches
                 table_keys=bool(args.sort_table_keys or args.all),
                 inline_tables=bool(args.sort_inline_tables or args.all),
                 inline_arrays=bool(args.sort_inline_arrays or args.all),
-                first=args.sort_first.split(","),
+                first=sort_first,
             ),
             format_config=FormattingConfiguration(
                 spaces_before_inline_comment=args.spaces_before_inline_comment,
