@@ -1,25 +1,18 @@
 [build-system]
-requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
 
 [tool.black]
 line-length = 79
 
 [tool.isort]
-line_length = 79
-indent = '    '
-multi_line_output = 3
 include_trailing_comma = true
+indent = '    '
+line_length = 79
+multi_line_output = 3
 
 [tool.poetry]
-name = "toml-sort"
-version = "0.23.0"
-description = "Toml sorting library"
 authors = ["Sam Roeca <samuel.roeca@gmail.com>"]
-readme = "README.md"
-homepage = "https://toml-sort.readthedocs.io/en/latest/"
-repository = "https://github.com/pappasam/toml-sort"
-keywords = ["toml", "sort", "cli", "unix", "utility"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
@@ -27,28 +20,35 @@ classifiers = [
   "Topic :: Utilities",
   "Typing :: Typed"
 ]
+description = "Toml sorting library"
+homepage = "https://toml-sort.readthedocs.io/en/latest/"
 include = ["README.md"]
+keywords = ["toml", "sort", "cli", "unix", "utility"]
 license = "MIT"
+name = "toml-sort"
+readme = "README.md"
+repository = "https://github.com/pappasam/toml-sort"
+version = "0.23.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
 tomlkit = ">=0.11.2"
 
 [tool.poetry.dev-dependencies]
-pylint = ">=2.13.9"
 black = ">=22.6.0"
+docformatter = ">=1.5.1"
+isort = "^5.11.4"
+m2r2 = ">=0.3.2"
 mypy = ">=0.961"
 pre-commit = ">=2.19.0"
-tox = "^3.25.1"
+pylint = ">=2.13.9"
 pytest = ">=7.1.2"
-tox-asdf = "^0.1.0"
-isort = "^5.11.4"
-sphinx = "^4.4.0"
-sphinx-rtd-theme = "^1.0.0"
-sphinx-argparse = ">=0.3.1"
-m2r2 = ">=0.3.2"
-docformatter = ">=1.5.1"
 pytest-cov = ">=3.0.0"
+sphinx = "^4.4.0"
+sphinx-argparse = ">=0.3.1"
+sphinx-rtd-theme = "^1.0.0"
+tox = "^3.25.1"
+tox-asdf = "^0.1.0"
 
 [tool.poetry.scripts]
 toml-sort = 'toml_sort.cli:cli'

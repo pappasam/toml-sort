@@ -23,6 +23,7 @@ publish:  ## Build & publish the new version
 
 .PHONY: format
 format:  ## Autoformat all files in the repo. WARNING: changes files in-place
+	poetry run toml-sort pyproject.toml --sort-table-keys -i
 	poetry run black toml_sort tests
 	poetry run isort toml_sort tests
 	poetry run docformatter --recursive --in-place toml_sort tests
