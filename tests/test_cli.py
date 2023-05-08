@@ -360,7 +360,21 @@ def test_load_config_overrides(toml, expected):
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
         section = cli.load_pyproject()
-        assert expected == cli.parse_config_overrides(section)
+        assert isinstance(section, dict)
+        parsed = cli.parse_config_overrides(section)
+        assert expected == parsed
+        # Make sure we are returning normal python types rather
+        # than TOMLKit types.
+        for key, value in parsed.items():
+            assert type(key) == str  # pylint: disable=unidiomatic-typecheck
+            assert (
+                type(value)  # pylint: disable=unidiomatic-typecheck
+                == SortOverrideConfiguration
+            )
+            assert (
+                type(value.first)  # pylint: disable=unidiomatic-typecheck
+                == list
+            )
 
 
 @pytest.mark.parametrize(

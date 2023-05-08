@@ -141,9 +141,10 @@ def parse_config_overrides(
     """Parse the tool.tomlsort.overrides section of the config."""
     fields = dataclasses.fields(SortOverrideConfiguration)
     settings_definition = {field.name: field.type for field in fields}
-    override_settings = dict(
-        tomlsort_section.get("overrides", tomlkit.document())
-    )
+    override_settings = tomlsort_section.get(
+        "overrides", tomlkit.document()
+    ).unwrap()
+
     overrides = {}
     for path, settings in override_settings.items():
         if not settings.keys() <= settings_definition.keys():
