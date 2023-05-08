@@ -658,11 +658,14 @@ class TomlSort:
         need to do this iteration because TomlKit puts comments into end of the
         collection they appear in, instead of the start of the next collection.
 
-        For example:
+        For example
+
+        ```toml
         [xyz]
 
         # Comment
         [abc]
+        ```
 
         TomlKit would place the comment from the example into the [xyz]
         collection, when we would like it to be attached to the [abc]
