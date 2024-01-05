@@ -1,15 +1,15 @@
 [a]
 test = [
-  {x = [
-    "foo",
-    "bar"
-  ], a = [
-    ""
-  ]},
-  {y = [
-    "foo",
-    "baz"
-  ]}
+  { x = [
+      "foo",
+      "bar"
+    ], a = [
+      ""
+    ] },
+  { y = [
+      "foo",
+      "baz"
+    ] }
 ]
 
 [b]
@@ -24,18 +24,18 @@ alist = [
   # Second attached comment
   'a'
 ]
-'aalist' = {c = "test", a = "another test"} # list comment
+'aalist' = { c = "test", a = "another test" } # list comment
 # Multilevel inline array
 aaalist = [
   [
-    {name = "Homer Simpson", town = "Springfield"}
+    { name = "Homer Simpson", town = "Springfield" }
   ],
   [
-    {name = "Bart Simpson", town = "Springfield"}
+    { name = "Bart Simpson", town = "Springfield" }
   ],
   # Weird block comment
   [
     # Another weird block comment
-    {name = "Lisa Simpson", town = "Springfield", a-test = "Did this sort?"} # Should get sorted
+    { name = "Lisa Simpson", town = "Springfield", a-test = "Did this sort?" } # Should get sorted
   ]
 ]
