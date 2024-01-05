@@ -1,15 +1,15 @@
 [a]
 test = [
-  {a = [
-    ""
-  ], x = [
-    "bar",
-    "foo"
-  ]},
-  {y = [
-    "baz",
-    "foo"
-  ]}
+  { a = [
+      ""
+    ], x = [
+      "bar",
+      "foo"
+    ] },
+  { y = [
+      "baz",
+      "foo"
+    ] }
 ]
 
 [b]
@@ -18,16 +18,16 @@ aaalist = [
   # Weird block comment
   [
     # Another weird block comment
-    {a-test = "Did this sort?", name = "Lisa Simpson", town = "Springfield"}  # Should get sorted
+    { a-test = "Did this sort?", name = "Lisa Simpson", town = "Springfield" }  # Should get sorted
   ],
   [
-    {name = "Bart Simpson", town = "Springfield"}
+    { name = "Bart Simpson", town = "Springfield" }
   ],
   [
-    {name = "Homer Simpson", town = "Springfield"}
+    { name = "Homer Simpson", town = "Springfield" }
   ]
 ]
-'aalist' = {a = "another test", c = "test"}  # list comment
+'aalist' = { a = "another test", c = "test" }  # list comment
 alist = [
   # Multiline
   # Second attached comment

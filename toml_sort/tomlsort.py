@@ -471,7 +471,9 @@ class TomlSort:
         tomlsort_items = [
             TomlSortItem(
                 keys=keys + k,
-                value=self.sort_item(keys + k, v, indent_depth=indent_depth),
+                value=self.sort_item(
+                    keys + k, v, indent_depth=indent_depth + 1
+                ),
             )
             for k, v in item.value.body
             if not isinstance(v, Whitespace) and k is not None
@@ -482,11 +484,15 @@ class TomlSort:
         new_table = InlineTable(
             Container(parsed=True), trivia=item.trivia, new=True
         )
+        if tomlsort_items:
+            new_table.append(None, Whitespace(" "))
         for tomlsort_item in tomlsort_items:
             normalize_trivia(tomlsort_item.value, include_comments=False)
             new_table.append(
                 self.format_key(tomlsort_item.keys.base), tomlsort_item.value
             )
+        if tomlsort_items:
+            new_table.append(None, Whitespace(" "))
         new_table = normalize_trivia(
             new_table,
             include_comments=self.comment_config.inline,
