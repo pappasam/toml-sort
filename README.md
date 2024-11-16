@@ -310,10 +310,6 @@ Install the following tools manually.
 - [Poetry>=1.0](https://github.com/sdispater/poetry#installation)
 - [GNU Make](https://www.gnu.org/software/make/)
 
-_Recommended_
-
-- [asdf](https://github.com/asdf-vm/asdf)
-
 **Set up development environment**
 
 ```bash
