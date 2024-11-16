@@ -24,7 +24,6 @@ setup: require .setup_complete ## Set up the local development environment
 
 .setup_complete: poetry.lock ## Internal helper to run the setup.
 	poetry install
-	poetry run pre-commit install
 	touch .setup_complete
 
 .PHONY: fix
