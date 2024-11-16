@@ -1,11 +1,9 @@
 name: Testing
-
 on:
   push:
     branches:
       - main
   pull_request:
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -15,7 +13,7 @@ jobs:
       - name: Select Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: "3.12"
           architecture: x64
       - name: Install Dependencies
         run: |
@@ -33,7 +31,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,7 +57,7 @@ jobs:
       - name: Select Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: "3.12"
           architecture: x64
       - name: Install Dependencies
         run: |
