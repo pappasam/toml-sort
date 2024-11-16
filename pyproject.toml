@@ -2,18 +2,14 @@
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 79
-
-[tool.isort]
-line_length = 79
-indent = '    '
-multi_line_output = 3
-include_trailing_comma = true
+[tool.mypy]
+python_version = "3.9"
+strict = true
+enable_error_code = "ignore-without-code,redundant-expr,truthy-bool"
 
 [tool.poetry]
 name = "toml-sort"
-version = "0.23.1"
+version = "0.24.0"
 description = "Toml sorting library"
 authors = ["Sam Roeca <samuel.roeca@gmail.com>"]
 readme = "README.md"
@@ -21,53 +17,45 @@ homepage = "https://toml-sort.readthedocs.io/en/latest/"
 repository = "https://github.com/pappasam/toml-sort"
 keywords = ["toml", "sort", "cli", "unix", "utility"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Environment :: Console",
   "Topic :: Software Development :: Code Generators",
   "Topic :: Utilities",
-  "Typing :: Typed"
+  "Typing :: Typed",
 ]
 include = ["README.md"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.7"
-tomlkit = ">=0.11.2"
+python = "^3.9"
+tomlkit = ">=0.13.2"
 
-[tool.poetry.dev-dependencies]
-pylint = ">=2.13.9"
-black = ">=22.6.0"
-mypy = ">=0.961"
-pre-commit = ">=2.19.0"
-tox = "^3.25.1"
-pytest = ">=7.1.2"
-tox-asdf = "^0.1.0"
-isort = "^5.11.4"
-sphinx = "^4.4.0"
-sphinx-rtd-theme = "^1.0.0"
-sphinx-argparse = ">=0.3.1"
-m2r2 = ">=0.3.2"
-docformatter = ">=1.5.1"
-pytest-cov = ">=3.0.0"
+[tool.poetry.group.dev.dependencies]
+mypy = "*"
+nox = "*"
+pytest = "*"
+pytest-cov = "*"
+ruff = "*"
 
 [tool.poetry.scripts]
 toml-sort = 'toml_sort.cli:cli'
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py37,py38,py39,py310,py311
-isolated_build = true
-skipsdist = true
-[testenv]
-whitelist_externals = poetry
-skip_install = true
-commands =
-  poetry install
-  poetry run black --check --diff toml_sort tests
-  poetry run docformatter --check --recursive toml_sort tests
-  poetry run isort --check toml_sort tests
-  poetry run mypy toml_sort
-  poetry run pylint toml_sort tests
-  poetry run pytest -vv
-"""
+[tool.ruff.lint]
+select = [
+  "D", # pydocstyle
+  "E", # pycodestyle
+  "F", # pyflakes
+  "I", # isort
+]
+ignore = [
+  "D10",  # missing-docstring
+  "D206", # indent-with-spaces
+  "D203", # one-blank-line-before-class
+  "D213", # multiline-summary-second-line
+  "D300", # triple-single-quotes
+  "D401", # imperative-mood
+  "E111", # indentation-with-invalid-multiple
+  "E114", # indentation-with-invalid-multiple-comment
+  "E117", # over-indented
+  "E501", # line-too-long
+]

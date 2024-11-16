@@ -4,7 +4,7 @@ import argparse
 import dataclasses
 import sys
 from argparse import ArgumentParser
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, cast
 
 import tomlkit
 from tomlkit import TOMLDocument
@@ -25,25 +25,8 @@ ENCODING = "UTF-8"  # Currently, we only support UTF-8
 
 def get_version() -> str:
     """Get the program version."""
-    # pylint: disable=import-outside-toplevel
-    try:
-        # Type checker for Python < 3.8 fails.
-        # Since this only happens here, we just ignore.
-        from importlib.metadata import version  # type: ignore
-    except ImportError:
-        try:
-            # Below ignored both because this a redefinition from above, and
-            # because importlib_metadata isn't known by mypy. Ignored because
-            # this is intentional.
-            from importlib_metadata import version  # type: ignore
-        except ImportError:
-            print(
-                "Error: unable to get version. "
-                "If using Python < 3.8, you must install "
-                "`importlib_metadata` to get the version.",
-                file=sys.stderr,
-            )
-            sys.exit(1)
+    from importlib.metadata import version
+
     return version("toml-sort")
 
 
@@ -70,7 +53,7 @@ def write_file(path: str, content: str) -> None:
 
 
 def validate_and_copy(
-    data: Dict[str, Any], target: Dict[str, Any], key: str, type_: Type
+    data: Dict[str, Any], target: Dict[str, Any], key: str, type_: Type[Any]
 ) -> None:
     """Validate a configuration key."""
     if key not in data:
@@ -91,7 +74,7 @@ def load_pyproject() -> TOMLDocument:
 
     document = tomlkit.parse(content)
     tool_section = document.get("tool", tomlkit.document())
-    return tool_section.get("tomlsort", tomlkit.document())
+    return cast(TOMLDocument, tool_section.get("tomlsort", tomlkit.document()))
 
 
 def parse_config(tomlsort_section: TOMLDocument) -> Dict[str, Any]:
@@ -117,13 +100,9 @@ def parse_config(tomlsort_section: TOMLDocument) -> Dict[str, Any]:
     validate_and_copy(config, clean_config, "sort_inline_tables", bool)
     validate_and_copy(config, clean_config, "sort_inline_arrays", bool)
     validate_and_copy(config, clean_config, "sort_table_keys", bool)
-    validate_and_copy(
-        config, clean_config, "spaces_before_inline_comment", int
-    )
+    validate_and_copy(config, clean_config, "spaces_before_inline_comment", int)
     validate_and_copy(config, clean_config, "spaces_indent_inline_array", int)
-    validate_and_copy(
-        config, clean_config, "trailing_comma_inline_array", bool
-    )
+    validate_and_copy(config, clean_config, "trailing_comma_inline_array", bool)
     validate_and_copy(config, clean_config, "sort_first", list)
     if "sort_first" in clean_config:
         clean_config["sort_first"] = ",".join(clean_config["sort_first"])
@@ -141,9 +120,7 @@ def parse_config_overrides(
     """Parse the tool.tomlsort.overrides section of the config."""
     fields = dataclasses.fields(SortOverrideConfiguration)
     settings_definition = {field.name: field.type for field in fields}
-    override_settings = tomlsort_section.get(
-        "overrides", tomlkit.document()
-    ).unwrap()
+    override_settings = tomlsort_section.get("overrides", tomlkit.document()).unwrap()
 
     overrides = {}
     for path, settings in override_settings.items():
@@ -282,9 +259,7 @@ Notes:
         type=str,
         default="",
     )
-    comments = parser.add_argument_group(
-        "comments", "exclude comments from output"
-    )
+    comments = parser.add_argument_group("comments", "exclude comments from output")
     comments.add_argument(
         "--no-header",
         help="Deprecated. See --no-header-comments",
@@ -331,8 +306,7 @@ Notes:
     formatting.add_argument(
         "--spaces-indent-inline-array",
         help=(
-            "the number of spaces to indent a multiline inline array "
-            "(default: 2)"
+            "the number of spaces to indent a multiline inline array " "(default: 2)"
         ),
         type=int,
         choices=[2, 4, 6, 8],
@@ -346,17 +320,14 @@ Notes:
     parser.add_argument(
         "--check",
         help=(
-            "silently check if an original file would be "
-            "changed by the formatter"
+            "silently check if an original file would be " "changed by the formatter"
         ),
         action="store_true",
     )
     parser.add_argument(
         "filenames",
         metavar="F",
-        help=(
-            f"filename(s) to be processed by toml-sort (default: {STD_STREAM})"
-        ),
+        help=(f"filename(s) to be processed by toml-sort (default: {STD_STREAM})"),
         type=str,
         nargs="*",
     )
@@ -371,9 +342,7 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
     settings = load_pyproject()
     configuration = parse_config(settings)
     configuration_overrides = parse_config_overrides(settings)
-    args = get_parser(configuration).parse_args(
-        args=arguments
-    )  # strip command itself
+    args = get_parser(configuration).parse_args(args=arguments)  # strip command itself
     if args.version:
         print(get_version())
         sys.exit(0)
@@ -396,9 +365,7 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
             f"'--in-place' not allowed with stdin FILENAME '{STD_STREAM}'"
         )
     if args.in_place and args.output is not None:
-        usage_errors.append(
-            "'--output' and '--in-place' cannot be used together"
-        )
+        usage_errors.append("'--output' and '--in-place' cannot be used together")
 
     if usage_errors:
         printerr("Usage error(s):")
@@ -415,9 +382,7 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
             input_toml=original_toml,
             comment_config=CommentConfiguration(
                 header=not bool(
-                    args.no_header
-                    or args.no_header_comments
-                    or args.no_comments
+                    args.no_header or args.no_header_comments or args.no_comments
                 ),
                 footer=not bool(args.no_footer_comments or args.no_comments),
                 block=not bool(args.no_block_comments or args.no_comments),

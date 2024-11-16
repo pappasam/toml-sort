@@ -4,11 +4,8 @@
 [![license](https://img.shields.io/pypi/l/toml-sort.svg)](https://python.org/pypi/toml-sort)
 [![image-python-versions](https://img.shields.io/badge/python->=3.7-blue)](https://python.org/pypi/jedi-language-server)
 [![image-pypi-downloads](https://pepy.tech/badge/toml-sort)](https://pepy.tech/project/toml-sort)
-[![readthedocs-status](https://readthedocs.org/projects/toml-sort/badge/?version=latest)](https://toml-sort.readthedocs.io/en/latest/?badge=latest)
 
 A command line utility to sort and format your toml files.
-
-Read the latest documentation here: <https://toml-sort.readthedocs.io/en/latest/>
 
 ## Installation
 
@@ -134,6 +131,7 @@ ignore_case = true
 ```
 
 ### Configuration Overrides
+
 The `pyproject.toml` configuration file also supports configuration overrides, which are not available as command-line arguments. These overrides allow for fine-grained control of sort options for particular keys.
 
 Only the following options can be included in an override:
@@ -146,7 +144,7 @@ inline_tables = true
 inline_arrays = true
 ```
 
-In the example configuration, `path.to.key` is the key to match. Keys are matched using the [Python fnmatch function](https://docs.python.org/3/library/fnmatch.html), so glob-style wildcards are supported. 
+In the example configuration, `path.to.key` is the key to match. Keys are matched using the [Python fnmatch function](https://docs.python.org/3/library/fnmatch.html), so glob-style wildcards are supported.
 
 For instance, to disable sorting the table in the following TOML file:
 
@@ -325,7 +323,7 @@ make setup
 **Run Tests**
 
 ```bash
-make test
+make tests
 ```
 
 ## Written by
