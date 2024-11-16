@@ -1,4 +1,5 @@
 """Test the CLI."""
+
 from __future__ import annotations
 
 import os
@@ -72,7 +73,6 @@ def test_cli_defaults(
     Test parameters are relative to the tests/examples directory within
     this project.
     """
-
     with get_fixture(path_sorted).open(encoding="UTF-8") as infile:
         expected = infile.read()
     result_filepath = capture(["toml-sort", str(get_fixture(path_unsorted))])
@@ -157,12 +157,9 @@ def test_cli_args(
     args: List[str],
 ) -> None:
     """Test the basic cli behavior with different arguments."""
-
     with get_fixture(path_sorted).open(encoding="UTF-8") as infile:
         expected = infile.read()
-    result_filepath = capture(
-        ["toml-sort"] + args + [str(get_fixture(path_unsorted))]
-    )
+    result_filepath = capture(["toml-sort"] + args + [str(get_fixture(path_unsorted))])
     assert result_filepath.returncode == 0
     assert result_filepath.stdout == expected
 
@@ -347,16 +344,13 @@ def test_load_config_file_invalid(toml):
                     "test.123".first = ["one", "two", "three"]
                     """,
             {
-                "test.123": SortOverrideConfiguration(
-                    first=["one", "two", "three"]
-                ),
+                "test.123": SortOverrideConfiguration(first=["one", "two", "three"]),
             },
         ),
     ],
 )
 def test_load_config_overrides(toml, expected):
-    """Test that we correctly turn settings in tomldocument into a
-    SortOverrideConfiguration dataclass."""
+    """Turn settings tomldocument into SortOverrideConfiguration."""
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
         section = cli.load_pyproject()
@@ -366,15 +360,9 @@ def test_load_config_overrides(toml, expected):
         # Make sure we are returning normal python types rather
         # than TOMLKit types.
         for key, value in parsed.items():
-            assert type(key) == str  # pylint: disable=unidiomatic-typecheck
-            assert (
-                type(value)  # pylint: disable=unidiomatic-typecheck
-                == SortOverrideConfiguration
-            )
-            assert (
-                type(value.first)  # pylint: disable=unidiomatic-typecheck
-                == list
-            )
+            assert type(key) is str
+            assert type(value) is SortOverrideConfiguration
+            assert type(value.first) is list
 
 
 @pytest.mark.parametrize(
@@ -394,8 +382,7 @@ def test_load_config_overrides(toml, expected):
     ],
 )
 def test_load_config_overrides_fail(toml):
-    """Test that parse_config_overrides exits if the config contains an
-    unexpected key."""
+    """parse_config_overrides exits if config contains unexpected key."""
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
         with pytest.raises(SystemExit):

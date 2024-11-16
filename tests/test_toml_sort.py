@@ -1,4 +1,5 @@
 """Test the toml_sort module."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -45,11 +46,7 @@ def test_sort_toml_is_str() -> None:
         (
             "comment",
             "comment-comments-preserved",
-            {
-                "comment_config": CommentConfiguration(
-                    header=False, footer=False
-                )
-            },
+            {"comment_config": CommentConfiguration(header=False, footer=False)},
         ),
         (
             "comment",
@@ -94,12 +91,8 @@ def test_sort_toml_is_str() -> None:
                     spaces_before_inline_comment=1
                 ),
                 "sort_config_overrides": {
-                    "servers.beta": SortOverrideConfiguration(
-                        table_keys=False
-                    ),
-                    "clients.data": SortOverrideConfiguration(
-                        inline_arrays=False
-                    ),
+                    "servers.beta": SortOverrideConfiguration(table_keys=False),
+                    "clients.data": SortOverrideConfiguration(inline_arrays=False),
                 },
             },
         ),
@@ -164,8 +157,7 @@ def test_tomlsort(
     sorted_fixture: str,
     args: Dict[str, Any],
 ) -> None:
-    """Make sure that output of TomlSort.sorted() function matches what we
-    expect."""
+    """Output of TomlSort.sorted() function matches expected."""
     path_unsorted = get_fixture(unsorted_fixture)
     path_sorted = get_fixture(["sorted", sorted_fixture])
 
