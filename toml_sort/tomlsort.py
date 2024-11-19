@@ -430,8 +430,9 @@ class TomlSort:
         """
 
         def sort_first(item: TomlSortItem) -> int:
-            if item.keys.base in sort_config.first:
-                return sort_config.first.index(item.keys.base.as_string())
+            for index, value in enumerate(sort_config.first):
+                if value == item.keys.base.key:
+                    return index
             return len(sort_config.first)
 
         items = sorted(items, key=self.key_sort_func)
