@@ -5,7 +5,7 @@
 [![image-python-versions](https://img.shields.io/badge/python->=3.9-blue)](https://python.org/pypi/jedi-language-server)
 [![image-pypi-downloads](https://pepy.tech/badge/toml-sort)](https://pepy.tech/project/toml-sort)
 
-A command line utility to sort and format your toml files.
+A command line utility to sort and format [toml](https://toml.io/en/) files.
 
 ## Installation
 
@@ -310,16 +310,9 @@ Install the following tools manually.
 - [Poetry>=1.0](https://github.com/sdispater/poetry#installation)
 - [GNU Make](https://www.gnu.org/software/make/)
 
-**Set up development environment**
-
 ```bash
-make setup
-```
-
-**Run Tests**
-
-```bash
-make tests
+make setup # set up dev environment
+make tests # run tests
 ```
 
 ## Written by

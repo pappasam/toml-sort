@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.24.2
+
+### Fixed
+
+- Regression from 0.24.1 and 0.24.0 where sorting inline tables would throw a ValueError if the key in the table had trailing spaces. Resolves <https://github.com/pappasam/toml-sort/issues/76>
+
 ## 0.24.1
 
 ### Fixed
