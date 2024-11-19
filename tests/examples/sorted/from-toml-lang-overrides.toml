@@ -16,6 +16,10 @@ enabled = true # Comment after a boolean
 ports = [8001, 8001, 8002]
 server = "192.168.1.1"
 
+[inline]
+# Test "first" sorting for inline tables
+c = {limit = "<3.12", version = "4.12.2"}
+
 [owner]
 bio = "GitHub Cofounder & CEO\nLikes tater tots and beer."
 dob = 1979-05-27T07:32:00Z # First class dates? Why not?

@@ -37,6 +37,10 @@ connection_max = 5000
 enabled = true # Comment after a boolean
 server = "192.168.1.1"
 
+[inline]
+# Test "first" sorting for inline tables
+c = {version = "4.12.2", limit = "<3.12"}
+
 [owner]
 name = "Tom Preston-Werner"
 dob = 1979-05-27T07:32:00Z # First class dates? Why not?

@@ -16,6 +16,10 @@ ports = [8001, 8001, 8002]
 connection_max = 5000
 enabled = true # Comment after a boolean
 
+[inline]
+# Test "first" sorting for inline tables
+c = {limit = "<3.12", version = "4.12.2"}
+
 [owner]
 name = "Tom Preston-Werner"
 organization = "GitHub"

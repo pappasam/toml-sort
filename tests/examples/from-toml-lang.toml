@@ -45,3 +45,7 @@ hosts = [
   name = "Nail"
   sku = 284758393
   color = "gray"
+
+[inline]
+# Test "first" sorting for inline tables
+c = { limit="<3.12", version ="4.12.2"}
