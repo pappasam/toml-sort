@@ -111,6 +111,7 @@ def test_sort_toml_is_str() -> None:
                 "sort_config_overrides": {
                     "database": SortOverrideConfiguration(first=["ports"]),
                     "owner": SortOverrideConfiguration(first=["name", "dob"]),
+                    "inline.c": SortOverrideConfiguration(first=["version"]),
                 },
             },
         ),
