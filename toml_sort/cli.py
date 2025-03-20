@@ -410,8 +410,7 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
             if original_toml != sorted_toml:
                 write_file(filename, sorted_toml)
         elif len(filenames_clean) == 1:
-            if original_toml != sorted_toml:
-                write_file(output_clean, sorted_toml)
+            write_file(output_clean, sorted_toml)
         else:
             printerr("Uncaught error. Please submit GitHub issue:")
             printerr("<https://github.com/pappasam/toml-sort/issues>")
