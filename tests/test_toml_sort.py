@@ -26,6 +26,15 @@ def test_sort_toml_is_str() -> None:
     "unsorted_fixture,sorted_fixture,args",
     [
         (
+            "gradle-version-catalog",
+            "gradle-version-catalog",
+            {
+                "sort_config": SortConfiguration(
+                    tables=False,
+                ),
+            },
+        ),
+        (
             "dotted-key",
             "dotted-key",
             {
