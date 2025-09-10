@@ -268,8 +268,7 @@ Notes:
     comments.add_argument(
         "--no-comments",
         help=(
-            "remove all comments. Implies no header, footer, inline, or "
-            "block comments"
+            "remove all comments. Implies no header, footer, inline, or block comments"
         ),
         action="store_true",
     )
@@ -305,9 +304,7 @@ Notes:
     )
     formatting.add_argument(
         "--spaces-indent-inline-array",
-        help=(
-            "the number of spaces to indent a multiline inline array " "(default: 2)"
-        ),
+        help=("the number of spaces to indent a multiline inline array (default: 2)"),
         type=int,
         choices=[2, 4, 6, 8],
         default=2,
@@ -319,9 +316,7 @@ Notes:
     )
     parser.add_argument(
         "--check",
-        help=(
-            "silently check if an original file would be " "changed by the formatter"
-        ),
+        help=("silently check if an original file would be changed by the formatter"),
         action="store_true",
     )
     parser.add_argument(
