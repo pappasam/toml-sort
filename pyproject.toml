@@ -9,7 +9,7 @@ enable_error_code = "ignore-without-code,redundant-expr,truthy-bool"
 
 [tool.poetry]
 name = "toml-sort"
-version = "0.24.2"
+version = "0.24.3"
 description = "Toml sorting library"
 authors = ["Sam Roeca <samuel.roeca@gmail.com>"]
 readme = "README.md"
