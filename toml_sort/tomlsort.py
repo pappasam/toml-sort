@@ -472,9 +472,11 @@ class TomlSort:
         """Format a key, removing any extra whitespace.
 
         Make sure that it will be formatted like: key = value with one space on
-        either side of the equal sign.
+        either side of the equal sign. For dotted keys, preserve the dotted format.
         """
-        key.sep = " = "
+        # Only set separator for non-dotted keys
+        if not key.is_dotted():
+            key.sep = " = "
         key._original = (  # pylint: disable=protected-access
             key.as_string().strip()
         )

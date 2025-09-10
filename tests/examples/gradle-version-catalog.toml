@@ -1,0 +1,7 @@
+[versions]
+fooVersion = "1.0.0"
+barVersion = "2.0.0"
+
+[libraries]
+fooLib = { module = "com.example:foo", version.ref = "fooVersion" }
+barLib = { module = "com.example:bar", version.ref = "barVersion" }
