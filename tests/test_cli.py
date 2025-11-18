@@ -247,7 +247,7 @@ def test_multiple_files_and_errors(options):
 def test_load_config_file_read():
     """Test no error if pyproject.toml cannot be read."""
     with mock.patch("toml_sort.cli.open", side_effect=OSError):
-        section = cli.load_pyproject()
+        section = cli.load_config_file()
         assert not cli.parse_config(section)
 
 
@@ -278,7 +278,7 @@ def test_load_config_file(toml, expected):
     """Test load_config_file."""
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
-        section = cli.load_pyproject()
+        section = cli.load_config_file()
         assert cli.parse_config(section) == expected
 
 
@@ -290,7 +290,7 @@ def test_load_config_file_invalid(toml):
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
         with pytest.raises(SystemExit):
-            section = cli.load_pyproject()
+            section = cli.load_config_file()
             cli.parse_config(section)
 
 
@@ -347,7 +347,7 @@ def test_load_config_overrides(toml, expected):
     """Turn settings tomldocument into SortOverrideConfiguration."""
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
-        section = cli.load_pyproject()
+        section = cli.load_config_file()
         assert isinstance(section, dict)
         parsed = cli.parse_config_overrides(section)
         assert expected == parsed
@@ -380,7 +380,7 @@ def test_load_config_overrides_fail(toml):
     open_mock = mock.mock_open(read_data=toml)
     with mock.patch("toml_sort.cli.open", open_mock):
         with pytest.raises(SystemExit):
-            section = cli.load_pyproject()
+            section = cli.load_config_file()
             cli.parse_config_overrides(section)
 
 
