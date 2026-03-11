@@ -4,9 +4,15 @@
   args: [--check]
   language: python
   types: [toml]
+  # These are TOML files per `identify`, but are generated and should not be sorted.
+  # SEE: https://regex101.com/r/nkPvmd/1
+  exclude: '(^|/)(uv\.lock|poetry\.lock|Cargo\.lock)$'
 - id: toml-sort-fix
   name: toml-sort-fix
   entry: toml-sort
   args: [--in-place]
   language: python
   types: [toml]
+  # These are TOML files per `identify`, but are generated and should not be sorted.
+  # SEE: https://regex101.com/r/nkPvmd/1
+  exclude: '(^|/)(uv\.lock|poetry\.lock|Cargo\.lock)$'
