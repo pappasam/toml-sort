@@ -3,5 +3,5 @@ barVersion = "2.0.0"
 fooVersion = "1.0.0"
 
 [libraries]
-barLib = {module = "com.example:bar", version.ref = "barVersion"}
-fooLib = {module = "com.example:foo", version.ref = "fooVersion"}
+barLib = { module = "com.example:bar", version.ref = "barVersion" }
+fooLib = { module = "com.example:foo", version.ref = "fooVersion" }

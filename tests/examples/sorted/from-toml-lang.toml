@@ -4,6 +4,7 @@ title = "TOML Example"
 
 [clients]
 data = [["gamma", "delta"], [1, 2]] # just an update to make sure parsers support it
+
 # Line breaks are OK when inside arrays
 hosts = [
   "alpha",
@@ -18,13 +19,15 @@ enabled = true # Comment after a boolean
 
 [inline]
 # Test "first" sorting for inline tables
-c = {limit = "<3.12", version = "4.12.2"}
+c = { limit = "<3.12", version = "4.12.2" }
 
 [owner]
 name = "Tom Preston-Werner"
 organization = "GitHub"
 bio = "GitHub Cofounder & CEO\nLikes tater tots and beer."
 dob = 1979-05-27T07:32:00Z # First class dates? Why not?
+
+# Products
 
 [[products]]
 name = "Hammer"

@@ -1,6 +1,8 @@
 # My great TOML example
 # it has multiple lines
 
+# Orphan <- will be removed
+
 # Comment attached to title
 title = "The example" # test
 
