@@ -29,14 +29,10 @@ aaalist = [
 ]
 'aalist' = { a = "another test", c = "test" }  # list comment
 alist = [
-
-  # Orphan comment
-
   # Multiline
   # Second attached comment
   'a',
   'g',
-
   # Comment attached
   'w'  # Comment inline
 ]

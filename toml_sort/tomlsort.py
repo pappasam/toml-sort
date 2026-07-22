@@ -14,6 +14,16 @@ TomlContainer = tomlrt.Document | tomlrt.Table
 TomlPath = tuple[str, ...]
 
 
+def _drop_orphans(block: tuple[str | None, ...]) -> tuple[str | None, ...]:
+    """Trim a leading block to its trailing attached comment run."""
+    if all(comment is None for comment in block):
+        return block
+    index = len(block)
+    while index > 0 and block[index - 1] is not None:
+        index -= 1
+    return block[index:]
+
+
 @dataclass
 class CommentConfiguration:
     """Configures how TomlSort handles comments."""
@@ -201,13 +211,22 @@ class TomlSort:
             ):
                 container.header_comment = None
 
-        if not self.comment_config.block:
+        if self.comment_config.block:
+            for key in list(container.leading_block):
+                block = container.leading_block[key]
+                attached = _drop_orphans(block)
+                if attached != block:
+                    container.leading_block[key] = attached
+        else:
             container.leading_block.clear()
-            if (
-                isinstance(container, tomlrt.Table)
-                and not container.is_inline
-                and container.header_leading_block
-            ):
+
+        if isinstance(container, tomlrt.Table) and not container.is_inline:
+            if self.comment_config.block:
+                header_block = container.header_leading_block
+                attached = _drop_orphans(header_block)
+                if attached != header_block:
+                    container.header_leading_block = attached
+            elif container.header_leading_block:
                 container.header_leading_block = ()
 
         for value in container.values():
@@ -217,7 +236,13 @@ class TomlSort:
         """Remove disabled inline-array comments recursively."""
         if not self.comment_config.inline:
             array.comments.clear()
-        if not self.comment_config.block:
+        if self.comment_config.block:
+            for index in list(array.leading_block):
+                block = array.leading_block[index]
+                attached = _drop_orphans(block)
+                if attached != block:
+                    array.leading_block[index] = attached
+        else:
             array.leading_block.clear()
         for value in array:
             self._filter_value_comments(value)
@@ -244,9 +269,10 @@ class TomlSort:
             document.preamble = ()
             first_key = next(iter(document), None)
             if first_key is not None and first_key in document.leading_block:
-                document.leading_block[first_key] = document.leading_comments.get(
-                    first_key, ()
-                )
+                block = document.leading_block[first_key]
+                attached = _drop_orphans(block)
+                if attached != block:
+                    document.leading_block[first_key] = attached
         if not self.comment_config.footer:
             document.epilogue = ()
 

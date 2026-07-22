@@ -14,8 +14,6 @@ country = "中国" # This should be parsed as UTF-8
 dc = "eqdc10"
 ip = "10.0.0.2"
 
-# Products
-
 [[products]]
 name = "Hammer"
 sku = 738594937
@@ -27,7 +25,6 @@ sku = 284758393
 
 [clients]
 data = [["delta", "gamma"], [1, 2]] # just an update to make sure parsers support it
-
 # Line breaks are OK when inside arrays
 hosts = [
   "alpha",

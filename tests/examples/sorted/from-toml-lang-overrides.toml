@@ -4,7 +4,6 @@ title = "TOML Example"
 
 [clients]
 data = [["gamma", "delta"], [1, 2]] # just an update to make sure parsers support it
-
 # Line breaks are OK when inside arrays
 hosts = [
   "alpha",
@@ -26,8 +25,6 @@ bio = "GitHub Cofounder & CEO\nLikes tater tots and beer."
 dob = 1979-05-27T07:32:00Z # First class dates? Why not?
 name = "Tom Preston-Werner"
 organization = "GitHub"
-
-# Products
 
 [[products]]
 name = "Hammer"
