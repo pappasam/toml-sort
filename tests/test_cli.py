@@ -17,12 +17,6 @@ from toml_sort.tomlsort import SortOverrideConfiguration
 
 PATH_EXAMPLES = "tests/examples"
 
-# NOTE: weird.toml currently exposes what I interpret to be some buggy
-# functionality in AOT parsing. It seems like the latest version of tomlkit
-# doesn't handle edge cases elegantly here and sometimes elements in AOT's are
-# ordered randomly or sorted somewhere in tomlkit itself. I've xfail'd the test
-# case for now.
-
 
 class SubprocessReturn(NamedTuple):
     """Organize the return results when of running a cli subprocess."""
@@ -57,7 +51,7 @@ def capture(
     "path_unsorted,path_sorted",
     [
         ("from-toml-lang", "sorted/from-toml-lang"),
-        pytest.param("weird", "sorted/weird", marks=[pytest.mark.xfail]),
+        pytest.param("weird", "sorted/weird"),
         ("pyproject-weird-order", "sorted/pyproject-weird-order"),
         ("comment", "sorted/comment-header-footer"),
         ("inline", "sorted/inline-default"),
@@ -358,7 +352,7 @@ def test_load_config_overrides(toml, expected):
         parsed = cli.parse_config_overrides(section)
         assert expected == parsed
         # Make sure we are returning normal python types rather
-        # than TOMLKit types.
+        # than tomlrt types.
         for key, value in parsed.items():
             assert type(key) is str
             assert type(value) is SortOverrideConfiguration
