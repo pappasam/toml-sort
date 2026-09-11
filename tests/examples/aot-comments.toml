@@ -1,0 +1,13 @@
+# A comment before an element of an array of tables stays with that
+# element, including the third and later ones.
+
+[[fruit]]
+name = "apple"
+
+# The second fruit
+[[fruit]]
+name = "banana"
+
+# The third fruit
+[[fruit]]
+name = "cherry"

@@ -589,11 +589,11 @@ class TomlSort:
                 self.format_config.spaces_before_inline_comment,
             )
             for table in original.children:
-                previous_item = next(iter(new_aot), parent)
+                # Comments belong after the element that precedes them,
+                # which is the last one appended so far.
+                previous_item = new_aot[-1] if len(new_aot) else parent
                 attach_comments(table, previous_item)
-                new_aot.append(
-                    self.toml_elements_sorted(table, next(iter(new_aot), previous_item))
-                )
+                new_aot.append(self.toml_elements_sorted(table, previous_item))
 
             return new_aot
 

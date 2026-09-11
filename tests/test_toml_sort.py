@@ -44,6 +44,11 @@ def test_sort_toml_is_str() -> None:
             },
         ),
         (
+            "aot-comments",
+            "aot-comments",
+            {},
+        ),
+        (
             "inline",
             "inline",
             {
