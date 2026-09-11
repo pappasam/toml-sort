@@ -1,0 +1,22 @@
+# Dotted keys are key/value lines. They must stay ahead of any table header
+# in the same table, or the header would capture them.
+
+top.key = 1
+z = 0
+
+[[arr]]
+a.b.c = 1
+a.b.d = 2
+
+[[arr]]
+a.b.c = 3
+a.b.d = 4
+
+[t]
+a = 2
+b.x = 3
+b.y = 1
+z = 0
+
+[t.c]
+k = 1

@@ -1,0 +1,20 @@
+# A dotted key and a table header with the same name are distinct items.
+# Merging them would render the header without its parent prefix, turning
+# [q.b.e] into [b.e].
+
+a.c = 1
+
+[a.e]
+x = 1
+
+[q]
+b.c = 1
+
+[q.b.e]
+x = 1
+
+[r]
+b.c = 1
+
+[[r.b.e]]
+x = 1

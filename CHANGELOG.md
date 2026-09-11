@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- A dotted key (`b.c = 1`) followed by a table header for the same name (`[a.b.e]`) no longer drops the parent prefix from the header, which changed the document
+- Dotted keys at the top level or inside a table (`top.key = 1`) are no longer rendered after a following table header, which moved them into that table
+
+### Changed
+
+- Dotted keys (`a.b = 1`) are now sorted together with the other keys of their table instead of being placed after them
+
 ## 0.24.4
 
 ### Changed

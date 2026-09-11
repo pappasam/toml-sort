@@ -44,6 +44,21 @@ def test_sort_toml_is_str() -> None:
             },
         ),
         (
+            "dotted-key-header",
+            "dotted-key-header",
+            {},
+        ),
+        (
+            "dotted-key-order",
+            "dotted-key-order",
+            {"sort_config": SortConfiguration(table_keys=True)},
+        ),
+        (
+            "dotted-key-order",
+            "dotted-key-order-no-sort-keys",
+            {"sort_config": SortConfiguration(table_keys=False)},
+        ),
+        (
             "inline",
             "inline",
             {

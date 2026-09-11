@@ -518,18 +518,33 @@ class TomlSort:
     def sorted_children_table(
         self, parent_keys: Optional[TomlSortKeys], parent: List[TomlSortItem]
     ) -> Iterable[TomlSortItem]:
-        """Get the sorted children of a table."""
+        """Get the sorted children of a table.
+
+        tomlkit models a dotted key (``a.b = 1``) as a table, but it is a
+        key/value line: it must be rendered before any ``[header]`` of the
+        same table, or the header captures it. So dotted keys are grouped
+        and sorted with the keys, never with the headers. Sibling dotted
+        keys (``a.b`` and ``a.c``) arrive as separate entries and are
+        coalesced like tables.
+        """
         sort_config = self.sort_config(parent_keys)
-        tables = coalesce_tables(
-            item for item in parent if isinstance(item.value, (Table, AoT))
-        )
+
+        def is_header(item: TomlSortItem) -> bool:
+            return (
+                isinstance(item.value, (Table, AoT)) and not item.keys.base.is_dotted()
+            )
+
+        def is_dotted_key(item: TomlSortItem) -> bool:
+            return isinstance(item.value, Table) and item.keys.base.is_dotted()
+
+        tables = coalesce_tables(item for item in parent if is_header(item))
+        dotted_keys = coalesce_tables(item for item in parent if is_dotted_key(item))
         non_tables = self.sort_items(
-            [item for item in parent if not isinstance(item.value, (Table, AoT))]
+            [item for item in parent if not is_header(item) and not is_dotted_key(item)]
         )
+        keys = list(itertools.chain(non_tables, dotted_keys))
         non_tables_final = (
-            self.sort_keys(non_tables, sort_config)
-            if sort_config.table_keys
-            else non_tables
+            self.sort_keys(keys, sort_config) if sort_config.table_keys else keys
         )
         tables_final = (
             self.sort_keys(tables, sort_config)
