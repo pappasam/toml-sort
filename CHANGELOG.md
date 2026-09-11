@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - A comment before the third or later element of an array of tables is no longer moved after the first element and then lost on the next run
+- Comments before a nested array of tables (`[[a.b]]` inside `[a]`) are no longer dropped, and the parent table's comment stays on the parent
 
 ## 0.24.4
 

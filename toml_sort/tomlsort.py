@@ -728,23 +728,17 @@ class TomlSort:
         if not value.is_super_table():
             new_table.trivia.indent = "\n"
 
-        first_child = next(iter(children), None)
-
-        # If the first child of this item is an AoT, we want the
-        # comment to be attached to the first table within the AoT,
-        # rather than the parent AoT object
-        if first_child and first_child.is_aot:
-            first_child.children[0].attached_comments = comments
-            comments = []
-
-        # If this item is a super table we want to walk down
-        # the tree and attach the comment to the first non-super table.
-        if value.is_super_table():
+        # A super table has no header of its own, so its comment must be
+        # attached to the first thing that is rendered beneath it: walk down
+        # through nested super tables and arrays of tables to the first real
+        # table. Prepend rather than replace, so comments that were already
+        # attached to that table are kept.
+        if value.is_super_table() and children:
             child_table = children[0]
-            while child_table.is_super_table:
+            while child_table.is_super_table or child_table.is_aot:
                 child_table = child_table.children[0]
 
-            child_table.attached_comments = comments
+            child_table.attached_comments = comments + child_table.attached_comments
             comments = []
 
         item = TomlSortItem(keys, new_table, comments, children)

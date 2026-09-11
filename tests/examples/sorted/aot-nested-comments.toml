@@ -1,0 +1,32 @@
+# Comments on a table, on a nested array of tables, and on arrays of
+# tables under implicit super tables all survive.
+
+[a]
+y = 1
+
+# About m
+[m]
+
+# About the first n
+[[m.n]]
+x = 1
+
+# About the second n
+[[m.n]]
+x = 2
+
+# Reached through the implicit super tables p and p.q
+[[p.q.r]]
+z = 1
+
+[[s]]
+
+# First t
+[[s.t]]
+x = 1
+
+[[s]]
+
+# Second t
+[[s.t]]
+x = 2

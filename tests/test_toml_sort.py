@@ -49,6 +49,11 @@ def test_sort_toml_is_str() -> None:
             {},
         ),
         (
+            "aot-nested-comments",
+            "aot-nested-comments",
+            {},
+        ),
+        (
             "inline",
             "inline",
             {
