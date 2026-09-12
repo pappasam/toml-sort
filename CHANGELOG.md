@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Replace tomlkit with tomlrt as the format-preserving TOML implementation.
+- Replace tomlkit with tomlrt as the style-preserving TOML implementation.
+  - Minor changes in formatted output eg introduces spaces around curly braces
+    in inline tables
 - Require Python 3.10 or newer.
 
 ## 0.24.4
