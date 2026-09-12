@@ -4,10 +4,10 @@ import argparse
 import dataclasses
 import sys
 from argparse import ArgumentParser
-from typing import Any, Dict, List, Optional, Tuple, Type, cast
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Type
 
-import tomlkit
-from tomlkit import TOMLDocument
+import tomlrt
+from tomlrt import Table
 
 from .tomlsort import (
     CommentConfiguration,
@@ -64,21 +64,20 @@ def validate_and_copy(
     target[key] = data.pop(key)
 
 
-def load_pyproject() -> TOMLDocument:
+def load_pyproject() -> Table:
     """Load pyproject file, and return tool.tomlsort section."""
     try:
         with open("pyproject.toml", encoding="utf-8") as file:
             content = file.read()
     except OSError:
-        return tomlkit.document()
+        return Table.inline()
 
-    document = tomlkit.parse(content)
-    tool_section = document.get("tool", tomlkit.document())
-    return cast(TOMLDocument, tool_section.get("tomlsort", tomlkit.document()))
+    document = tomlrt.loads(content)
+    return document.get_table("tool.tomlsort", Table.inline())
 
 
-def parse_config(tomlsort_section: TOMLDocument) -> Dict[str, Any]:
-    """Load the toml_sort configuration from a TOMLDocument."""
+def parse_config(tomlsort_section: Mapping[str, Any]) -> Dict[str, Any]:
+    """Load the toml_sort configuration from a TOML mapping."""
     config = dict(tomlsort_section)
 
     # remove the overrides key, since it is parsed separately
@@ -115,12 +114,14 @@ def parse_config(tomlsort_section: TOMLDocument) -> Dict[str, Any]:
 
 
 def parse_config_overrides(
-    tomlsort_section: TOMLDocument,
+    tomlsort_section: Table,
 ) -> Dict[str, SortOverrideConfiguration]:
     """Parse the tool.tomlsort.overrides section of the config."""
     fields = dataclasses.fields(SortOverrideConfiguration)
     settings_definition = {field.name: field.type for field in fields}
-    override_settings = tomlsort_section.get("overrides", tomlkit.document()).unwrap()
+    override_settings = tomlsort_section.get_table(
+        "overrides", Table.inline()
+    ).to_dict()
 
     overrides = {}
     for path, settings in override_settings.items():

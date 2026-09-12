@@ -147,7 +147,6 @@ def test_sort_toml_is_str() -> None:
                     spaces_before_inline_comment=1
                 ),
             },
-            marks=[pytest.mark.xfail],
         ),
         pytest.param(
             "single-comment",
