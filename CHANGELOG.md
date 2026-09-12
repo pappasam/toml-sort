@@ -4,14 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.25.0
+
+### Added
+
+- Support newlines and trailing commas in inline tables ([#55](https://github.com/pappasam/toml-sort/issues/55)).
 
 ### Changed
 
 - Replace tomlkit with tomlrt as the style-preserving TOML implementation.
-  - Minor changes in formatted output eg introduces spaces around curly braces
-    in inline tables
+  - Add spaces inside the curly braces of inline tables, for example
+    `{ key = "value" }`.
+  - Sort inline-array elements by the string representation of their parsed
+    values instead of their original TOML spelling. With inline-array sorting
+    enabled, `[0xF, 10]` now becomes `[10, 0xF]`. Sorting remains lexicographic,
+    not numeric.
 - Require Python 3.10 or newer.
+
+### Fixed
+
+- Preserve table paths when dotted keys and nested table headers are used
+  together, including Ruff configuration ([#69](https://github.com/pappasam/toml-sort/issues/69), [#101](https://github.com/pappasam/toml-sort/issues/101)).
+- Keep dotted-key values in their original table when sorting nested tables
+  and arrays of tables ([#67](https://github.com/pappasam/toml-sort/issues/67), [#94](https://github.com/pappasam/toml-sort/issues/94)).
+- Preserve consecutive blank lines inside multiline string values.
 
 ## 0.24.4
 
