@@ -105,7 +105,7 @@ Notes:
 
 ## Configuration file
 
-toml-sort can also be configured by using the `pyproject.toml` file. If the file exists and has a `tool.tomlsort` section, the configuration is used. If both command line arguments and the configuration are used, the options are merged. In the case of conflicts, the command line option is used.
+toml-sort can also be configured by using either a `.tomlsort.toml` or `pyproject.toml` file. If `.tomlsort.toml` does not exist then `pyproject.toml` is used. If the file exists and has a `tool.tomlsort` section, the configuration is used. If both command line arguments and the configuration are used, the options are merged. In the case of conflicts, the command line option is used.
 
 In short, the names are the same as on the command line (and have the same meaning), but `-` is replaced with `_`. Please note, that only the below options are supported:
 

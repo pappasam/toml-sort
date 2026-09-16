@@ -64,13 +64,17 @@ def validate_and_copy(
     target[key] = data.pop(key)
 
 
-def load_pyproject() -> Table:
-    """Load pyproject file, and return tool.tomlsort section."""
+def load_config_file() -> Table:
+    """Load .tomlsort.toml or pyproject.toml file, and return tool.tomlsort section."""
     try:
-        with open("pyproject.toml", encoding="utf-8") as file:
+        with open(".tomlsort.toml", encoding="utf-8") as file:
             content = file.read()
     except OSError:
-        return Table.inline()
+        try:
+            with open("pyproject.toml", encoding="utf-8") as file:
+                content = file.read()
+        except OSError:
+            return Table.inline()
 
     document = tomlrt.loads(content)
     return document.get_table("tool.tomlsort", Table.inline())
@@ -335,7 +339,7 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
     arguments: Optional[List[str]] = None,
 ) -> None:
     """Toml sort cli implementation."""
-    settings = load_pyproject()
+    settings = load_config_file()
     configuration = parse_config(settings)
     configuration_overrides = parse_config_overrides(settings)
     args = get_parser(configuration).parse_args(args=arguments)  # strip command itself
