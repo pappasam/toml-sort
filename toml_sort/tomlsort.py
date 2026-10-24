@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import copy
 import fnmatch
+import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -70,7 +72,7 @@ class TomlSort:
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        input_toml: str,
+        input_toml: str | tomlrt.Document,
         comment_config: Optional[CommentConfiguration] = None,
         sort_config: Optional[SortConfiguration] = None,
         format_config: Optional[FormattingConfiguration] = None,
@@ -261,9 +263,14 @@ class TomlSort:
         elif isinstance(value, tomlrt.Table):
             self._filter_container_comments(value)
 
-    def sorted(self) -> str:
-        """Sort a TOML string."""
-        document = tomlrt.loads(self.input_toml)
+    def sorted_document(self) -> tomlrt.Document:
+        """Return a sorted document without modifying the input."""
+        if isinstance(self.input_toml, str):
+            source = self.input_toml
+            document = tomlrt.loads(source)
+        else:
+            source = tomlrt.dumps(self.input_toml)
+            document = copy.deepcopy(self.input_toml)
 
         if not self.comment_config.header:
             document.preamble = ()
@@ -287,4 +294,12 @@ class TomlSort:
                 ),
             )
         )
-        return tomlrt.dumps(document).strip() + "\n"
+        first_newline = re.search(r"\r?\n", source)
+        newline = first_newline.group() if first_newline else "\n"
+        # Retain the existing outer-whitespace normalization in the document
+        # returned to the CLI's binary writer as well as the string API.
+        return tomlrt.loads(tomlrt.dumps(document).strip() + newline)
+
+    def sorted(self) -> str:
+        """Sort a TOML string, preserving the existing string-returning API."""
+        return tomlrt.dumps(self.sorted_document())

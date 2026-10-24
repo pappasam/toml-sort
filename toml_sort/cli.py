@@ -4,10 +4,11 @@ import argparse
 import dataclasses
 import sys
 from argparse import ArgumentParser
+from io import BytesIO
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Type
 
 import tomlrt
-from tomlrt import Table
+from tomlrt import Document, Table
 
 from .tomlsort import (
     CommentConfiguration,
@@ -35,21 +36,29 @@ def printerr(arg: str) -> None:
     print(arg, file=sys.stderr)
 
 
-def read_file(path: str) -> str:
-    """Read contents from a file."""
+def read_file(path: str) -> Document:
+    """Read a document from a binary file or standard input."""
     if path == STD_STREAM:
-        return sys.stdin.read()
-    with open(path, "r", encoding=ENCODING) as fileobj:
-        return fileobj.read()
+        if hasattr(sys.stdin, "buffer"):
+            return tomlrt.load(sys.stdin.buffer)
+        return tomlrt.load(BytesIO(sys.stdin.read().encode(ENCODING)))
+    with open(path, "rb") as fileobj:
+        return tomlrt.load(fileobj)
 
 
-def write_file(path: str, content: str) -> None:
-    """Write content to a path."""
+def write_file(path: str, document: Document) -> None:
+    """Write a document to a binary file or standard output."""
     if path == STD_STREAM:
-        print(content, end="")
+        if hasattr(sys.stdout, "buffer"):
+            sys.stdout.flush()
+            tomlrt.dump(document, sys.stdout.buffer)
+        else:
+            buffer = BytesIO()
+            tomlrt.dump(document, buffer)
+            sys.stdout.write(buffer.getvalue().decode(ENCODING))
         return
-    with open(path, "w", encoding=ENCODING) as fileobj:
-        fileobj.write(content)
+    with open(path, "wb") as fileobj:
+        tomlrt.dump(document, fileobj)
 
 
 def validate_and_copy(
@@ -67,12 +76,11 @@ def validate_and_copy(
 def load_pyproject() -> Table:
     """Load pyproject file, and return tool.tomlsort section."""
     try:
-        with open("pyproject.toml", encoding="utf-8") as file:
-            content = file.read()
+        with open("pyproject.toml", "rb") as file:
+            document = tomlrt.load(file)
     except OSError:
         return Table.inline()
 
-    document = tomlrt.loads(content)
     return document.get_table("tool.tomlsort", Table.inline())
 
 
@@ -398,12 +406,13 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
                 trailing_comma_inline_array=args.trailing_comma_inline_array,
             ),
             sort_config_overrides=configuration_overrides,
-        ).sorted()
+        ).sorted_document()
+        changed = tomlrt.dumps(original_toml) != tomlrt.dumps(sorted_toml)
         if args.check:
-            if original_toml != sorted_toml:
+            if changed:
                 check_failures.append(filename)
         elif args.in_place:
-            if original_toml != sorted_toml:
+            if changed:
                 write_file(filename, sorted_toml)
         elif len(filenames_clean) == 1:
             write_file(output_clean, sorted_toml)

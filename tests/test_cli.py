@@ -5,17 +5,68 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+from io import BytesIO, TextIOWrapper
 from pathlib import Path
 from typing import Callable, List, NamedTuple, Optional
 from unittest import mock
 
 import pytest
+import tomlrt
 
 from toml_sort import cli
 from toml_sort.cli import parse_sort_first
 from toml_sort.tomlsort import SortOverrideConfiguration
 
 PATH_EXAMPLES = "tests/examples"
+
+
+def test_stdout_does_not_translate_existing_crlf(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    buffer = BytesIO()
+    stream = TextIOWrapper(buffer, encoding="UTF-8", newline="\r\n")
+    with monkeypatch.context() as patcher:
+        patcher.setattr("sys.stdout", stream)
+        cli.write_file("-", tomlrt.loads("a = 1\r\n"))
+        stream.flush()
+    assert buffer.getvalue() == b"a = 1\r\n"
+
+
+@pytest.mark.parametrize("newline", [b"\n", b"\r\n"])
+def test_binary_standard_streams_preserve_newlines(newline: bytes) -> None:
+    original = newline.join([b"b = 2", b"a = 1", b""])
+    result = subprocess.run(
+        ["toml-sort", "--all"], input=original, capture_output=True, check=False
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == newline.join([b"a = 1", b"b = 2", b""])
+
+
+@pytest.mark.parametrize("newline", [b"\n", b"\r\n"])
+def test_check_preserves_newlines(tmp_path: Path, newline: bytes) -> None:
+    path = tmp_path / "formatted.toml"
+    original = newline.join([b"a = 1", b"b = 2", b""])
+    path.write_bytes(original)
+    result = capture(["toml-sort", "--check", str(path)])
+    assert result.returncode == 0
+    assert path.read_bytes() == original
+
+
+@pytest.mark.parametrize("newline", [b"\n", b"\r\n"])
+@pytest.mark.parametrize("in_place", [True, False])
+def test_file_output_preserves_newlines(
+    tmp_path: Path, newline: bytes, in_place: bool
+) -> None:
+    source = tmp_path / "input.toml"
+    target = source if in_place else tmp_path / "output.toml"
+    original = newline.join([b"b = 2", b"a = 1", b""])
+    source.write_bytes(original)
+    args = ["--in-place"] if in_place else ["--output", str(target)]
+    result = capture(["toml-sort", "--all", *args, str(source)])
+    assert result.returncode == 0
+    assert target.read_bytes() == newline.join([b"a = 1", b"b = 2", b""])
+    if not in_place:
+        assert source.read_bytes() == original
 
 
 class SubprocessReturn(NamedTuple):
@@ -276,7 +327,7 @@ def test_load_config_file_read():
 )
 def test_load_config_file(toml, expected):
     """Test load_config_file."""
-    open_mock = mock.mock_open(read_data=toml)
+    open_mock = mock.mock_open(read_data=toml.encode("UTF-8"))
     with mock.patch("toml_sort.cli.open", open_mock):
         section = cli.load_pyproject()
         assert cli.parse_config(section) == expected
@@ -287,7 +338,7 @@ def test_load_config_file(toml, expected):
 )
 def test_load_config_file_invalid(toml):
     """Test error if pyproject.toml is not valid."""
-    open_mock = mock.mock_open(read_data=toml)
+    open_mock = mock.mock_open(read_data=toml.encode("UTF-8"))
     with mock.patch("toml_sort.cli.open", open_mock):
         with pytest.raises(SystemExit):
             section = cli.load_pyproject()
@@ -345,7 +396,7 @@ def test_load_config_file_invalid(toml):
 )
 def test_load_config_overrides(toml, expected):
     """Turn settings tomldocument into SortOverrideConfiguration."""
-    open_mock = mock.mock_open(read_data=toml)
+    open_mock = mock.mock_open(read_data=toml.encode("UTF-8"))
     with mock.patch("toml_sort.cli.open", open_mock):
         section = cli.load_pyproject()
         assert isinstance(section, dict)
@@ -377,7 +428,7 @@ def test_load_config_overrides(toml, expected):
 )
 def test_load_config_overrides_fail(toml):
     """parse_config_overrides exits if config contains unexpected key."""
-    open_mock = mock.mock_open(read_data=toml)
+    open_mock = mock.mock_open(read_data=toml.encode("UTF-8"))
     with mock.patch("toml_sort.cli.open", open_mock):
         with pytest.raises(SystemExit):
             section = cli.load_pyproject()
