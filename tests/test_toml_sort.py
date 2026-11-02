@@ -93,6 +93,17 @@ def test_comment_preservation_does_not_change_string_values(value: str) -> None:
     assert "#foo\n" in result
 
 
+@pytest.mark.parametrize("control", ["\x00", "\x0b", "\x7f"])
+def test_preserving_comments_still_rejects_invalid_toml(control: str) -> None:
+    import tomlrt
+
+    with pytest.raises(tomlrt.TOMLParseError):
+        TomlSort(
+            f"a=1 # invalid{control}comment\n",
+            format_config=FormattingConfiguration(normalize_comments=False),
+        ).sorted()
+
+
 @pytest.mark.parametrize(
     "unsorted_fixture,sorted_fixture,args",
     [

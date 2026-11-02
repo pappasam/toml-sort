@@ -303,12 +303,12 @@ class TomlSort:
 
     def sorted(self) -> str:
         """Sort a TOML string."""
-        source = self.input_toml
+        document = tomlrt.loads(self.input_toml)
         prefix = ""
         comments: list[str] = []
         if not self.format_config.normalize_comments:
-            source, prefix, comments = _protect_comment_text(source)
-        document = tomlrt.loads(source)
+            source, prefix, comments = _protect_comment_text(self.input_toml)
+            document = tomlrt.loads(source)
 
         if not self.comment_config.header:
             document.preamble = ()
