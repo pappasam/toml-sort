@@ -45,6 +45,32 @@ def test_remove_comments_with_preserved_formatting() -> None:
     assert result.stdout == "key = 1\n"
 
 
+@pytest.mark.parametrize("use_config", [False, True])
+@pytest.mark.parametrize(
+    "original",
+    [
+        "a=1\n\n#foo\nb=2\n",
+        "a=1\n# orphan\n\n#foo\n[section]\nb=2\n",
+        "a=[\n1,\n# orphan\n\n#foo\n2,\n]\n",
+    ],
+)
+def test_preserve_filtered_comment_format_cli(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, use_config: bool, original: str
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    if use_config:
+        Path("pyproject.toml").write_text(
+            "[tool.tomlsort]\nno_comment_format = true\n", encoding="UTF-8"
+        )
+    args = [] if use_config else ["--no-comment-format"]
+    result = capture(["toml-sort", *args], stdin=original)
+    assert result.returncode == 0
+    assert result.stderr == ""
+    assert "#foo" in result.stdout
+    assert "# foo" not in result.stdout
+    assert "# orphan" not in result.stdout
+
+
 class SubprocessReturn(NamedTuple):
     """Organize the return results when of running a cli subprocess."""
 
