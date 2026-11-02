@@ -22,6 +22,88 @@ def test_sort_toml_is_str() -> None:
     assert isinstance(sorted_result, str)
 
 
+def test_preserve_comment_text_formatting() -> None:
+    original = "# init_command = [\n#     'python',\n# ]\n\nb=2 #  inline\n#    block\na=1\n#  footer  \n"
+    formatter = FormattingConfiguration(normalize_comments=False)
+    result = TomlSort(original, format_config=formatter).sorted()
+    assert "#     'python'," in result
+    assert "#  inline" in result
+    assert "#    block" in result
+    assert "#  footer  \n" in result
+    assert "b = 2" in result
+    assert TomlSort(result, format_config=formatter).sorted() == result
+    assert "#     'python'," not in TomlSort(original).sorted()
+
+
+@pytest.mark.parametrize(
+    "original",
+    [
+        "a=1\n\n#foo  \nb=2\n",
+        "a=1\n# orphan\n\n#foo\n[section]\nb=2\n",
+        "a=[\n1,\n# orphan\n\n#foo\n2,\n]\n",
+        "# header\n\n# orphan\n\n#foo\na=1\n",
+    ],
+)
+def test_preserve_filtered_comment_text(original: str) -> None:
+    formatter = FormattingConfiguration(normalize_comments=False)
+    result = TomlSort(original, format_config=formatter).sorted()
+    assert "#foo" in result
+    assert "# foo" not in result
+    assert "# orphan" not in result
+    assert TomlSort(result, format_config=formatter).sorted() == result
+
+
+def test_preserve_distinct_comment_spacing_and_toml_strings() -> None:
+    original = (
+        'text = """\n# literal text\n"""\n'
+        'quoted = "# not a comment"\n'
+        "a=1\n\n#foo\nb=2\n\n# foo\nc=3\n\n#\tfoo  \nd=4\n"
+    )
+    formatter = FormattingConfiguration(normalize_comments=False)
+    result = TomlSort(original, format_config=formatter).sorted()
+    assert "#foo\n" in result
+    assert "# foo\n" in result
+    assert "#\tfoo  \n" in result
+    assert '"""\n# literal text\n"""' in result
+    assert '"# not a comment"' in result
+    assert TomlSort(result, format_config=formatter).sorted() == result
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        '"# basic"',
+        "'# literal'",
+        '"""# multiline basic\n# line"""',
+        "'" * 3 + "# multiline literal\n# line" + "'" * 3,
+        '"""# extra closing quote""""',
+        "'" * 3 + "# extra closing quotes" + "'" * 5,
+        '"\\"# escaped quote"',
+        '"__toml_sort_comment_0__"',
+    ],
+)
+def test_comment_preservation_does_not_change_string_values(value: str) -> None:
+    import tomlrt
+
+    original = f"text = {value}\na=1\n\n#foo\nb=2\n"
+    result = TomlSort(
+        original, format_config=FormattingConfiguration(normalize_comments=False)
+    ).sorted()
+    assert tomlrt.loads(result).to_dict() == tomlrt.loads(original).to_dict()
+    assert "#foo\n" in result
+
+
+@pytest.mark.parametrize("control", ["\x00", "\x0b", "\x7f"])
+def test_preserving_comments_still_rejects_invalid_toml(control: str) -> None:
+    import tomlrt
+
+    with pytest.raises(tomlrt.TOMLParseError):
+        TomlSort(
+            f"a=1 # invalid{control}comment\n",
+            format_config=FormattingConfiguration(normalize_comments=False),
+        ).sorted()
+
+
 @pytest.mark.parametrize(
     "unsorted_fixture,sorted_fixture,args",
     [

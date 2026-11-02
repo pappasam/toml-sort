@@ -33,7 +33,7 @@ $ toml-sort --help
 usage: toml-sort [-h] [--version] [-o OUTPUT] [-i] [-I] [-a] [--no-sort-tables] [--sort-table-keys]
                  [--sort-inline-tables] [--sort-inline-arrays] [--sort-first KEYS] [--no-header] [--no-comments]
                  [--no-header-comments] [--no-footer-comments] [--no-inline-comments] [--no-block-comments]
-                 [--spaces-before-inline-comment {1,2,3,4}] [--spaces-indent-inline-array {2,4,6,8}]
+                 [--no-comment-format] [--spaces-before-inline-comment {1,2,3,4}] [--spaces-indent-inline-array {2,4,6,8}]
                  [--trailing-comma-inline-array] [--check]
                  [F ...]
 
@@ -77,6 +77,7 @@ comments:
 formatting:
   options to change output formatting
 
+  --no-comment-format   preserve comment text spacing and indentation
   --spaces-before-inline-comment {1,2,3,4}
                         the number of spaces before an inline comment (default: 1)
   --spaces-indent-inline-array {2,4,6,8}
@@ -103,6 +104,8 @@ Notes:
     reason
 ```
 
+By default, comments are normalized while TOML is formatted. Use `--no-comment-format` to preserve comment text spacing and indentation while continuing to format and sort TOML values.
+
 ## Configuration file
 
 toml-sort can also be configured by using the `pyproject.toml` file. If the file exists and has a `tool.tomlsort` section, the configuration is used. If both command line arguments and the configuration are used, the options are merged. In the case of conflicts, the command line option is used.
@@ -114,6 +117,7 @@ In short, the names are the same as on the command line (and have the same meani
 all = true
 in_place = true
 no_comments = true
+no_comment_format = true
 no_header_comments = true
 no_footer_comments = true
 no_inline_comments = true

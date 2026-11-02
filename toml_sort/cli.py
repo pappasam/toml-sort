@@ -96,6 +96,7 @@ def parse_config(tomlsort_section: Mapping[str, Any]) -> Dict[str, Any]:
     validate_and_copy(config, clean_config, "in_place", bool)
     validate_and_copy(config, clean_config, "no_header", bool)
     validate_and_copy(config, clean_config, "no_comments", bool)
+    validate_and_copy(config, clean_config, "no_comment_format", bool)
     validate_and_copy(config, clean_config, "no_header_comments", bool)
     validate_and_copy(config, clean_config, "no_footer_comments", bool)
     validate_and_copy(config, clean_config, "no_inline_comments", bool)
@@ -304,6 +305,11 @@ Notes:
         "formatting", "options to change output formatting"
     )
     formatting.add_argument(
+        "--no-comment-format",
+        help="preserve comment text spacing and indentation",
+        action="store_true",
+    )
+    formatting.add_argument(
         "--spaces-before-inline-comment",
         help=("the number of spaces before an inline comment (default: 1)"),
         type=int,
@@ -401,6 +407,7 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
                     first=sort_first,
                 ),
                 format_config=FormattingConfiguration(
+                    normalize_comments=not args.no_comment_format,
                     spaces_before_inline_comment=args.spaces_before_inline_comment,
                     spaces_indent_inline_array=args.spaces_indent_inline_array,
                     trailing_comma_inline_array=args.trailing_comma_inline_array,

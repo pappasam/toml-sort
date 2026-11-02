@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import fnmatch
+import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -22,6 +23,44 @@ def _drop_orphans(block: tuple[str | None, ...]) -> tuple[str | None, ...]:
     while index > 0 and block[index - 1] is not None:
         index -= 1
     return block[index:]
+
+
+def _protect_comment_text(source: str) -> tuple[str, str, list[str]]:
+    """Keep raw comment text out of the decoded comment-view setters."""
+    prefix = "__toml_sort_comment_"
+    while prefix in source:
+        prefix += "_"
+    comments: list[str] = []
+    chunks: list[str] = []
+    start = index = 0
+    while index < len(source):
+        char = source[index]
+        if char in "\"'":
+            delimiter = char * (3 if source.startswith(char * 3, index) else 1)
+            index += len(delimiter)
+            while index < len(source):
+                if char == '"' and source[index] == "\\":
+                    index += 2
+                elif source.startswith(delimiter, index):
+                    index += len(delimiter)
+                    if len(delimiter) == 3:
+                        while index < len(source) and source[index] == char:
+                            index += 1
+                    break
+                else:
+                    index += 1
+        elif char == "#":
+            end = index
+            while end < len(source) and source[end] not in "\r\n":
+                end += 1
+            chunks.append(source[start:index])
+            chunks.append(f"# {prefix}{len(comments)}__")
+            comments.append(source[index:end])
+            start = index = end
+        else:
+            index += 1
+    chunks.append(source[start:])
+    return "".join(chunks), prefix, comments
 
 
 @dataclass
@@ -53,6 +92,7 @@ class FormattingConfiguration:
     spaces_before_inline_comment: int = 2
     spaces_indent_inline_array: int = 2
     trailing_comma_inline_array: bool = False
+    normalize_comments: bool = True
 
 
 @dataclass
@@ -264,6 +304,11 @@ class TomlSort:
     def sorted(self) -> str:
         """Sort a TOML string."""
         document = tomlrt.loads(self.input_toml)
+        prefix = ""
+        comments: list[str] = []
+        if not self.format_config.normalize_comments:
+            source, prefix, comments = _protect_comment_text(self.input_toml)
+            document = tomlrt.loads(source)
 
         if not self.comment_config.header:
             document.preamble = ()
@@ -280,6 +325,7 @@ class TomlSort:
         self._sort_container(document, ())
         document.format(
             options=tomlrt.FormatOptions(
+                normalize_comments=self.format_config.normalize_comments,
                 indent=self.format_config.spaces_indent_inline_array,
                 eol_comment_spaces=self.format_config.spaces_before_inline_comment,
                 multiline_trailing_comma=(
@@ -287,4 +333,16 @@ class TomlSort:
                 ),
             )
         )
-        return tomlrt.dumps(document).strip() + "\n"
+        output = tomlrt.dumps(document)
+        if comments:
+            output = re.sub(
+                rf"# {re.escape(prefix)}(\d+)__",
+                lambda match: comments[int(match.group(1))],
+                output,
+            )
+        output = (
+            output.strip()
+            if self.format_config.normalize_comments
+            else output.strip("\r\n")
+        )
+        return output + "\n"
