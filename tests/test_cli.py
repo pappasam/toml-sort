@@ -18,6 +18,66 @@ from toml_sort.tomlsort import SortOverrideConfiguration
 PATH_EXAMPLES = "tests/examples"
 
 
+@pytest.mark.parametrize("args", [[], ["--check"], ["--in-place"]])
+def test_invalid_input_reports_filename(tmp_path: Path, args: List[str]) -> None:
+    path = tmp_path / "templated.toml"
+    original = "key = {{ template }}\n"
+    path.write_text(original, encoding="UTF-8")
+
+    result = capture(["toml-sort", *args, str(path)])
+
+    assert result.returncode == 1
+    assert str(path) in result.stderr
+    assert "Traceback" not in result.stderr
+    assert result.stdout == ""
+    assert path.read_text(encoding="UTF-8") == original
+
+
+def test_invalid_stdin_reports_source() -> None:
+    result = capture(["toml-sort"], stdin="key = {{ template }}\n")
+
+    assert result.returncode == 1
+    assert "-:" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert result.stdout == ""
+
+
+def test_missing_input_reports_filename(tmp_path: Path) -> None:
+    path = tmp_path / "missing.toml"
+    result = capture(["toml-sort", str(path)])
+
+    assert result.returncode == 1
+    assert str(path) in result.stderr
+    assert "Traceback" not in result.stderr
+    assert result.stdout == ""
+
+
+def test_invalid_configuration_reports_filename(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    Path("pyproject.toml").write_text("[invalid\n", encoding="UTF-8")
+    result = capture(["toml-sort"], stdin="key = 1\n")
+
+    assert result.returncode == 1
+    assert "pyproject.toml:" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert result.stdout == ""
+
+
+def test_invalid_configuration_encoding_reports_filename(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    Path("pyproject.toml").write_bytes(b'key = "\xff"\n')
+    result = capture(["toml-sort"], stdin="key = 1\n")
+
+    assert result.returncode == 1
+    assert "pyproject.toml:" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert result.stdout == ""
+
+
 class SubprocessReturn(NamedTuple):
     """Organize the return results when of running a cli subprocess."""
 

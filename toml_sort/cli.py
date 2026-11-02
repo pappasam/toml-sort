@@ -71,8 +71,15 @@ def load_pyproject() -> Table:
             content = file.read()
     except OSError:
         return Table.inline()
+    except UnicodeError as error:
+        printerr(f"pyproject.toml: {error}")
+        sys.exit(1)
 
-    document = tomlrt.loads(content)
+    try:
+        document = tomlrt.loads(content)
+    except tomlrt.TOMLParseError as error:
+        printerr(f"pyproject.toml: {error}")
+        sys.exit(1)
     return document.get_table("tool.tomlsort", Table.inline())
 
 
@@ -373,32 +380,36 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
     check_failures = []
 
     for filename in filenames_clean:
-        original_toml = read_file(filename)
-        sorted_toml = TomlSort(
-            input_toml=original_toml,
-            comment_config=CommentConfiguration(
-                header=not bool(
-                    args.no_header or args.no_header_comments or args.no_comments
+        try:
+            original_toml = read_file(filename)
+            sorted_toml = TomlSort(
+                input_toml=original_toml,
+                comment_config=CommentConfiguration(
+                    header=not bool(
+                        args.no_header or args.no_header_comments or args.no_comments
+                    ),
+                    footer=not bool(args.no_footer_comments or args.no_comments),
+                    block=not bool(args.no_block_comments or args.no_comments),
+                    inline=not bool(args.no_inline_comments or args.no_comments),
                 ),
-                footer=not bool(args.no_footer_comments or args.no_comments),
-                block=not bool(args.no_block_comments or args.no_comments),
-                inline=not bool(args.no_inline_comments or args.no_comments),
-            ),
-            sort_config=SortConfiguration(
-                ignore_case=args.ignore_case,
-                tables=not bool(args.no_sort_tables),
-                table_keys=bool(args.sort_table_keys or args.all),
-                inline_tables=bool(args.sort_inline_tables or args.all),
-                inline_arrays=bool(args.sort_inline_arrays or args.all),
-                first=sort_first,
-            ),
-            format_config=FormattingConfiguration(
-                spaces_before_inline_comment=args.spaces_before_inline_comment,
-                spaces_indent_inline_array=args.spaces_indent_inline_array,
-                trailing_comma_inline_array=args.trailing_comma_inline_array,
-            ),
-            sort_config_overrides=configuration_overrides,
-        ).sorted()
+                sort_config=SortConfiguration(
+                    ignore_case=args.ignore_case,
+                    tables=not bool(args.no_sort_tables),
+                    table_keys=bool(args.sort_table_keys or args.all),
+                    inline_tables=bool(args.sort_inline_tables or args.all),
+                    inline_arrays=bool(args.sort_inline_arrays or args.all),
+                    first=sort_first,
+                ),
+                format_config=FormattingConfiguration(
+                    spaces_before_inline_comment=args.spaces_before_inline_comment,
+                    spaces_indent_inline_array=args.spaces_indent_inline_array,
+                    trailing_comma_inline_array=args.trailing_comma_inline_array,
+                ),
+                sort_config_overrides=configuration_overrides,
+            ).sorted()
+        except (OSError, UnicodeError, tomlrt.TOMLParseError) as error:
+            printerr(f"{filename}: {error}")
+            sys.exit(1)
         if args.check:
             if original_toml != sorted_toml:
                 check_failures.append(filename)
