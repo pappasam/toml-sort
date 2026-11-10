@@ -415,9 +415,17 @@ def cli(  # pylint: disable=too-many-branches,too-many-locals
                 check_failures.append(filename)
         elif args.in_place:
             if original_toml != sorted_toml:
-                write_file(filename, sorted_toml)
+                try:
+                    write_file(filename, sorted_toml)
+                except OSError as error:
+                    printerr(f"{filename}: {error}")
+                    sys.exit(1)
         elif len(filenames_clean) == 1:
-            write_file(output_clean, sorted_toml)
+            try:
+                write_file(output_clean, sorted_toml)
+            except OSError as error:
+                printerr(f"{output_clean}: {error}")
+                sys.exit(1)
         else:
             printerr("Uncaught error. Please submit GitHub issue:")
             printerr("<https://github.com/pappasam/toml-sort/issues>")

@@ -464,3 +464,15 @@ def test_parse_sort_first(arg, expected_first, expected_overrides):
     first, overrides = parse_sort_first(arg, {})
     assert first == expected_first
     assert overrides == expected_overrides
+
+
+def test_unwritable_output_reports_filename(tmp_path: Path) -> None:
+    src = tmp_path / "source.toml"
+    src.write_text("b = 2\na = 1\n", encoding="UTF-8")
+    bad_output = tmp_path / "no-such-dir" / "output.toml"
+    result = capture(["toml-sort", "--output", str(bad_output), str(src)])
+
+    assert result.returncode == 1
+    assert str(bad_output) in result.stderr
+    assert "Traceback" not in result.stderr
+    assert result.stdout == ""
