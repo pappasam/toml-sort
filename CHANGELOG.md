@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.25.1
+
+### Changed
+
+- Extend GitHub Actions test coverage to Python 3.15 and simplify workflow setup.
+
+### Fixed
+
+- Report the source filename (or `-` for standard input) for invalid TOML,
+  decoding errors, and input read failures instead of displaying a traceback.
+  Also identify `pyproject.toml` when configuration parsing or decoding fails
+  ([#107](https://github.com/pappasam/toml-sort/pull/107)).
+- Match override patterns case-sensitively on every platform, including Windows,
+  consistently with TOML keys
+  ([#110](https://github.com/pappasam/toml-sort/pull/110)).
+
 ## 0.25.0
 
 ### Added
