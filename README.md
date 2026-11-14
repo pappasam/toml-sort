@@ -144,7 +144,7 @@ inline_tables = true
 inline_arrays = true
 ```
 
-In the example configuration, `path.to.key` is the key to match. Keys are matched using the [Python fnmatch function](https://docs.python.org/3/library/fnmatch.html), so glob-style wildcards are supported.
+In the example configuration, `path.to.key` is the key to match. Keys are matched using the [Python fnmatchcase function](https://docs.python.org/3/library/fnmatch.html#fnmatch.fnmatchcase), so glob-style wildcards are supported. Like TOML keys, patterns are case-sensitive on every platform.
 
 For instance, to disable sorting the table in the following TOML file:
 

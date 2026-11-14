@@ -103,8 +103,9 @@ class TomlSort:
         If none exists returns None.
 
         Override matches are evaluated as glob patterns by the python
-        fnmatch function. If there are multiple matches, return the
-        exact match first otherwise return the first match.
+        fnmatchcase function, so they are case-sensitive on every
+        platform, like TOML keys. If there are multiple matches, return
+        the exact match first otherwise return the first match.
         """
         if not path:
             return None
@@ -116,7 +117,7 @@ class TomlSort:
         matches = [
             config
             for pattern, config in self.sort_config_overrides.items()
-            if fnmatch.fnmatch(path_string, pattern)
+            if fnmatch.fnmatchcase(path_string, pattern)
         ]
 
         if len(matches) > 0:

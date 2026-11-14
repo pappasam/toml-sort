@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ntpath
+import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
@@ -177,3 +179,34 @@ def test_tomlsort(
 
     assert sort_output == toml_sorted_fixture
     assert TomlSort(sort_output, **args).sorted() == sort_output
+
+
+@pytest.mark.parametrize(
+    "pattern,matches",
+    [
+        ("servers.beta", True),
+        ("servers.*", True),
+        ("servers.Beta", False),
+        ("Servers.*", False),
+        ("servers.[A-Z]*", False),
+    ],
+)
+def test_override_patterns_are_case_sensitive(
+    monkeypatch: pytest.MonkeyPatch, pattern: str, matches: bool
+) -> None:
+    """Override patterns match keys case-sensitively on every platform."""
+    # fnmatch.fnmatch() folds case through os.path.normcase() on Windows.
+    # Use the Windows version here so the test means the same on every OS.
+    monkeypatch.setattr(os.path, "normcase", ntpath.normcase)
+    unsorted = "[servers.beta]\nz = 1\na = 2\n"
+    sort_output = TomlSort(
+        unsorted,
+        sort_config_overrides={
+            pattern: SortOverrideConfiguration(table_keys=False),
+        },
+    ).sorted()
+
+    if matches:
+        assert sort_output == unsorted
+    else:
+        assert sort_output == "[servers.beta]\na = 2\nz = 1\n"
