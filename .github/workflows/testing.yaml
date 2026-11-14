@@ -17,21 +17,19 @@ jobs:
           architecture: x64
       - name: Install Dependencies
         run: |
-          python -m pip install -U pip
-          python -m pip install wheel
-          python -m pip install poetry
-          poetry install
+          python -m pip install --upgrade pip wheel poetry
+          poetry install --no-interaction
       - name: Run linting
         run: poetry run nox -s lint
       - name: Run static type checking
         run: poetry run nox -s typecheck
   tests:
     needs: [lint]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -39,13 +37,12 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
           architecture: x64
       - name: Install Dependencies
         run: |
-          python -m pip install -U pip
-          python -m pip install wheel
-          python -m pip install poetry
-          poetry install
+          python -m pip install --upgrade pip wheel poetry
+          poetry install --no-interaction
       - name: Run Tests
         run: poetry run nox -s tests
   coverage:
@@ -61,11 +58,7 @@ jobs:
           architecture: x64
       - name: Install Dependencies
         run: |
-          python -m pip install -U pip
-          python -m pip install wheel
-          python -m pip install poetry
-          poetry install
+          python -m pip install --upgrade pip wheel poetry
+          poetry install --no-interaction
       - name: Run Coverage
-        env:
-          WITH_COVERAGE: true
         run: poetry run nox -s coverage
