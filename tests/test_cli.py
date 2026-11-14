@@ -18,7 +18,62 @@ from toml_sort.tomlsort import SortOverrideConfiguration
 PATH_EXAMPLES = "tests/examples"
 
 
-@pytest.mark.parametrize("args", [[], ["--check"], ["--in-place"]])
+@pytest.mark.parametrize("use_config", [False, True])
+def test_preserve_comment_format_option(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, use_config: bool
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    original = "# command = [\n#     'python',\n# ]\nb=2\na=1\n"
+    if use_config:
+        Path("pyproject.toml").write_text(
+            "[tool.tomlsort]\nno_comment_format = true\n", encoding="UTF-8"
+        )
+    args = [] if use_config else ["--no-comment-format"]
+    result = capture(["toml-sort", "--all", *args], stdin=original)
+    assert result.returncode == 0
+    assert result.stderr == ""
+    assert "#     'python'," in result.stdout
+    assert result.stdout.index("a = 1") < result.stdout.index("b = 2")
+
+
+def test_remove_comments_with_preserved_formatting() -> None:
+    result = capture(
+        ["toml-sort", "--no-comments", "--no-comment-format"],
+        stdin="#    comment\nkey=1 #  inline\n",
+    )
+    assert result.returncode == 0
+    assert result.stdout == "key = 1\n"
+
+
+@pytest.mark.parametrize("use_config", [False, True])
+@pytest.mark.parametrize(
+    "original",
+    [
+        "a=1\n\n#foo\nb=2\n",
+        "a=1\n# orphan\n\n#foo\n[section]\nb=2\n",
+        "a=[\n1,\n# orphan\n\n#foo\n2,\n]\n",
+    ],
+)
+def test_preserve_filtered_comment_format_cli(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, use_config: bool, original: str
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    if use_config:
+        Path("pyproject.toml").write_text(
+            "[tool.tomlsort]\nno_comment_format = true\n", encoding="UTF-8"
+        )
+    args = [] if use_config else ["--no-comment-format"]
+    result = capture(["toml-sort", *args], stdin=original)
+    assert result.returncode == 0
+    assert result.stderr == ""
+    assert "#foo" in result.stdout
+    assert "# foo" not in result.stdout
+    assert "# orphan" not in result.stdout
+
+
+@pytest.mark.parametrize(
+    "args", [[], ["--check"], ["--in-place"], ["--no-comment-format"]]
+)
 def test_invalid_input_reports_filename(tmp_path: Path, args: List[str]) -> None:
     path = tmp_path / "templated.toml"
     original = "key = {{ template }}\n"
