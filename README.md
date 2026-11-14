@@ -307,6 +307,7 @@ Local development for this project is quite simple.
 
 Install the following tools manually.
 
+- Python 3.11 or newer
 - [Poetry>=1.0](https://github.com/sdispater/poetry#installation)
 - [GNU Make](https://www.gnu.org/software/make/)
 
